@@ -20,16 +20,16 @@ coverage
 # nyc test coverage
 .nyc_output
 
-# Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
+# Grunt intermediate storage
 .grunt
 
-# Bower dependency directory (https://bower.io/)
+# Bower dependency directory
 bower_components
 
 # node-waf configuration
 .lock-wscript
 
-# Compiled binary addons (https://nodejs.org/api/addons.html)
+# Compiled binary addons
 build/Release
 
 # Dependency directories
@@ -59,3 +59,23 @@ typings/
 
 # next.js build output
 .next
+
+# Nest.js production build folder
+dist/
+
+# Prisma generated files
+.prisma/client/
+
+# Docker config overrides
+docker-compose.override.yml
+
+# IDE specific files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor backup files
+*.swp
