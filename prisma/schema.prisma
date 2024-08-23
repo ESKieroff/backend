@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ATENÇÃO: OS MODELOS ABAIXO SÃO APENAS PARA EXEMPLO, VOCÊ DEVE ALTERÁ-LOS CONFORME A NECESSIDADE DO SEU PROJETO
+
+model profiles {
+  id                  Int       @id
+  photo               Bytes?
+  biography           String?
+  tittle              String?   @db.VarChar(255)
+  description         String?
+  birth               DateTime? @db.Timestamp(6)
+  phone               String?   @db.VarChar(255)
+  profile_description String?
+  profile_status      String?   @db.VarChar(255)
+  social_network      Json?
+  interests           Json?
+  preferences         Json?
+  configurations      Json?
+  gender              Gender?
+  language            Language?
+  created_at          DateTime  @default(now()) @db.Timestamp(6)
+  updated_at          DateTime  @default(now()) @db.Timestamp(6)
+  users               users     @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique @db.VarChar(255)
+  email      String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  first_name String?   @db.VarChar(255)
+  last_name  String?   @db.VarChar(255)
+  country    Country?
+  user_type  UserType  @default(PUBLIC)
+  active     Boolean   @default(true)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime  @default(now()) @db.Timestamp(6)
+  profiles   profiles?
+}
+
+enum Country {
+  BRAZIL
+  UNITED_STATES
+  GERMANY
+  CHINA
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Language {
+  EN_US
+  PT_BR
+  PT_PT
+  ZH_CN
+  ES
+}
+
+enum UserType {
+  ERP
+  PUBLIC
+  API
+  SYSTEM
+  ANONYMOUS
+  ROOT
+  ADMIN
+}
