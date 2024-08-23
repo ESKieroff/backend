@@ -1,21 +1,26 @@
-# Use uma imagem base oficial do Node.js
-FROM node:18-alpine
+# Use a specific Node.js version with Alpine for smaller image size
+FROM node:20.17.0-alpine
 
-# Defina o diretório de trabalho dentro do container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copie o package.json e o package-lock.json para o diretório de trabalho
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Instale as dependências do projeto
-# Utilize --only=production para evitar instalar dependências de desenvolvimento
-RUN npm install --only=production
+# Install all dependencies, including devDependencies
+RUN npm install
 
-# Copie todo o código fonte do projeto para o diretório de trabalho
+# Copy all source code to the working directory
 COPY . .
 
-# Exponha a porta padrão do Nest.js (geralmente 3000, mas pode ser configurada)
+# Build the TypeScript code
+RUN npm run build
+
+# Remove devDependencies after build to reduce image size
+RUN npm prune --omit=dev
+
+# Expose the default port for NestJS (usually 3000)
 EXPOSE 3000
 
-# Comando para iniciar o servidor Nest.js em modo de produção
+# Command to start the NestJS server in production mode
 CMD ["npm", "run", "start:prod"]
