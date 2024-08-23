@@ -34,8 +34,8 @@ ou source ~/.zshrc para usuários de zsh
 
 1. Cerifique-se da utilização uma versão estável do Node.js (ex: v18):
 
-`nvm install 18`
-`nvm use 18`
+`nvm install 20`
+`nvm use 20`
 
 2. Instale as dependencias do projeto
 
