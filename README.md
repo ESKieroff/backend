@@ -43,13 +43,13 @@ ou source ~/.zshrc para usuários de zsh
 
 `npm install`
 
-2. Compile o projeto com npm run build.
+3. Compile o projeto com npm run build.
 
 `npm run build`
 
 4. Iniciar o Projeto:
 
-`npm start`
+`npm start:prod`
 
 # Opção de utilização com Docker
 
