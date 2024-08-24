@@ -32,28 +32,31 @@ ou source ~/.zshrc para usuários de zsh
 
 `nest -v` # Verificar versão do NestJS
 
-# Build e Run
-
-1. Cerifique-se da utilização uma versão estável do Node.js (ex: v20):
-
-`nvm install 20`
-`nvm use 20`
-
-2. Instale as dependencias do projeto
-
-`npm install`
-
-3. Compile o projeto com npm run build.
-
-`npm run build`
-
-4. Iniciar o Projeto:
-
-`npm start:prod`
-
 # Opção de utilização com Docker
 
-### Construção padrão
+### Utilização da imagem disponiblizada no Docker Hub
+
+1. Pull da Imagem Docker:
+Fazer o pull da imagem Docker do DockerHub usando:
+
+`docker pull norohim/cp-planta-backt:latest`
+
+2. Executar a Imagem Docker:
+Executando a imagem Docker, mapeando as portas necessárias:
+
+`docker run --rm -d -p 3000:3000 --name backend-container norohim/backend-project:latest`
+
+Este comando iniciará a aplicação em localhost:3000.
+
+3. Utilizando Volumes do Docker (opcional mas recomendado)
+
+Se for necessário persistir os dados gerados pelo contêiner, como logs ou arquivos de banco de dados, você pode usar `volumes` do Docker. No entanto, eles não farão parte da própria image; eles são armazenados na máquina local.
+
+`docker run --rm -d -p 3000:3000 -v app-data-back:/app/data --name backend-container norohim/backend-project:latest`
+
+Este comando cria e monta um volume chamado app-data-back no diretório /app/data dentro do contêiner.
+
+### Construção padrão Sem Dockerhub
 
 1. Construir a Imagem Docker
 
@@ -94,27 +97,24 @@ Escolha o contêiner que você acabou de rodar (nome-do-container).
 
 `docker run -it -p 3000:3000 backend-project`
 
-### Utilização da imagem disponiblizada no Docker Hub
+### Build e Run na Mão
 
-1. Pull da Imagem Docker:
-Fazer o pull da imagem Docker do DockerHub usando:
+1. Cerifique-se da utilização uma versão estável do Node.js (ex: v20):
 
-`docker pull norohim/cp-planta-backt:latest`
+`nvm install 20`
+`nvm use 20`
 
-2. Executar a Imagem Docker:
-Executando a imagem Docker, mapeando as portas necessárias:
+2. Instale as dependencias do projeto
 
-`docker run --rm -d -p 3000:3000 --name backend-container norohim/backend-project:latest`
+`npm install`
 
-Este comando iniciará a aplicação em localhost:3000.
+3. Compile o projeto com npm run build.
 
-3. Utilizando Volumes do Docker (opcional mas recomendado)
+`npm run build`
 
-Se for necessário persistir os dados gerados pelo contêiner, como logs ou arquivos de banco de dados, você pode usar `volumes` do Docker. No entanto, eles não farão parte da própria image; eles são armazenados na máquina local.
+4. Iniciar o Projeto:
 
-`docker run --rm -d -p 3000:3000 -v app-data-back:/app/data --name backend-container norohim/backend-project:latest`
-
-Este comando cria e monta um volume chamado app-data-back no diretório /app/data dentro do contêiner.
+`npm start:prod`
 
 
 # Estrutura de diretórios
