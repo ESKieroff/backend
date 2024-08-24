@@ -13,15 +13,11 @@ RUN npm install
 # Copy all source code to the working directory
 COPY . .
 
-RUN npm install -g typescript
-
-RUN npm install -g @nestjs/cli
+RUN npm install -g typescript @nestjs/cli
 # Remove devDependencies after build to reduce image size
 
 # Build the TypeScript code
 RUN npm run build
-
-#RUN npm prune --omit=dev
 
 # Expose the default port for NestJS (usually 3000)
 EXPOSE 3000

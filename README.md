@@ -20,7 +20,7 @@ Executando a imagem Docker, mapeando as portas necessárias:
 
 Este comando iniciará a aplicação em localhost:3000.
 
-3. Utilizando Volumes do Docker (opcional)
+4. Utilizando Volumes do Docker (opcional)
 
 Se for necessário persistir os dados gerados pelo contêiner, como logs ou arquivos de banco de dados, você pode usar `volumes` do Docker. No entanto, eles não farão parte da própria image; eles são armazenados na máquina local.
 
@@ -65,10 +65,9 @@ Escolha o contêiner que você acabou de rodar (nome-do-container).
 
 4. Versão simplificada para acesso via terminal ao ambiente do container:
 
-`docker build -t backend-project .`
+`docker build -t cp-planta-backend .`
 
-`docker run -it -p 3000:3000 backend-project`
-
+`docker run -it -p 3000:3000 cp-planta-backend`
 
 ### Opção de utilização sem Docker
 
