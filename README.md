@@ -81,8 +81,8 @@ ou source ~/.zshrc para usuários de zsh
 
 2. Instalar Node.js e npm com NVM
 
-`nvm install 20`
-`nvm use 20`
+`nvm install 18`
+`nvm use 18`
 `nvm install --lts`
 
 3. Instalar TypeScript
@@ -105,22 +105,17 @@ ou source ~/.zshrc para usuários de zsh
 
 ### Build e Run na Mão
 
-1. Cerifique-se da utilização uma versão estável do Node.js (ex: v20):
-
-`nvm install 20`
-`nvm use 20`
-
-2. Instale as dependencias do projeto
+1. Instale as dependencias do projeto
 
 `npm install`
 
-3. Compile o projeto com npm run build.
+2. Compile o projeto com npm run build.
 
 `npm run build`
 
-4. Iniciar o Projeto:
+3. Iniciar o Projeto:
 
-`npm start:prod`
+`npm run start`
 
 # Estrutura de diretórios
 ```

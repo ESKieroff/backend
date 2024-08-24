@@ -1,5 +1,5 @@
 # Use a specific Node.js version with Alpine for smaller image size
-FROM node:20.17.0-alpine
+FROM node:18-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -7,14 +7,14 @@ WORKDIR /app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
+# Install TypeScript and NestJS CLI globally
+RUN npm install -g typescript @nestjs/cli
+
 # Install all dependencies, including devDependencies
 RUN npm install
 
-# Copy all source code to the working directory
+# Copy all the left source code to the working directory
 COPY . .
-
-RUN npm install -g typescript @nestjs/cli
-# Remove devDependencies after build to reduce image size
 
 # Build the TypeScript code
 RUN npm run build
@@ -23,4 +23,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Command to start the NestJS server in production mode
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start"]
