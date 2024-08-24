@@ -16,7 +16,7 @@ Fazer o pull da imagem Docker do DockerHub usando:
 3. Executar a Imagem Docker:
 Executando a imagem Docker, mapeando as portas necessárias:
 
-`docker run --rm -d -p 3000:3000 --name cp-planta-backend norohim/cp-planta-backend:latest`
+`docker run -d -p 3000:3000 --name cp-planta-backend norohim/cp-planta-backend:latest`
 
 Este comando iniciará a aplicação em localhost:3000.
 
@@ -24,7 +24,7 @@ Este comando iniciará a aplicação em localhost:3000.
 
 Se for necessário persistir os dados gerados pelo contêiner, como logs ou arquivos de banco de dados, você pode usar `volumes` do Docker. No entanto, eles não farão parte da própria image; eles são armazenados na máquina local.
 
-`docker run --rm -d -p 3000:3000 -v app-data-back:/app/data --name cp-planta-backend norohim/cp-planta-backend:latest`
+`docker run -d -p 3000:3000 -v app-data-back:/app/data --name cp-planta-backend norohim/cp-planta-backend:latest`
 
 Este comando cria e monta um volume chamado app-data-back no diretório /app/data dentro do contêiner.
 
