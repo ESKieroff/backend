@@ -1,62 +1,34 @@
 # Installation and Setup Instructions
 
-1. Instalar NVM (Node Version Manager)
-
-`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash`
-
-`source ~/.bashrc `
-
-ou source ~/.zshrc para usuários de zsh
-
-2. Instalar Node.js e npm com NVM
-
-`nvm install 20`
-`nvm use 20`
-`nvm install --lts`
-
-3. Instalar TypeScript
-
-`npm install -g typescript`
-
-4. Instalar NestJS CLI
-
-`npm install -g @nestjs/cli`
-
-5. Comandos para Verificação de versões
-
-`node -v`  # Verificar versão do Node.js
-
-`npm -v`   # Verificar versão do npm
-
-`tsc -v`   # Verificar versão do TypeScript
-
-`nest -v` # Verificar versão do NestJS
-
 # Opção de utilização com Docker
 
 ### Utilização da imagem disponiblizada no Docker Hub
 
-1. Pull da Imagem Docker:
+1. Logar no DockerHub:
+
+`docker login`
+
+2. Pull da Imagem Docker:
 Fazer o pull da imagem Docker do DockerHub usando:
 
-`docker pull norohim/cp-planta-backt:latest`
+`docker pull norohim/cp-planta-backend:latest`
 
-2. Executar a Imagem Docker:
+3. Executar a Imagem Docker:
 Executando a imagem Docker, mapeando as portas necessárias:
 
-`docker run --rm -d -p 3000:3000 --name backend-container norohim/backend-project:latest`
+`docker run --rm -d -p 3000:3000 --name backend-container norohim/cp-planta-backend:latest`
 
 Este comando iniciará a aplicação em localhost:3000.
 
-3. Utilizando Volumes do Docker (opcional mas recomendado)
+3. Utilizando Volumes do Docker (opcional)
 
 Se for necessário persistir os dados gerados pelo contêiner, como logs ou arquivos de banco de dados, você pode usar `volumes` do Docker. No entanto, eles não farão parte da própria image; eles são armazenados na máquina local.
 
-`docker run --rm -d -p 3000:3000 -v app-data-back:/app/data --name backend-container norohim/backend-project:latest`
+`docker run --rm -d -p 3000:3000 -v app-data-back:/app/data --name backend-container norohim/cp-planta-backend:latest`
 
 Este comando cria e monta um volume chamado app-data-back no diretório /app/data dentro do contêiner.
 
-### Construção padrão Sem Dockerhub
+### Construção padrão Local Sem Dockerhub
 
 1. Construir a Imagem Docker
 
@@ -97,6 +69,41 @@ Escolha o contêiner que você acabou de rodar (nome-do-container).
 
 `docker run -it -p 3000:3000 backend-project`
 
+
+### Opção de utilização sem Docker
+
+1. Instalar NVM (Node Version Manager)
+
+`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash`
+
+`source ~/.bashrc `
+
+ou source ~/.zshrc para usuários de zsh
+
+2. Instalar Node.js e npm com NVM
+
+`nvm install 20`
+`nvm use 20`
+`nvm install --lts`
+
+3. Instalar TypeScript
+
+`npm install -g typescript`
+
+4. Instalar NestJS CLI
+
+`npm install -g @nestjs/cli`
+
+5. Comandos para Verificação de versões
+
+`node -v`  # Verificar versão do Node.js
+
+`npm -v`   # Verificar versão do npm
+
+`tsc -v`   # Verificar versão do TypeScript
+
+`nest -v` # Verificar versão do NestJS
+
 ### Build e Run na Mão
 
 1. Cerifique-se da utilização uma versão estável do Node.js (ex: v20):
@@ -115,7 +122,6 @@ Escolha o contêiner que você acabou de rodar (nome-do-container).
 4. Iniciar o Projeto:
 
 `npm start:prod`
-
 
 # Estrutura de diretórios
 ```
