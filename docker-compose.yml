@@ -19,8 +19,11 @@ services:
       - .:/app/node_modules
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV}
     depends_on:
-      - database
+      - pgadmin
+    networks: 
+      - myapp-network
 
   database:
     build:
@@ -41,24 +44,28 @@ services:
       - pgpersistencedata:/var/lib/postgresql/data
       - ./scripts/db_create.sql:/docker-entrypoint-initdb.d/db_create.sql
       - ./scripts/db_insert.sql:/docker-entrypoint-initdb.d/db_insert.sql
+    networks: 
+      - myapp-network
 
   pgadmin:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4
     restart: always
     ports:
-      - "8080:80" # Exponha a porta 80 do pgAdmin para a porta 8080 no host
+      - "1234:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - database
+    networks:
+      - myapp-network
+
+networks:
+  myapp-network:
+    driver: bridge
 
 volumes:
   pgpersistencedata:
-  pgadmin_data:
-    driver: local
     driver_opts:
       type: 'none'
       o: 'bind'

@@ -4,11 +4,11 @@ WORKDIR /app
 
 COPY package*.json ./
 
-ARG NODE_ENV=production
-RUN if [ "$NODE_ENV" = "production" ]; then npm install --only=production; else npm install; fi
+RUN npm install
+RUN npm install -g @nestjs/cli
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npm run start:${NODE_ENV:-dev}"]
