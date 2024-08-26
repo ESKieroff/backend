@@ -6,19 +6,23 @@ import 'reflect-metadata';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+
+
+
+
+  
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
+              .setTitle('API Documentation')
     .setDescription('The API description')
     .setVersion('1.0')
-    .addTag('users') // Adicione tags conforme necessário
+    .addTag('users')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
   await app.listen(3000);
-  
 }
 bootstrap();
 
-console.log("This should cause an ESLint error");
+console.log('This should cause an ESLint error');
