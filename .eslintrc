@@ -1,28 +1,22 @@
 {
     "env": {
-      "browser": true,
       "es2021": true,
       "node": true,
-      "jest": true,
+      "jest": true
     },
     "settings": {
-      "react": {
-        "version": "detect",
-      },
       "import/extensions": [".js", ".jsx", ".ts", ".tsx"],
       "import/parsers": {
-        "@typescript-eslint/parser": [".ts", ".tsx"],
+        "@typescript-eslint/parser": [".ts", ".tsx"]
       },
       "import/resolver": {
         "typescript": {
-          "project": "tsconfig.json",
-        },
-      },
+          "project": "tsconfig.json"
+        }
+      }
     },
     "extends": [
-      "standard",
       "eslint:recommended",
-      "plugin:react/recommended",
       "plugin:@typescript-eslint/recommended",
       "plugin:promise/recommended",
       "plugin:jsx-a11y/recommended",
@@ -30,49 +24,32 @@
       "plugin:import/typescript",
       "prettier",
       "plugin:prettier/recommended",
-      "plugin:jest-dom/recommended",
-      "plugin:testing-library/react",
       "plugin:jest/recommended",
       "plugin:jest/style",
-      "airbnb-base",
+      "airbnb-base"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-      "ecmaFeatures": {
-        "jsx": true,
-      },
       "ecmaVersion": 12,
-      "sourceType": "module",
+      "sourceType": "module"
     },
     "plugins": [
-      "react",
-      "react-hooks",
       "promise",
       "prettier",
-      "jest-dom",
-      "testing-library",
       "jest",
       "jsx-a11y",
-      "@typescript-eslint",
+      "@typescript-eslint"
     ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "prettier",
-    ],
-  
-    "rules": {
-      "console.log": "warn",
+    "rules": {      
       "arrow-parens": "off",
       "eqeqeq": "error",
-      "function-paren-newline": "off",
       "indent": ["error", 4],
       "linebreak-style": [2, "unix"],
       "no-console": [
         "error",
         {
-          "allow": ["info", "warn", "error", "time", "timeEnd"],
-        },
+          "allow": ["warn", "error"]
+        }
       ],
       "no-duplicate-imports": "error",
       "no-extra-parens": "off",
@@ -81,41 +58,18 @@
         {
           "builtinGlobals": false,
           "hoist": "functions",
-          "allow": [],
-        },
+          "allow": []
+        }
       ],
       "operator-linebreak": [2, "before", { "overrides": { "=": "after" } }],
-      "eslint-plugin-import/prefer-default-export": "off",
-      "react/jsx-filename-extension": [
-        1,
-        {
-          "extensions": [".tsx"],
-        },
-      ],
-      "react/function-component-definition": [
-        "error",
-        {
-          "namedComponents": "arrow-function",
-          "unnamedComponents": "arrow-function",
-        },
-      ],
-      "react/jsx-uses-react": "error",
-      "react/jsx-uses-vars": "error",
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
-      "react/prop-types": "off",
-      "react/display-name": "off",
-      "react/react-in-jsx-scope": "off",
-      "jsx-a11y/anchor-is-valid": "error",
+      "import/prefer-default-export": "off",
       "space-before-function-paren": "off",
-      "eslint-disable-next-line": "off",
       "prettier/prettier": "error",
       "no-return-await": "error",
-      "@typescript-eslint-in-jsx-scope": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"]
     },
     "overrides": [
       {
@@ -125,9 +79,9 @@
           "plugin:jest-dom/recommended",
           "plugin:testing-library/react",
           "plugin:jest/recommended",
-          "plugin:jest/style",
-        ],
-      },
-    ],
+          "plugin:jest/style"
+        ]
+      }
+    ]
   }
   
