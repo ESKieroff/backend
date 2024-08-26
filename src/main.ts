@@ -17,8 +17,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(3000);
-
   
-  console.log(`batata is running on: ${await app.getUrl()}`);
 }
 bootstrap();
+
+console.log("This should cause an ESLint error");
