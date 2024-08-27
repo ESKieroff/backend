@@ -23,9 +23,9 @@
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
-      "npx pretty-quick --staged",
-      "npx prettier --write",
-      "npx eslint --fix"
+      "pretty-quick --staged",
+      "prettier --write",
+      "eslint --fix"
     ]
   },
   "dependencies": {
