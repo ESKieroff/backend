@@ -5,6 +5,5 @@
   "endOfLine": "lf",
   "trailingComma": "all",
   "tabWidth": 2,
-  "printWidth": 80,
-  "console": "warn"
+  "printWidth": 80
 }
