@@ -1,14 +1,23 @@
-// src/teste.ts
+// Outro exemplo com diversas expressões e lógica condicional
 
-const mensagem = 'Olá, mundo!'
-console.log(mensagem)
-const soma = (a: number, b: number): number => {
-  return a + b
-}
-console.log(soma(2, 3))
-console.log('ave maria')
+const processarDados = (
+  nome: string,
+  idade: number,
+  ativo: boolean,
+): string[] => {
+  return nome !== '' && idade > 18 && ativo
+    ? ['Nome:', nome, 'Idade:', idade.toString()]
+    : ['Dados incompletos'];
+};
+processarDados('Fulano', 20, true);
 
-const funcao1 = (): string => {
-  return 'Teste'
-}
-console.log(funcao1())
+const calcularPreco = (
+  preco: number,
+  desconto: number = 0.1,
+  taxa: number = 0.2,
+): number => {
+  const precoFinal = preco - preco * desconto;
+  const precoComTaxa = precoFinal + precoFinal * taxa;
+  return precoComTaxa;
+};
+calcularPreco(100);
