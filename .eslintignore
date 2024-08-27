@@ -6,6 +6,7 @@ container
 security
 src/ui/assets/*
 coverage
+commitlint.config.js
 
 .gitbub
 .jest

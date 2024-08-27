@@ -6,6 +6,7 @@ const soma = (a: number, b: number): number => {
   return a + b
 }
 console.log(soma(2, 3))
+console.log('ave maria')
 
 const funcao1 = (): string => {
   return 'Teste'

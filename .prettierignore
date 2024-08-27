@@ -10,8 +10,9 @@ container
 security
 src/ui/assets/*
 coverage
+commitlint.config.js
 
-.gitbub
+.github
 .jest
 .gitignore
 .gitattributes
