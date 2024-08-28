@@ -1,7 +1,28 @@
 {
-  "name": "backend-project",
+  "name": "cpplanta-backend",
+  "author": "AGES",
+  "description": "Backend for CPPlanta project",
   "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "nestjs",
+    "typescript",
+    "prisma",
+    "swagger",
+    "passport",
+    "nodejs",
+    "postgresql"
+  ],
   "private": true,
+  "repository": {
+    "type": "gitlab",
+    "url": "https://tools.ages.pucrs.br/cp-planta/backend"
+  },
+  "bugs": {
+    "url": "https://tools.ages.pucrs.br/cp-planta/backend/-/issues"
+  },
+  "homepage": "https://www.ages.pucrs.br/projetos-2/cpplanta/",
   "scripts": {
     "start": "nest start",
     "start:dev": "nest start --watch",

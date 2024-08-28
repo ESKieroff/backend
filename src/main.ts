@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 
@@ -18,4 +18,6 @@ async function bootstrap(): Promise<void> {
 
   await app.listen(3000);
 }
-await bootstrap();
+(async () => {
+  await bootstrap();
+})();
