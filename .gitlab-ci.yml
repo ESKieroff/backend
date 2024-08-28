@@ -68,6 +68,6 @@ release:
     - npm ci # Instala as dependências
     - npx semantic-release # Executa o semantic-release
   only:
-    - main # ou o branch principal que você está usando
+    - develop # ou o branch principal que você está usando
   variables:
     GITLAB_TOKEN: $CI_JOB_TOKEN
