@@ -152,3 +152,19 @@ ou source ~/.zshrc para usuários de zsh
 ├── tsconfig.json # Configurações do TypeScript
 └── README.md
 ```
+## update configuration:
+
+Backend
+├── src
+│   ├── config/       # Configurações
+│   ├── controllers/  # Controladores que lidam com requisições HTTP
+│   ├── dto/          # Data Transfer Objects
+│   ├── entities/     # Entidades do domínio
+│   ├── interfaces/   # Interfaces de tipos e contratos
+│   ├── middleware/   # Tratamento de erros e middleware
+│   ├── models/       # Modelos de dados e estruturas de dados
+│   ├── repositories/ # Implementações de repositórios e acesso a dados
+│   ├── routes/       # Definição das rotas e endpoints
+│   ├── services/     # Serviços que contêm a lógica de negócios
+│   └── utils/        # Utilidades gerais e funções auxiliares
+└── index.ts          # Arquivo principal do aplicativo

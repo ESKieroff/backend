@@ -11,8 +11,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ATENÇÃO: OS MODELOS ABAIXO SÃO APENAS PARA EXEMPLO, VOCÊ DEVE ALTERÁ-LOS CONFORME A NECESSIDADE DO SEU PROJETO
-
 model profiles {
   id                  Int       @id
   photo               Bytes?

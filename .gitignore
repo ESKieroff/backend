@@ -1,5 +1,8 @@
 # Custom
 desktop.ini
+zz/
+yarn.lock
+package-lock.json
 
 # Logs
 logs
