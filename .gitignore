@@ -155,3 +155,8 @@ Thumbs.db
 
 # Editor backup files
 *.swp
+
+# Fixes configs files errors
+commitlint.config.js
+tsconfig.json
+nest-cli.json
