@@ -83,7 +83,6 @@ ou source ~/.zshrc para usuários de zsh
 
 `nvm install 18`
 `nvm use 18`
-`nvm install --lts`
 
 3. Instalar TypeScript
 
