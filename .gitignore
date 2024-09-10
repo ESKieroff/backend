@@ -3,6 +3,9 @@ desktop.ini
 zz/
 yarn.lock
 package-lock.json
+tsconfig.tsbuildinfo
+tsconfig.build.json
+openapitools.json
 
 # Logs
 logs

@@ -12,6 +12,6 @@
   },
   "[prisma]": {
     "editor.formatOnSaveMode": "file",
-    "editor.defaultFormatter": "ajmnz.prisma-import"
+    "editor.defaultFormatter": "Prisma.prisma"
   }
 }
