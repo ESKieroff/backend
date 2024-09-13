@@ -1,153 +1,338 @@
-# Installation and Setup Instructions
+# **Configurações do Projeto - CP-Planta**
 
-# Opção de utilização com Docker
+## Sumário
 
-### Utilização da imagem disponiblizada no Docker Hub
+- [Configurações Gerais](#configurações-gerais)
+  - [Instalação do Ambiente de Desenvolvimento](#instalação-do-ambiente-de-desenvolvimento)
+- [Backend](#backend)
+  - [Configurando o Backend](#configurando-o-backend)
+  - [Rodando o Backend](#rodando-o-backend)
+  - [Banco de Dados](#banco-de-dados)
+- [ORM Client](#orm-client)
+  - [Prisma Client](#prisma-client)
+- [Extras](#extras)
+  - [PGadmin4](#pgadmin4)
+- [Estou com pressa: Resumo](#resumo-dos-passos)
 
-1. Logar no DockerHub:
+> **Observação:** Consulte a documentação do projeto no menu [Instalação](https://tools.ages.pucrs.br/cp-planta/wiki/-/wikis/instalacao) para mais detalhes sobre o processo.
 
-`docker login`
+## **Configurações Gerais**
 
-2. Pull da Imagem Docker:
-Fazer o pull da imagem Docker do DockerHub usando:
+### **Instalação do Ambiente de Desenvolvimento**
 
-`docker pull norohim/cp-planta-backend:latest`
+Antes de configurar os ambientes, siga estas instruções gerais:
 
-3. Executar a Imagem Docker:
-Executando a imagem Docker, mapeando as portas necessárias:
+- **VSCode**: Baixe [aqui](https://code.visualstudio.com/download).
 
-`docker run -d -p 3000:3000 --name cp-planta-backend norohim/cp-planta-backend:latest`
+- **Plugins recomendados para VSCode**:  
+  - ESLint
+  - Prettier
+  - Jest
+  - Jest Runner
+  - GitHub Copilot (opcional).
 
-Este comando iniciará a aplicação em localhost:3000.
+- **NodeJS**: Verifique se o Node está instalado:
 
-4. Utilizando Volumes do Docker (opcional)
+  ```bash
+  node --version
+  ```
 
-Se for necessário persistir os dados gerados pelo contêiner, como logs ou arquivos de banco de dados, você pode usar `volumes` do Docker. No entanto, eles não farão parte da própria image; eles são armazenados na máquina local.
+  Caso não esteja, siga o [tutorial oficial](https://nodejs.org/en/download/).
 
-`docker run -d -p 3000:3000 -v app-data-back:/app/data --name cp-planta-backend norohim/cp-planta-backend:latest`
+- **NPM**: O NPM já vem com o NodeJS. Verifique a versão:
 
-Este comando cria e monta um volume chamado app-data-back no diretório /app/data dentro do contêiner.
+  ```bash
+  npm --version
+  ```
 
-### Construção padrão Local Sem Dockerhub
+- **YARN**: Caso queira utilizar o yarn, precisa verificar se está instalado:
 
-1. Construir a Imagem Docker
+  ```bash
+  yarn --version
+  ```
 
-Execute o comando abaixo para construir a imagem Docker. Substitua nome-da-imagem pelo nome desejado para sua imagem.
+  para instalar:
 
-`docker build -t <nome-da-imagem> .`
+    ```bash
+  npm install --global yarn
+  ```
 
-2. Rodar o Contêiner Docker
+---
 
-Depois de construir a imagem, você pode rodar o contêiner com o comando abaixo. Substitua o nome-do-container e nome-da-imagem pelos nomes apropriados.
+# **Backend**
 
-`docker run -d --name nome-do-container -v $(pwd):/app -w /app -p 3000:3000 nome-da-imagem`
+## **Configurando o Backend**
 
-Explicação dos parâmetros:
+1. **Instalar Node (versão 18.0 ou superior)**:
+   - Para Windows: [Download Node.js](https://nodejs.org/en/download/package-manager/)
+   - Para Linux:
 
-`-d: Executa o contêiner em segundo plano (modo "detached").`
+     ```bash
+     sudo apt install nodejs
+     ```
 
-`--name: Nomeia o contêiner.`
+2. **Clonar o repositório do Backend**:
 
-`-v $(pwd):/app: Monta o diretório atual $(pwd) no diretório /app dentro do contêiner.`
+   ```bash
+   git clone https://tools.ages.pucrs.br/cp-planta/backend.git
+   ```
 
-`-w /app: Define o diretório de trabalho dentro do contêiner como /app.`
+3. **Instalar dependências**:
+   - No terminal, dentro do diretório do projeto:
 
-`-p 3000:3000: Mapeia a porta 3000 do contêiner para a porta 3000 do host (ajuste conforme necessário).`
+     ```bash
+     npm install
+     ```
 
+     usando yarn:
 
-Alguns destes paramêtros já estão configurados no arquivo Dockerfile, mas você pode ajustá-los conforme necessário e deixá-los expliícitos no comando de execução docker run.
+     ```bash
+     yarn install
+     ```
 
-3. Conectar ao Contêiner Docker Usando VS Code
+4. **Configurar variáveis de ambiente**:
+   - Renomeie o arquivo `.envExample` para `.env`.(caso já possua o .env, desconsidere.)
 
-Clique no ícone verde no canto inferior esquerdo do VS Code (ou use o atalho Ctrl+Shift+P para abrir o Command Palette).
-Selecione Dev Containers: Attach to Running Container....
-Escolha o contêiner que você acabou de rodar (nome-do-container).
+## **Rodando o Backend**
 
-4. Versão simplificada para acesso via terminal ao ambiente do container:
+### **Modo de Desenvolvimento**
 
-`docker build -t cp-planta-backend .`
+- Para rodar o backend em modo de desenvolvimento:
 
-`docker run -it -p 3000:3000 cp-planta-backend`
+  ```bash
+  npm run dev
+  ```
 
-### Opção de utilização sem Docker
+  usando yarn:
 
-1. Instalar NVM (Node Version Manager)
+  ```bash
+  yarn dev
+  ```
 
-`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash`
+- O projeto estará disponível em:  
+  [http://localhost:3000](http://localhost:3000)
 
-`source ~/.bashrc `
+### **Rodando com Docker**
 
-ou source ~/.zshrc para usuários de zsh
+- Se desejar usar Docker, rode os seguintes comandos:
 
-2. Instalar Node.js e npm com NVM
+  ```bash
+  docker-compose build
+  docker-compose up -d
+  ```
 
-`nvm install 18`
-`nvm use 18`
+  se usa wsl, seu comando pode ser algo como:
 
-3. Instalar TypeScript
+  ```bash
+  docker compose up -d
+  ```
 
-`npm install -g typescript`
+- O backend estará acessível em:  
+  [http://localhost:3000](http://localhost:3000)
 
-4. Instalar NestJS CLI
+---
 
-`npm install -g @nestjs/cli`
+## **Banco de Dados**
 
-5. Comandos para Verificação de versões
+### **PostgreSQL**
 
-`node -v`  # Verificar versão do Node.js
+1. **Download do PostgreSQL**: Baixe [aqui](https://www.postgresql.org/download/).
+2. **PgAdmin 4**: Para gerenciar os bancos de dados, use o [PgAdmin 4](https://www.pgadmin.org/download/).
 
-`npm -v`   # Verificar versão do npm
+### **Postman/Insomnia**
 
-`tsc -v`   # Verificar versão do TypeScript
+- Teste suas APIs usando o [Postman](https://www.postman.com/) ou [Insomnia](https://insomnia.rest/download).
 
-`nest -v` # Verificar versão do NestJS
+---
 
-### Build e Run na Mão
+## **ORM Client**
 
-1. Instale as dependencias do projeto
+### **Prisma Client**
 
-`npm install`
+Para realizar a interface entre o banco de dados e a aplicação, vamos utilizar o ORM Prisma (incuso no backend).
+Para isso vamos gerar o Prisma Client:
 
-2. Compile o projeto com npm run build.
+  ```bash
+  npx prisma generate
+  ```
 
-`npm run build`
+Para consultar os dados do banco de dados no seu browser, use:
 
-3. Iniciar o Projeto:
+  ```bash
+  npx prisma studio
+  ```
 
-`npm run start`
+---
 
-# Estrutura de diretórios
+## **Extras**
+
+### **PGadmin4**
+
+Caso necessite realizar ações mais avançadas, como:
+
+- Criar scripts CRUD
+- Alterar dados diretamente no banco de dados
+- Criar views, procedures, index...
+- Verificar campos, conferir dados no banco, etc.
+
+Você pode utilizar o administrador **Pgadmin4**, que é o padrão do PostgreSQL.  
+Ele já está incluído no Docker, mas você pode instalá-lo localmente, assim como o banco de dados.
+
+### Para configurar o acesso
+
+Usando o Pgadmin do container Docker, será necessário informar os dados da rede interna dos containers.  
+Para obter os nomes, abra um novo terminal e digite:
+
+```bash
+docker ps
+```
+
+Acesse em seu navegador o endereço: [http://localhost:1234/](http://localhost:1234/)  
+**Login:** <fulano@gmail.com>  
+**Senha:** abc123
+
+#### Registrar o servidor
+
+- **Aba Geral**  
+  - **Nome:** postgres  
+  - **Grupo de Servidores:** Servers
+
+- **Aba Conexão**  
+  - **Host name/address:** backend-database-1  
+  - **Port:** 5432  
+  - **Maintenance database:** postgres  
+  - **Username:** postgres  
+  - **Senha:** postgres
+
+> **Observação:** Os dados de acesso podem variar. Consulte o arquivo *.env* do projeto: [environments](./.env) para verificar os dados.
+---
+
+Caso queira usar o Pgadmin já instalado em sua máquina, use as portas expostas pelos containers:
+
+- **Aba Geral**  
+  - **Nome:** postgres  
+  - **Grupo de Servidores:** Servers
+
+- **Aba Conexão**  
+  - **Host name/address:** localhost  
+  - **Port:** 5435  
+  - **Maintenance database:** postgres  
+  - **Username:** postgres  
+  - **Senha:** postgres
+
+---
+
+## **Resumo dos Passos**
+
+### 1. **Configurações Gerais**
+
+- **Instalar VSCode** e seus **plugins recomendados** (ESLint, Prettier, etc).
+- **Instalar NodeJS e NPM**, verificar suas versões.
+- **Instalar Yarn**, se preferir usá-lo.
+
+### 2. **Configurar o Backend**
+
+- **Clonar o repositório** do [backend](https://tools.ages.pucrs.br/cp-planta/backend.git).
+- **Instalar as dependências** com `npm install` ou `yarn install`.
+- **Configurar o arquivo .env**, renomeando o `.envExample`.
+
+### 3. **Rodar o Backend**
+
+- **Modo de desenvolvimento**: `npm run dev` ou `yarn dev`.
+- **Rodar com Docker**: `docker-compose up -d` ou `docker compose up -d`.
+
+### 4. **Banco de Dados**
+
+- **Instalar PostgreSQL** e utilizar **PgAdmin 4** para gerenciar o banco.
+- **Testar APIs** com ferramentas como **Postman** ou **Insomnia**.
+
+### 5. **ORM Client - Prisma**
+
+- **Gerar Prisma Client** com o comando `npx prisma generate`.
+- **Visualizar dados no Prisma Studio**: `npx prisma studio`.
+
+### 6. **Extras: Configuração do PgAdmin4**
+
+- **Registrar o servidor** no PgAdmin4 para gerenciar o banco de dados.
+- Acesse o PgAdmin através do endereço fornecido ou use a instalação local, utilizando as portas expostas pelos containers.
+
+---
+
+### Estrutura de diretórios (Backend)
+
 ```
 /backend
-├── src/
-│ ├── config/
-│ │ └── configuration.ts # Arquivo para gerenciar configurações e variáveis de ambiente
-│ ├── core/
-│ │ ├── domain/
-│ │ │ ├── entities/ # Entidades do domínio
-│ │ │ └── interfaces/ # Interfaces para os repositórios do domínio
-│ │ └── application/
-│ │ ├── services/ # Serviços que contêm lógica de negócios
-│ │ └── dto/ # Data Transfer Objects
-│ ├── infrastructure/
-│ │ ├── db/
-│ │ │ ├── prisma/ # Configurações e migrações do Prisma
-│ │ │ └── repository/ # Implementações dos repositórios
-│ │ ├── web/
-│ │ │ ├── controllers/ # Controladores que lidam com requisições HTTP
-│ │ │ └── middleware/ # Middlewares específicos da aplicação
-│ │ └── auth/
-│ │ └── strategies/ # Estratégias de autenticação (ex: JWT)
-│ ├── shared/
-│ │ ├── filters/ # Filtros globais (ex: para captura de exceções)
-│ │ └── utilities/ # Utilidades gerais
-│ └── app.module.ts # Módulo raiz que organiza e importa outros módulos
-├── test/
-│ ├── unit/ # Testes unitários
-│ └── integration/ # Testes de integração
-├── .env # Variáveis de ambiente
-├── nest-cli.json # Configurações do CLI do Nest
-├── package.json
-├── tsconfig.json # Configurações do TypeScript
-└── README.md
+├── .dockerignore
+├── .env.example                   # Exemplo de arquivo de variáveis de ambiente
+├── .eslintignore                  # Configuração do ESLint para ignorar arquivos
+├── .eslintrc                      # Configuração do ESLint
+├── .gitignore                     # Arquivos e diretórios a serem ignorados pelo Git
+├── .gitpod.yml                    # Configuração do Gitpod
+├── .husky/                        # Hooks do Git
+│   ├── _/
+│   ├── commit-msg
+│   └── pre-commit
+├── .nvmrc                         # Configuração da versão do Node.js
+├── .prettierignore                # Configuração do Prettier para ignorar arquivos
+├── .prettierrc                    # Configuração do Prettier
+├── .releaserc                     # Configuração do Semantic Release
+├── .vscode/                       # Configurações do Visual Studio Code
+│   └── settings.json
+├── CHANGELOG.md                   # Histórico de mudanças do projeto
+├── commitlint.config.js           # Configuração do Commitlint
+├── database/                      # Arquivos relacionados ao banco de dados
+│   └── backup.sql                 # Backup do banco de dados
+├── docker-compose.yml             # Configuração do Docker Compose
+├── dockerfile.node                # Dockerfile para o ambiente Node.js
+├── dockerfile.postgres            # Dockerfile para o ambiente PostgreSQL
+├── jest.config.js                 # Configuração do Jest
+├── LICENSE.md                     # Licença do projeto
+├── nest-cli.json                  # Configuração do Nest CLI
+├── package.json                   # Dependências e scripts do Node.js
+├── prisma/                        # Configuração do Prisma
+│   ├── migrations/                # Migrações do Prisma
+│   ├── patterns.md                # Padrões de desenvolvimento
+│   └── schema.prisma              # Esquema do Prisma
+├── README.md                      # Documentação do projeto
+├── scripts/                       # Scripts auxiliares
+│   └── db_create.sql              # Script para criação do banco de dados
+│   └── ...                        # Outros scripts
+├── src/                           # Código fonte do projeto
+│   ├── domain/                    # Camada de domínio (modelos, interfaces de repositórios)
+│   │   ├── models/
+│   │   │   └── User.ts            # Definição do modelo de usuário
+│   │   └── repositories/
+│   │       └── UserRepository.ts  # Interface do repositório de usuário
+│   ├── application/               # Camada de aplicação (serviços, DTOs)
+│   │   ├── services/
+│   │   │   └── UserService.ts     # Serviço de usuário
+│   │   └── dtos/
+│   │       └── UserDTO.ts         # Objeto de Transferência de Dados de Usuário
+│   ├── interfaces/                # Camada de interface (views, controladores)
+│   │   ├── components/
+│   │   │   └── UserProfile.tsx    # Componente React para o perfil do usuário
+│   │   ├── views/
+│   │   │   └── UserView.tsx       # Componente de visualização para a página de usuário
+│   │   ├── controllers/
+│   │   │   └── UserController.ts  # Controlador de usuário para lidar com requisições de API
+│   │   ├── pages/                 # Páginas e roteamento do Next.js
+│   │   │   └── user/
+│   │   │       └── [id].tsx       # Rota dinâmica para a página de usuário
+│   │   ├── styles/
+│   │   │   └── globals.css        # Estilos globais usando Tailwind CSS
+│   │   └── utils/
+│   │       └── formatDate.ts      # Função utilitária para formatação de datas
+│   ├── infrastructure/            # Camada de infraestrutura (implementações de repositórios, integrações)
+│   │   └── repositories/
+│   │       └── InMemoryUserRepository.ts  # Implementação do repositório de usuário em memória
+│   └── tests/                     # Testes (testes unitários e de integração)
+│       ├── unit/
+│       │   └── UserService.spec.ts  # Teste unitário para UserService
+│       └── integration/
+│           └── UserController.spec.ts  # Teste de integração para UserController
+├── tsconfig.build.json            # Configuração do TypeScript para build
+├── tsconfig.json                  # Configuração do TypeScript
+└── tsconfig.tsbuildinfo           # Informações de build do TypeScript
 ```
+
+---

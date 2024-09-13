@@ -1,21 +1,36 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "target": "ES2020",
+    "module": "CommonJS",
+    "target": "ES2020",   
+    "moduleResolution": "node",    
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./src",    
+    "declaration": true, 
+    "removeComments": true,
     "strict": true,
+    "incremental": true,
     "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
     "types": ["node", "jest"]
   },
+  "paths": {
+    "@/*": ["src/*"]
+  },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/*.spec.ts"
   ]
 }
