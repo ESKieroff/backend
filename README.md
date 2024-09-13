@@ -59,9 +59,9 @@ Antes de configurar os ambientes, siga estas instruções gerais:
 
 ---
 
-# **Backend**
+## **Backend**
 
-## **Configurando o Backend**
+### **Configurando o Backend**
 
 1. **Instalar Node (versão 18.0 ou superior)**:
    - Para Windows: [Download Node.js](https://nodejs.org/en/download/package-manager/)
@@ -260,7 +260,7 @@ Caso queira usar o Pgadmin já instalado em sua máquina, use as portas expostas
 
 ### Estrutura de diretórios (Backend)
 
-```
+```plaintext
 /backend
 ├── .dockerignore
 ├── .env.example                   # Exemplo de arquivo de variáveis de ambiente
