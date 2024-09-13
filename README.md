@@ -138,9 +138,6 @@ Para consultar os dados do banco de dados no seu browser, use:
   npx prisma studio
   ```
 ---
-Aqui está o trecho formatado:
-
----
 
 ## **Extras**
 
