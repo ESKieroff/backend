@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   app:
@@ -9,7 +9,7 @@ services:
       - .env
     restart: always
     ports:
-      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+      - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
     expose:
       - '3000'
     stdin_open: true
@@ -18,8 +18,8 @@ services:
       - .:/app/
       - .:/app/node_modules
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      NODE_ENV: ${NODE_ENV}
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - pgadmin
     networks:
@@ -33,13 +33,13 @@ services:
       - .env
     restart: always
     ports:
-      - ${DB_PORT}:${POSTGRES_DOCKER_PORT}
+      - ${POSTGRES_DOCKER_PORT}:${DB_PORT}
     stdin_open: true
     tty: true
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - pgpersistencedata:/var/lib/postgresql/data
       - ./scripts/db_create.sql:/docker-entrypoint-initdb.d/db_create.sql
@@ -51,10 +51,10 @@ services:
     image: dpage/pgadmin4
     restart: always
     ports:
-      - '1234:80'
+      - '80:80'
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     depends_on:
       - database
     networks:
