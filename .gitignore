@@ -6,6 +6,9 @@ package-lock.json
 tsconfig.tsbuildinfo
 tsconfig.build.json
 openapitools.json
+.env.example
+isrg-root-x1-cross-signed.pem
+tsconfig.tsbuildinfo
 
 # Logs
 logs
