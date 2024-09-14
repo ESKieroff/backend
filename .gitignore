@@ -23,6 +23,7 @@ commitlint.config.js
 .eslintrc
 .env.example
 .tsconfig.json
+.husky/
 
 # custom
 
