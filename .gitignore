@@ -9,6 +9,22 @@ openapitools.json
 .env.example
 isrg-root-x1-cross-signed.pem
 tsconfig.tsbuildinfo
+tsconfig.json
+tsconfig.build.json
+nest-cli.json
+lICENSE.md
+README.md
+docker-compose.yml
+dockerfile.postgres
+dockerfile.node
+commitlint.config.js
+.releaserc
+.prettierrc
+.eslintrc
+.env.example
+.tsconfig.json
+
+# custom
 
 # Logs
 logs
