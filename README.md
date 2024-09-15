@@ -106,8 +106,13 @@ Antes de configurar os ambientes, siga estas instruções gerais:
   usando yarn:
 
   ```bash
+  yarn start dev
+  ```
+ou algo como:
+  ```bash
   yarn dev
   ```
+
 
 - O projeto estará disponível em:  
   [http://localhost:3000](http://localhost:3000)
