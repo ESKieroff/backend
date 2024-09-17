@@ -7,21 +7,21 @@ services:
       - .env
     restart: always
     ports:
-      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+      - '${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}'
     expose:
       - $NODE_DOCKER_PORT
     stdin_open: true
     tty: true
     volumes:
       - .:/app/
-        - /app/node_modules 
+        - /app/node_modules
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      NODE_ENV: ${NODE_ENV}
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
-      - pgadmin    
+      - pgadmin
       - database
-    
+
     networks:
       - myapp-network
 
@@ -33,18 +33,18 @@ services:
       - .env
     restart: always
     ports:
-      - ${DB_PORT}:${POSTGRES_DOCKER_PORT}
+      - ${POSTGRES_DOCKER_PORT}:${DB_PORT}
     stdin_open: true
     tty: true
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - ./scripts/db_create.sql:/docker-entrypoint-initdb.d/db_create.sql
       - ./scripts/db_insert.sql:/docker-entrypoint-initdb.d/db_insert.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,10 +55,10 @@ services:
     image: dpage/pgadmin4
     restart: always
     ports:
-      - '1234:80'
+      - '80:80'
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     depends_on:
       - database
     networks:

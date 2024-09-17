@@ -1,4 +1,4 @@
-INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "user_type", "gender")
+INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
 VALUES 
 	('Cassio', 'cassio@gmail.com', 'cassio', 'Cassio', 'Santos', 'PUBLIC', 'MALE'),
     ('fulano', 'fulano@gmail.com', 'fulano', 'Fulano', 'De Tals', 'PUBLIC', 'MALE'),
@@ -28,25 +28,15 @@ VALUES
     ('Top Demais'),
     ('Promoção');
 	
--- Insert into customers
-INSERT INTO "customers" ("name")
+-- Insert into persons
+INSERT INTO "persons" ("name")
 VALUES 
     ('Pedro Cabral'),
     ('Machado Assis'),
     ('Clarice Lispector'),
     ('Sebastião Costa'),	
     ('Produtor Rural'),
-    ('Ecologia na Veia');
-	
--- Insert into suppliers
-INSERT INTO "suppliers" ("name")
-VALUES 
-    ('Fazendinha'),
-    ('Feira de Acari'),
-    ('Produtor X'),
-    ('Fulaninho da Feira'),	
-    ('Produtor Rural'),
-    ('Eco-Produtor');
+    ('Ecologia na Veia');	
 	
 -- Insert into stock_location
 INSERT INTO "stock_location" ("description")
