@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ControlPanelController } from './control-panel/control-panel.controller';
 import { ControlPanelModule } from './control-panel/control-panel.module';
 import { Config } from './config/config.module';
+import { FeatureFlagsService } from './feature-flags/feature-flags.service';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { Config } from './config/config.module';
     Config
   ],
   controllers: [ControlPanelController],
-  providers: []
+  providers: [FeatureFlagsService]
 })
 export class AppModule {}
