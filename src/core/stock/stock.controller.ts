@@ -7,9 +7,9 @@ import {
   Param,
   Delete
 } from '@nestjs/common';
-import { StokService } from './stok.service';
-import { CreateStokDto } from './dto/create-stok.dto';
-import { UpdateStokDto } from './dto/update-stok.dto';
+import { StokService } from './stock.service';
+import { CreateStokDto } from './dto/create-stock.dto';
+import { UpdateStokDto } from './dto/update-stock.dto';
 
 @Controller('stok')
 export class StokController {

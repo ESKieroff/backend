@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { StokService } from './stok.service';
-import { StokController } from './stok.controller';
+import { StokService } from './stock.service';
+import { StokController } from './stock.controller';
 
 @Module({
   controllers: [StokController],

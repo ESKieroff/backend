@@ -10,6 +10,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserSchema } from './dto/user.schema';
 
 @Controller('users')
 export class UsersController {
@@ -17,6 +18,13 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
+    const validation = CreateUserSchema.safeParse(createUserDto);
+
+    if (!validation.success) {
+      throw new Error(
+        validation.error.errors.map(error => error.message).join(', ')
+      );
+    }
     return this.usersService.create(createUserDto);
   }
 

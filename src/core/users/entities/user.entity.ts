@@ -4,5 +4,5 @@ export class User {
   password: string;
   email: string;
   role: string;
-  isActive: boolean;
+  active: boolean;
 }
