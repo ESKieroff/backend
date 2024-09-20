@@ -35,7 +35,8 @@
     "format": "npm run prettier",
     "commit": "git-cz",
     "prepare": "husky install",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "prisma": "prisma generate"
   },
   "husky": {
     "hooks": {
