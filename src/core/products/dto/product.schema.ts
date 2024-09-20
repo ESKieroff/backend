@@ -11,3 +11,12 @@ export const CreateProductSchema = z.object({
   supplier_id: z.number().int().positive('Supplier is required').optional(),
   nutritional_info: z.string().optional()
 });
+
+export const UpdateProductSchema = z.object({
+  description: z.string().min(3, 'Description is required').optional(),
+  origin: z.string().default('RAW_MATERIAL').optional(),
+  category_id: z.number().int().positive('Category is required').optional(),
+  group_id: z.number().int().positive('Group is required').optional(),
+  supplier_id: z.number().int().positive('Supplier is required').optional(),
+  nutritional_info: z.string().optional()
+});
