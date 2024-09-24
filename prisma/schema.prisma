@@ -2,301 +2,91 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Production {
-  id                                          Int               @id @default(autoincrement())
-  description                                 String            @db.VarChar(255)
-  prodution_quantity_estimated                Float
-  production_quantity_real                    Float
-  lote                                        String?
-  expiration                                  DateTime?
-  created_at                                  DateTime          @default(now()) @db.Timestamp(6)
-  updated_at                                  DateTime          @default(now()) @db.Timestamp(6)
-  Production_Status                           Production_Status @default(CREATED)
-  final_product                               Int
-  products_production_final_productToproducts Products          @relation("production_final_productToproducts", fields: [final_product], references: [id], onDelete: Cascade, map: "final_product_fkey")
-  Production_Work                             Production_Work[]
-  production_item                             Products[]        @relation("production_item")
-
-  @@map("production")
-}
-
-model Production_Work {
-  id             Int              @id @default(autoincrement())
-  production_id  Int              @map("production_id")
-  step_id        Int              @map("step_id")
-  raw_product_id Int
-  sequence       Int
-  start_time     DateTime
-  end_time       DateTime
-  total_time     Float
-  initial_weight Float
-  final_weight   Float
-  weight_loss    Float
-  machine        String?
-  photos         Bytes[]
-  observation    String?
-  ocurrences     Json?            @db.Json
-  created_at     DateTime         @default(now()) @db.Timestamp(6)
-  updated_at     DateTime         @default(now()) @db.Timestamp(6)
-  production     Production       @relation(fields: [production_id], references: [id])
-  products       Products         @relation(fields: [raw_product_id], references: [id])
-  step           Production_Steps @relation(fields: [step_id], references: [id])
-
-  @@map("production_work")
-}
-
-model Production_Steps {
-  id              Int               @id @default(autoincrement())
-  description     String            @db.VarChar(255)
-  created_at      DateTime          @default(now()) @db.Timestamp(6)
-  updated_at      DateTime          @default(now()) @db.Timestamp(6)
-  Production_Work Production_Work[]
-
-  @@map("production_steps")
-}
-
-model Ocurrences {
-  id          Int      @id @default(autoincrement())
-  description String   @db.VarChar(255)
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  updated_at  DateTime @default(now()) @db.Timestamp(6)
-
-  @@map("ocurrences")
-}
-
-model Stock {
-  id              Int            @id @default(autoincrement())
-  document_number String         @db.VarChar(255)
-  document_date   DateTime       @db.Timestamp(6)
-  stock_moviment  Stock_Moviment
-  created_at      DateTime       @default(now()) @db.Timestamp(6)
-  updated_at      DateTime       @default(now()) @db.Timestamp(6)
-  stock_items     Stock_Items[]
-
-  @@map("stock")
-}
-
-model Stock_Items {
-  id                Int            @id @default(autoincrement())
-  stock_id          Int
-  sequence          Int
-  product_id        Int            @map("product_id")
-  quantity          Float
-  unit_price        Float
-  total_price       Float
-  lote              String?
-  expiration        DateTime?
-  supplier_id       Int?           @map("suppliers")
-  costumer_id       Int?           @map("costumers")
-  stock_location_id Int            @map("stock_location_id")
-  observation       String?
-  created_at        DateTime       @default(now()) @db.Timestamp(6)
-  updated_at        DateTime       @default(now()) @db.Timestamp(6)
-  costumer          Customers?     @relation(fields: [costumer_id], references: [id])
-  product           Products       @relation(fields: [product_id], references: [id])
-  stock             Stock          @relation(fields: [stock_id], references: [id])
-  stock_location    Stock_Location @relation(fields: [stock_location_id], references: [id])
-  supplier          Suppliers?     @relation(fields: [supplier_id], references: [id])
-
-  @@map("stock_items")
-}
-
-model Stock_Location {
-  id          Int           @id @default(autoincrement())
-  description String        @db.VarChar(255)
-  active      Boolean       @default(true)
-  created_at  DateTime      @default(now()) @db.Timestamp(6)
-  updated_at  DateTime      @default(now()) @db.Timestamp(6)
-  Stock_Items Stock_Items[]
-
-  @@map("stock_location")
-}
-
-model Products {
-  id                                            Int                 @id @default(autoincrement())
-  description                                   String              @db.VarChar(255)
-  code                                          String              @unique @db.VarChar(255)
-  sku                                           String              @unique @db.VarChar(255)
-  origin                                        Origin              @default(RAW_MATERIAL)
-  unit_measure                                  Unit_Measure        @default(UN)
-  category_id                                   Int                 @map("category_id")
-  group_id                                      Int                 @map("group_id")
-  supplier_id                                   Int?                @map("supplier_id")
-  nutritional_info                              String?
-  active                                        Boolean             @default(true)
-  created_at                                    DateTime            @default(now()) @db.Timestamp(6)
-  updated_at                                    DateTime            @default(now()) @db.Timestamp(6)
-  Composition_Items                             Composition_Items[] @relation("product_items")
-  Compositions                                  Compositions[]      @relation("compositions_product")
-  Prices                                        Prices[]            @relation("product_prices")
-  production_production_final_productToproducts Production[]        @relation("production_final_productToproducts")
-  production_work                               Production_Work[]
-  category                                      Categories          @relation("products_category", fields: [category_id], references: [id])
-  group                                         Groups              @relation("products_group", fields: [group_id], references: [id])
-  supplier                                      Suppliers?          @relation("products_supplier", fields: [supplier_id], references: [id])
-  Stock_Items                                   Stock_Items[]
-  Production                                    Production[]        @relation("production_item")
-
-  @@map("products")
-}
-
-model Compositions {
-  id                Int                 @id @default(autoincrement())
-  product_id        Int                 @map("product_id")
-  description       String              @db.VarChar(255)
-  created_at        DateTime            @default(now()) @db.Timestamp(6)
-  updated_at        DateTime            @default(now()) @db.Timestamp(6)
-  production_steps  Json?               @db.Json
-  Composition_Items Composition_Items[] @relation("composition_items")
-  product           Products            @relation("compositions_product", fields: [product_id], references: [id])
-
-  @@map("compositions")
-}
-
-model Composition_Items {
-  id             Int          @id @default(autoincrement())
-  composition_id Int          @map("composition_id")
-  sequence       Int
-  product_id     Int          @map("product_id")
-  quantity       Float
-  created_at     DateTime     @default(now()) @db.Timestamp(6)
-  updated_at     DateTime     @default(now()) @db.Timestamp(6)
-  composition    Compositions @relation("composition_items", fields: [composition_id], references: [id])
-  product        Products     @relation("product_items", fields: [product_id], references: [id])
-
-  @@map("composition_items")
-}
-
-model Prices {
-  id         Int        @id @default(autoincrement())
-  product_id Int        @map("product_id")
-  price      Float
-  type       Price_Type
-  is_current Boolean    @default(true)
-  created_at DateTime   @default(now()) @db.Timestamp(6)
-  updated_at DateTime   @default(now()) @db.Timestamp(6)
-  product    Products   @relation("product_prices", fields: [product_id], references: [id])
-
-  @@map("prices")
-}
-
-model Suppliers {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  created_at  DateTime      @default(now()) @db.Timestamp(6)
-  updated_at  DateTime      @default(now()) @db.Timestamp(6)
-  Products    Products[]    @relation("products_supplier")
-  Stock_Items Stock_Items[]
-
-  @@map("suppliers")
-}
-
-model Customers {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  created_at  DateTime      @default(now()) @db.Timestamp(6)
-  updated_at  DateTime      @default(now()) @db.Timestamp(6)
-  Stock_Items Stock_Items[]
-
-  @@map("customers")
-}
-
-model Groups {
-  id          Int        @id @default(autoincrement())
-  description String     @db.VarChar(255)
-  father_id   Int?       @map("father_id")
-  created_at  DateTime   @default(now()) @db.Timestamp(6)
-  updated_at  DateTime   @default(now()) @db.Timestamp(6)
-  father      Groups?    @relation("groups_father", fields: [father_id], references: [id])
-  groups      Groups[]   @relation("groups_father")
-  Products    Products[] @relation("products_group")
-
-  @@map("groups")
-}
-
-model Categories {
-  id          Int        @id @default(autoincrement())
-  description String     @unique @db.VarChar(255)
-  active      Boolean    @default(true)
-  created_at  DateTime   @default(now()) @db.Timestamp(6)
-  updated_at  DateTime   @default(now()) @db.Timestamp(6)
-  Products    Products[] @relation("products_category")
-
-  @@map("categories")
-}
-
-model Users {
+model categoria {
   id         Int      @id @default(autoincrement())
-  username   String   @unique @db.VarChar(255)
-  email      String   @unique @db.VarChar(255)
-  password   String   @db.VarChar(255)
-  first_name String?  @db.VarChar(255)
-  last_name  String?  @db.VarChar(255)
-  user_type  UserType @default(PUBLIC)
-  gender     Gender
-  active     Boolean  @default(true)
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @default(now()) @db.Timestamp(6)
-
-  @@map("users")
+  descricao  String
+  produto_final produto_final?  
+  materia_prima materia_prima[]     
 }
 
-enum Production_Status {
-  CREATED
-  SCHEDULED
-  OPEN
-  IN_PROGRESS
-  FINISHED
-  STOPPED
-  CANCELED
+model produto_final {
+  id             Int      @id @default(autoincrement())
+  descricao      String
+  unidade_medida String
+  categoriaId    Int      @unique 
+  categoria      categoria @relation(fields: [categoriaId], references: [id])
 }
 
-enum Stock_Moviment {
-  INPUT
-  TRANSIT
-  OUTPUT
+model materia_prima {
+  id             Int       @id @default(autoincrement())
+  descricao      String
+  unidade_medida String
+  preco_custo    Int
+  Images String
+  categoriaId    Int?
+  categoria      categoria? @relation(fields: [categoriaId], references: [id])  
 }
 
-enum Price_Type {
-  COST
-  SALE
+model lote_materia {
+  id         Int      @id @default(autoincrement())
+  numero  Int
+  quantidade_inicial Int
+  quantidade_atual  Int
+  data_entrada DateTime     @default(now()) @db.Timestamp(6)
+  fornecedor  String
+  localId     Int           @unique 
+  local       local         @relation(fields: [localId], references: [id])
 }
 
-enum Origin {
-  RAW_MATERIAL
-  MADE
+model local {
+  id         Int      @id @default(autoincrement())
+  descricao String
+  lote_materia lote_materia?
 }
 
-enum Unit_Measure {
-  UN
-  KG
-  L
-  GR
-  ML
-  PC
+//deixei status como String por enquanto
+model ordem {
+  id         Int      @id @default(autoincrement())
+  status String 
+  numero Int
+  data_ordem DateTime     @default(now()) @db.Timestamp(6)
+  quantidade_esperada Int
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
+model etapa {
+  id         Int      @id @default(autoincrement())
+  descricao String
 }
 
-enum UserType {
-  ERP
-  PUBLIC
-  API
-  SYSTEM
-  ANONYMOUS
-  ROOT
-  ADMIN
+//deixei status como String por enquanto
+model etapa_ordem {
+  status String
+  quantidade_inicial Int
+  quantidade_final Int
+}
+
+model ocorrencia {
+  id         Int      @id @default(autoincrement())
+  titulo String
+  texto String
+  data_ocorrencia DateTime     @default(now()) @db.Timestamp(6)
+  Imagem String
+}
+
+model lote_produto {
+  id         Int      @id @default(autoincrement())
+  numero Int
+  quantidade Int
+  Imagem String
+}
+
+model usuario {
+  id         Int      @id @default(autoincrement())
+  nome String
+  senha String
 }
