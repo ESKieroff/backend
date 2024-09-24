@@ -1,134 +1,96 @@
-INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "user_type", "gender")
+-- Insert into usuario
+INSERT INTO "Usuario" ("nome", "senha")
 VALUES 
-	('Cassio', 'cassio@gmail.com', 'cassio', 'Cassio', 'Santos', 'PUBLIC', 'MALE'),
-    ('fulano', 'fulano@gmail.com', 'fulano', 'Fulano', 'De Tals', 'PUBLIC', 'MALE'),
-    ('kieroff', 'kieroff@gmail.com', 'abracadabra', 'Rodrigo', 'Oliveira', 'PUBLIC', 'MALE'),
-    ('Maria', 'maria@gmail.com', 'maria', 'Maria', 'Silva', 'PUBLIC', 'FEMALE');
-	
--- Insert into groups
-INSERT INTO "groups" ("description", "father_id" )
-VALUES 
-    ('Batata', Null),
-	('Tomate', Null),
-	('Cebola', Null),
-	('Couve', Null),
-    ('Melancia', Null),
-	('Batata Branca',1),
-	('Tomate Cereja',2),
-	('Cebola Roxa',3),
-	('Couve Mirim',4),
-    ('Melancia Gigante',5);
-	
--- Insert into categories
-INSERT INTO "categories" ("description")
-VALUES 
-    ('Premium'),
-    ('Importado'),
-    ('Nacional'),
-    ('Top Demais'),
-    ('Promoção');
-	
--- Insert into customers
-INSERT INTO "customers" ("name")
-VALUES 
-    ('Pedro Cabral'),
-    ('Machado Assis'),
-    ('Clarice Lispector'),
-    ('Sebastião Costa'),	
-    ('Produtor Rural'),
-    ('Ecologia na Veia');
-	
--- Insert into suppliers
-INSERT INTO "suppliers" ("name")
-VALUES 
-    ('Fazendinha'),
-    ('Feira de Acari'),
-    ('Produtor X'),
-    ('Fulaninho da Feira'),	
-    ('Produtor Rural'),
-    ('Eco-Produtor');
-	
--- Insert into stock_location
-INSERT INTO "stock_location" ("description")
-VALUES 
-    ('Câmara Fria A'),
-    ('Depósito'),
-    ('Pátio'),
-    ('Câmara Fria B');
-	
--- Insert into ocurrences
-INSERT INTO "ocurrences" ("description")
-VALUES 
-    ('CORPO ESTRANHO'),
-    ('MAU CHEIRO'),
-    ('FALTA DE ENERGIA'),
-    ('DEFEITO EQUIPAMENTO'),
-    ('RISCO BIOLÓGICO'),
-    ('IMPRÓPRIO PARA CONSUMO'),
-    ('FORA DA ESPECIFICAÇÃO'),
-    ('CONTROLE DE QUALIDADE');
+	('Cassio', 'cassio'),
+	('Joao', 'joao'),
+	('Joana', 'joana'),
+	('Laura', 'laura'),
+	('Lauro', 'lauro'),
+    ('Maria', 'maria');
 
--- Insert into products
-INSERT INTO "products" ("description", "code", "sku", "origin", "unit_measure","category_id", "group_id", "supplier_id", "nutritional_info")
+	
+-- Insert into lote_produto
+INSERT INTO "Lote_Produto" ("numero", "quantidade" , "imagem")
 VALUES 
-('batata branca', 'CODE001', 'SKU001', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('cenoura', 'CODE002', 'SKU015', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('aipim', 'CODE003', 'SKU002', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('mirtilo', 'CODE004', 'SKU003', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('laranja', 'CODE005', 'SKU004', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('couve', 'CODE006', 'SKU005', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('uva', 'CODE007', 'SKU006', 'RAW_MATERIAL', 'KG',1, 1, 1, 'cada 100g desse produto contém xyz'),
-('batata frita', 'CODE016', 'SKU007', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz'),
-('cenoura cubinhos', 'CODE008', 'SKU008', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz'),
-('aipim descascado', 'CODE009', 'SKU009', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz'),
-('mirtilos selecionados', 'CODE010', 'SKU010', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz'),
-('laranja fatiada', 'CODE011', 'SKU011', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz'),
-('mix de verduras', 'CODE012', 'SKU012', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz'),
-('suco natural de uva', 'CODE013', 'SKU013', 'MADE', 'KG',2, 2, 2, 'cada 100g desse produto contém xyz');	
-
--- Insert into compositions
-INSERT INTO "compositions" ("product_id", "description")
-VALUES 
-(8,'batata frita'),
-(9,'cenoura cubinhos'),
-(10,'aipim descascado'),
-(11,'mirtilos selecionados'),
-(12,'laranja fatiada'),
-(13,'mix de verduras'),
-(14,'suco natural de uva');	
+    ('1', '11','https://th.bing.com/th/id/OIP.JRIl232pnbpA16SBAYybKAHaGR?rs=1&pid=ImgDetMain'),
+	('2', '22','https://th.bing.com/th/id/OIP.n8TrCIyMGsoJJYQqXsncvAHaE8?rs=1&pid=ImgDetMain'),
+    ('3', '33','https://th.bing.com/th/id/OIP.iFm2DffdX5eMg2LjmcRovQHaEK?rs=1&pid=ImgDetMain'),
+    ('4', '44','https://th.bing.com/th/id/OIP.pxR1WpT9QADVJm2k5KJV_gHaE8?rs=1&pid=ImgDetMain'),
+    ('5', '55','https://th.bing.com/th/id/OIP.yk1JDwcZ44Y8eQKGfMC7cAHaEo?rs=1&pid=ImgDetMain'),
+    ('6', '66','https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain'),
+    ('7', '77','https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0');
 
 
--- Insert into prices
-INSERT INTO "prices" ("product_id", "price", "type", "is_current")
+	
+-- Insert into categoria
+INSERT INTO "Categoria" ("descricao")
 VALUES 
-    (1, 1.0, 'COST',FALSE),
-    (1, 1.5, 'COST',FALSE),
-    (1, 2.0, 'COST',FALSE),
-    (1, 3.0, 'COST',FALSE),
-    (1, 4.0, 'COST',TRUE),
-    (2, 2.0, 'COST',FALSE),
-    (2, 10.0, 'COST',TRUE),
-    (3, 13.0, 'COST',FALSE),
-    (3, 15.0, 'COST',TRUE),
-    (4, 21.0, 'COST',FALSE),
-    (4, 20.0, 'COST',TRUE),
-    (5, 18.0, 'COST',TRUE),
-    (6, 14.0, 'COST',TRUE),
-    (7, 11.0, 'COST',TRUE),
-    (8, 7.0, 'COST',TRUE),	 
-    (9, 9.0, 'COST',TRUE),
-    (10, 8.0, 'COST',TRUE),
-    (11, 12.0, 'COST',TRUE),
-    (12, 3.0, 'COST',TRUE),
-    (13, 4.0, 'COST',TRUE),
-    (14, 5.0, 'COST',TRUE),
-    (8, 7.0,'SALE',TRUE),
-    (9, 9.0,'SALE',TRUE),
-    (10, 8.0,'SALE',TRUE),
-    (11, 12.0,'SALE',TRUE),
-    (12, 3.0,'SALE',TRUE),
-    (13, 4.0,'SALE',TRUE),
-    (14, 5.0,'SALE',TRUE);
+    ('Legumes'),
+    ('Frutas'),
+    ('Liquidos'),
+    ('Detergentes'),
+    ('Verduras');
+
+	
+-- Insert into produto_final
+INSERT INTO "Produto_Final" ("descricao", "unidade_medida", "categoriaID", "categoria")
+VALUES 
+    ('Batata','Kg', 1),
+    ('Cenoura', 'Kg', 1),
+    ('Maca', 'Kg', 2),
+    ('Alface', 'Kg', 5),	
+    ('Beterraba', 'Kg', 1);
+	
+-- Insert into materia_prima
+INSERT INTO "Materia_Prima" ("descricao","unidade_medida","preco_custo","images","categoriaID","categoria")
+VALUES 
+    ('Batata','Kg','50','https://images.app.goo.gl/DDnkSGBFhtAJ6LAF7','1','Legumes'),
+    ('Maca','kg','70','https://images.app.goo.gl/xyXxbBfENNM2R1fM9','2','Frutas'),
+    ('Agua','L','999','https://images.app.goo.gl/PJxhiX1Nub5G2cJa7','3','Liquidos'),
+    ('XPTO Ozonio','L','70','https://images.app.goo.gl/6tqJ1jj3RryHMPgN8','4','Detergentes');
+	
+-- Insert into lote_materia
+INSERT INTO "Lote_Materia" ("numero", "quantidade_inicial", "quantidade_atual", "forcenedor", "materiaPrimaId", "localId")
+VALUES 
+    (1, 50, 50, 'Fazenda Sol', 1, 1),
+    (2, 40, 40, 'Fazenda Feliz', 1, 1),
+    (3, 130, 130, 'Fazenda Magica', 2, 2),
+    (4, 20, 20, 'Fazenda Luz', 2, 1),
+    (5, 5, 5, 'Fazenda Verde', 2, 2),
+    (6, 55, 53, 'Fazenda Lua', 1, 2);
+
+-- Insert into local 
+INSERT INTO "Local" ("descricao")
+VALUES
+ ('Freezer 1'),
+ ('Freezer 2');
+
+-- Insert into ordem
+INSERT INTO "Ordem" ("numero","quantidade_esperada","status","produtoFinalId","produtoFinal","loteMateriaId","loteMateria")
+VALUES 
+('SKU001','20','Em Andamento','1','Batata cubinhos','4','4'),
+('SKU002','100','Pausada','2','Cenoura cubinhos','3','3'),	
+('SKU003','50','Finalizada','3','Madioca descascada','6','6'),
+('SKU004','5', 'Em Andamento','7','Alface desfolhado','5','5'),
+('SKU005','50','Finalizada','6','Maca cubinhos','1','1');
+
+
+-- Insert into produto_final
+INSERT INTO "Produto_Final" ("descricao", "unidadeMedida","categoriaId",)
+VALUES 
+('Batata cubinhos', 'Kg', 1),
+('Cenoura cubinhos', 'Kg', 1),
+('Mandioca descascada', 'Kg', 1),
+('Mirtilos selecionados', 'Kg', 2),
+('Laranja descascada', 'Kg', 2),
+('Maca cubinhos', 'Kg', 2)
+('Alface desfolhado', 'Kg', 5);	
+
+
+-- Insert into etapa
+INSERT INTO "Etapa" ("descricao","produtoId","produto","usuarioId","usuario")
+VALUES 
+    (''),
 
 
 

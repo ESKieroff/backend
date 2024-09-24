@@ -2,91 +2,133 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model categoria {
-  id         Int      @id @default(autoincrement())
-  descricao  String
-  produto_final produto_final?  
-  materia_prima materia_prima[]     
+model Categoria {
+  id           Int            @id @default(autoincrement())
+  descricao    String
+  produto      ProdutoFinal[]
+  materiaPrima MateriaPrima[]
 }
 
-model produto_final {
-  id             Int      @id @default(autoincrement())
+model ProdutoFinal {
+  id             Int            @id @default(autoincrement())
   descricao      String
   unidade_medida String
-  categoriaId    Int      @unique 
-  categoria      categoria @relation(fields: [categoriaId], references: [id])
+  categoriaId    Int
+  categoria      Categoria      @relation(fields: [categoriaId], references: [id])
+  loteProduto    LoteProduto[]
+  etapa          Etapa[]
+  materiaPrima   MateriaPrima[]
+  ordens         Ordem[]
 }
 
-model materia_prima {
-  id             Int       @id @default(autoincrement())
+model MateriaPrima {
+  id             Int           @id @default(autoincrement())
   descricao      String
   unidade_medida String
-  preco_custo    Int
-  Images String
-  categoriaId    Int?
-  categoria      categoria? @relation(fields: [categoriaId], references: [id])  
+  preco_custo    Float
+  imagem         String?
+  loteMateria    LoteMateria[]
+  categoriaId    Int
+  categoria      Categoria     @relation(fields: [categoriaId], references: [id])
+  produtoFinalId Int
+  produtoFinal   ProdutoFinal  @relation(fields: [produtoFinalId], references: [id])
 }
 
-model lote_materia {
-  id         Int      @id @default(autoincrement())
-  numero  Int
-  quantidade_inicial Int
-  quantidade_atual  Int
-  data_entrada DateTime     @default(now()) @db.Timestamp(6)
-  fornecedor  String
-  localId     Int           @unique 
-  local       local         @relation(fields: [localId], references: [id])
+model LoteMateria {
+  id                 Int          @id @default(autoincrement())
+  numero             String
+  quantidade_inicial Float
+  quantidade_atual   Float
+  data_entrada       DateTime
+  fornecedor         String
+  materiaPrimaId     Int
+  materiaPrima       MateriaPrima @relation(fields: [materiaPrimaId], references: [id])
+  localId            Int
+  local              Local        @relation(fields: [localId], references: [id])
+  ordens             Ordem[]
 }
 
-model local {
-  id         Int      @id @default(autoincrement())
-  descricao String
-  lote_materia lote_materia?
+model Local {
+  id          Int           @id @default(autoincrement())
+  descricao   String
+  loteMateria LoteMateria[]
+  loteProduto LoteProduto[]
 }
 
-//deixei status como String por enquanto
-model ordem {
-  id         Int      @id @default(autoincrement())
-  status String 
-  numero Int
-  data_ordem DateTime     @default(now()) @db.Timestamp(6)
-  quantidade_esperada Int
-}
-
-model etapa {
-  id         Int      @id @default(autoincrement())
-  descricao String
-}
-
-//deixei status como String por enquanto
-model etapa_ordem {
-  status String
-  quantidade_inicial Int
-  quantidade_final Int
-}
-
-model ocorrencia {
-  id         Int      @id @default(autoincrement())
-  titulo String
-  texto String
-  data_ocorrencia DateTime     @default(now()) @db.Timestamp(6)
-  Imagem String
-}
-
-model lote_produto {
-  id         Int      @id @default(autoincrement())
-  numero Int
+model LoteProduto {
+  id         Int          @id @default(autoincrement())
+  numero     String
   quantidade Int
-  Imagem String
+  imagem     String?
+  produtoId  Int
+  produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
+  localId    Int
+  local      Local        @relation(fields: [localId], references: [id])
+  Ordem      Ordem?       @relation(fields: [ordemId], references: [id])
+  ordemId    Int?
 }
 
-model usuario {
-  id         Int      @id @default(autoincrement())
-  nome String
-  senha String
+model Ordem {
+  id                  Int           @id @default(autoincrement())
+  numero              String
+  data_ordem          DateTime
+  quantidade_esperada Int
+  status              String
+  produtoFinalId      Int
+  produtoFinal        ProdutoFinal  @relation(fields: [produtoFinalId], references: [id])
+  loteMateriaId       Int
+  loteMateria         LoteMateria   @relation(fields: [loteMateriaId], references: [id])
+  etapaOrdem          EtapaOrdem[]
+  LoteProduto         LoteProduto[]
+}
+
+model Etapa {
+  id         Int          @id @default(autoincrement())
+  descricao  String
+  produtoId  Int
+  produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
+  etapaOrdem EtapaOrdem[]
+  Usuario    Usuario?     @relation(fields: [usuarioId], references: [id])
+  usuarioId  Int?
+}
+
+model EtapaOrdem {
+  id                 Int          @id @default(autoincrement())
+  status             String
+  quantidade_inicial Float
+  quantidade_final   Float
+  ordemId            Int
+  ordem              Ordem        @relation(fields: [ordemId], references: [id])
+  etapaId            Int
+  etapa              Etapa        @relation(fields: [etapaId], references: [id])
+  usuarioId          Int
+  usuario            Usuario      @relation(fields: [usuarioId], references: [id])
+  ocorrencias        Ocorrencia[]
+}
+
+model Ocorrencia {
+  id              Int        @id @default(autoincrement())
+  titulo          String
+  texto           String
+  data_ocorrencia DateTime
+  imagem          String?
+  etapaOrdemId    Int
+  etapaOrdem      EtapaOrdem @relation(fields: [etapaOrdemId], references: [id])
+}
+
+model Usuario {
+  id         Int          @id @default(autoincrement())
+  nome       String
+  senha      String
+  etapas     Etapa[]
+  etapaOrdem EtapaOrdem[]
 }
