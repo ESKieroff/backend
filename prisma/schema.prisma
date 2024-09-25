@@ -14,8 +14,8 @@ datasource db {
 model Categoria {
   id           Int            @id @default(autoincrement())
   descricao    String
-  produto      ProdutoFinal[]
   materiaPrima MateriaPrima[]
+  produto      ProdutoFinal[]
 }
 
 model ProdutoFinal {
@@ -23,11 +23,11 @@ model ProdutoFinal {
   descricao      String
   unidade_medida String
   categoriaId    Int
-  categoria      Categoria      @relation(fields: [categoriaId], references: [id])
-  loteProduto    LoteProduto[]
   etapa          Etapa[]
+  loteProduto    LoteProduto[]
   materiaPrima   MateriaPrima[]
   ordens         Ordem[]
+  categoria      Categoria      @relation(fields: [categoriaId], references: [id])
 }
 
 model MateriaPrima {
@@ -36,10 +36,10 @@ model MateriaPrima {
   unidade_medida String
   preco_custo    Float
   imagem         String?
-  loteMateria    LoteMateria[]
   categoriaId    Int
-  categoria      Categoria     @relation(fields: [categoriaId], references: [id])
   produtoFinalId Int
+  loteMateria    LoteMateria[]
+  categoria      Categoria     @relation(fields: [categoriaId], references: [id])
   produtoFinal   ProdutoFinal  @relation(fields: [produtoFinalId], references: [id])
 }
 
@@ -48,12 +48,12 @@ model LoteMateria {
   numero             String
   quantidade_inicial Float
   quantidade_atual   Float
-  data_entrada       DateTime
+  data_entrada       DateTime     @default(now()) @db.Timestamp(6)
   fornecedor         String
   materiaPrimaId     Int
-  materiaPrima       MateriaPrima @relation(fields: [materiaPrimaId], references: [id])
   localId            Int
   local              Local        @relation(fields: [localId], references: [id])
+  materiaPrima       MateriaPrima @relation(fields: [materiaPrimaId], references: [id])
   ordens             Ordem[]
 }
 
@@ -70,35 +70,35 @@ model LoteProduto {
   quantidade Int
   imagem     String?
   produtoId  Int
-  produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
   localId    Int
+  ordemId    Int?
   local      Local        @relation(fields: [localId], references: [id])
   Ordem      Ordem?       @relation(fields: [ordemId], references: [id])
-  ordemId    Int?
+  produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
 }
 
 model Ordem {
   id                  Int           @id @default(autoincrement())
   numero              String
-  data_ordem          DateTime
+  data_ordem          DateTime      @default(now()) @db.Timestamp(6)
   quantidade_esperada Int
   status              String
   produtoFinalId      Int
-  produtoFinal        ProdutoFinal  @relation(fields: [produtoFinalId], references: [id])
   loteMateriaId       Int
-  loteMateria         LoteMateria   @relation(fields: [loteMateriaId], references: [id])
   etapaOrdem          EtapaOrdem[]
   LoteProduto         LoteProduto[]
+  loteMateria         LoteMateria   @relation(fields: [loteMateriaId], references: [id])
+  produtoFinal        ProdutoFinal  @relation(fields: [produtoFinalId], references: [id])
 }
 
 model Etapa {
   id         Int          @id @default(autoincrement())
   descricao  String
   produtoId  Int
-  produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
-  etapaOrdem EtapaOrdem[]
-  Usuario    Usuario?     @relation(fields: [usuarioId], references: [id])
   usuarioId  Int?
+  produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
+  Usuario    Usuario?     @relation(fields: [usuarioId], references: [id])
+  etapaOrdem EtapaOrdem[]
 }
 
 model EtapaOrdem {
@@ -107,10 +107,10 @@ model EtapaOrdem {
   quantidade_inicial Float
   quantidade_final   Float
   ordemId            Int
-  ordem              Ordem        @relation(fields: [ordemId], references: [id])
   etapaId            Int
-  etapa              Etapa        @relation(fields: [etapaId], references: [id])
   usuarioId          Int
+  etapa              Etapa        @relation(fields: [etapaId], references: [id])
+  ordem              Ordem        @relation(fields: [ordemId], references: [id])
   usuario            Usuario      @relation(fields: [usuarioId], references: [id])
   ocorrencias        Ocorrencia[]
 }
@@ -119,7 +119,7 @@ model Ocorrencia {
   id              Int        @id @default(autoincrement())
   titulo          String
   texto           String
-  data_ocorrencia DateTime
+  data_ocorrencia DateTime   @default(now()) @db.Timestamp(6)
   imagem          String?
   etapaOrdemId    Int
   etapaOrdem      EtapaOrdem @relation(fields: [etapaOrdemId], references: [id])
