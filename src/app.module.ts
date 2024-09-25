@@ -11,6 +11,10 @@ import { Config } from './config/config.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { PrismaService } from './database/prisma/prisma.service';
 import { FeatureFlagsService } from './feature-flags/feature-flags.service';
+// import { CategoriesModule } from './core/categories/categories.module';
+// import { PersonsModule } from './core/persons/persons.module';
+// import { GroupsModule } from './core/groups/groups.module';
+// import { CompositionsModule } from './core/compositions/compositions.module';
 
 @Module({
   imports: [
@@ -23,6 +27,10 @@ import { FeatureFlagsService } from './feature-flags/feature-flags.service';
     ControlPanelModule,
     Config,
     PrismaModule
+    // CategoriesModule,
+    // PersonsModule,
+    // GroupsModule,
+    // CompositionsModule
   ],
   controllers: [ControlPanelController],
   providers: [PrismaService, FeatureFlagsService]
