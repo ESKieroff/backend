@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './core/users/users.module';
 import { ProductsModule } from './core/products/products.module';
 import { ProductionModule } from './core/production/production.module';
-import { StokModule } from './core/stok/stok.module';
+import { StockModule } from './core/stock/stock.module';
 import { AuthModule } from './auth/auth.module';
 import { ControlPanelController } from './control-panel/control-panel.controller';
 import { ControlPanelModule } from './control-panel/control-panel.module';
@@ -18,7 +18,7 @@ import { FeatureFlagsService } from './feature-flags/feature-flags.service';
     UsersModule,
     ProductsModule,
     ProductionModule,
-    StokModule,
+    StockModule,
     AuthModule,
     ControlPanelModule,
     Config,
