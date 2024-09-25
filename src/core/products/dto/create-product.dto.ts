@@ -40,25 +40,25 @@ export class CreateProductDto {
   })
   readonly unit_measure: Unit_Measure;
 
-  // @ApiProperty({
-  //   description: 'Product category id',
-  //   default: 1,
-  //   example: 'search for the category id in the database'
-  // })
-  // readonly category_id: categories;
+  @ApiProperty({
+    description: 'Product category id',
+    default: 1,
+    example: 'search for the category id in the database'
+  })
+  readonly category_id: number;
 
-  // @ApiProperty({
-  //   description: 'Product group id',
-  //   default: 1,
-  //   example: 'search for the group id in the database'
-  // })
-  // readonly group_id: groups;
+  @ApiProperty({
+    description: 'Product group id',
+    default: 1,
+    example: 'search for the group id in the database'
+  })
+  readonly group_id: number;
 
-  // @ApiProperty({
-  //   description: 'Product supplier id',
-  //   example: 'search for the supplier id in the database'
-  // })
-  // readonly supplier_id: persons;
+  @ApiProperty({
+    description: 'Product supplier id',
+    example: 'search for the supplier id in the database'
+  })
+  readonly supplier_id: number;
 
   @ApiProperty({
     description: 'Product nutritional info'
