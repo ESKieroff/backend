@@ -1,323 +1,170 @@
--- CreateEnum
-CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
-
--- CreateEnum
-CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT');
-
--- CreateEnum
-CREATE TYPE "Price_Type" AS ENUM ('COST', 'SALE');
-
--- CreateEnum
-CREATE TYPE "Origin" AS ENUM ('RAW_MATERIAL', 'MADE');
-
--- CreateEnum
-CREATE TYPE "Unit_Measure" AS ENUM ('UN', 'KG', 'L', 'GR', 'ML', 'PC');
-
--- CreateEnum
-CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
-
--- CreateEnum
-CREATE TYPE "UserType" AS ENUM ('ERP', 'PUBLIC', 'API', 'SYSTEM', 'ANONYMOUS', 'ROOT', 'ADMIN');
-
 -- CreateTable
-CREATE TABLE "production" (
+CREATE TABLE "Categoria" (
     "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "prodution_quantity_estimated" DOUBLE PRECISION NOT NULL,
-    "production_quantity_real" DOUBLE PRECISION NOT NULL,
-    "lote" TEXT,
-    "expiration" TIMESTAMP(3),
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "Production_Status" "Production_Status" NOT NULL DEFAULT 'CREATED',
-    "final_product" INTEGER NOT NULL,
+    "descricao" TEXT NOT NULL,
 
-    CONSTRAINT "production_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Categoria_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "production_work" (
+CREATE TABLE "ProdutoFinal" (
     "id" SERIAL NOT NULL,
-    "production_id" INTEGER NOT NULL,
-    "step_id" INTEGER NOT NULL,
-    "raw_product_id" INTEGER NOT NULL,
-    "sequence" INTEGER NOT NULL,
-    "start_time" TIMESTAMP(3) NOT NULL,
-    "end_time" TIMESTAMP(3) NOT NULL,
-    "total_time" DOUBLE PRECISION NOT NULL,
-    "initial_weight" DOUBLE PRECISION NOT NULL,
-    "final_weight" DOUBLE PRECISION NOT NULL,
-    "weight_loss" DOUBLE PRECISION NOT NULL,
-    "machine" TEXT,
-    "photos" BYTEA[],
-    "observation" TEXT,
-    "ocurrences" JSON,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "descricao" TEXT NOT NULL,
+    "unidade_medida" TEXT NOT NULL,
+    "categoriaId" INTEGER NOT NULL,
 
-    CONSTRAINT "production_work_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ProdutoFinal_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "production_steps" (
+CREATE TABLE "MateriaPrima" (
     "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "descricao" TEXT NOT NULL,
+    "unidade_medida" TEXT NOT NULL,
+    "preco_custo" DOUBLE PRECISION NOT NULL,
+    "imagem" TEXT,
+    "categoriaId" INTEGER NOT NULL,
+    "produtoFinalId" INTEGER NOT NULL,
 
-    CONSTRAINT "production_steps_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "MateriaPrima_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "ocurrences" (
+CREATE TABLE "LoteMateria" (
     "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "numero" TEXT NOT NULL,
+    "quantidade_inicial" DOUBLE PRECISION NOT NULL,
+    "quantidade_atual" DOUBLE PRECISION NOT NULL,
+    "data_entrada" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "fornecedor" TEXT NOT NULL,
+    "materiaPrimaId" INTEGER NOT NULL,
+    "localId" INTEGER NOT NULL,
 
-    CONSTRAINT "ocurrences_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "LoteMateria_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "stock" (
+CREATE TABLE "Local" (
     "id" SERIAL NOT NULL,
-    "document_number" VARCHAR(255) NOT NULL,
-    "document_date" TIMESTAMP(6) NOT NULL,
-    "stock_moviment" "Stock_Moviment" NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "descricao" TEXT NOT NULL,
 
-    CONSTRAINT "stock_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Local_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "stock_items" (
+CREATE TABLE "LoteProduto" (
     "id" SERIAL NOT NULL,
-    "stock_id" INTEGER NOT NULL,
-    "sequence" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
-    "quantity" DOUBLE PRECISION NOT NULL,
-    "unit_price" DOUBLE PRECISION NOT NULL,
-    "total_price" DOUBLE PRECISION NOT NULL,
-    "lote" TEXT,
-    "expiration" TIMESTAMP(3),
-    "suppliers" INTEGER,
-    "costumers" INTEGER,
-    "stock_location_id" INTEGER NOT NULL,
-    "observation" TEXT,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "numero" TEXT NOT NULL,
+    "quantidade" INTEGER NOT NULL,
+    "imagem" TEXT,
+    "produtoId" INTEGER NOT NULL,
+    "localId" INTEGER NOT NULL,
+    "ordemId" INTEGER,
 
-    CONSTRAINT "stock_items_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "LoteProduto_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "stock_location" (
+CREATE TABLE "Ordem" (
     "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "numero" TEXT NOT NULL,
+    "data_ordem" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "quantidade_esperada" INTEGER NOT NULL,
+    "status" TEXT NOT NULL,
+    "produtoFinalId" INTEGER NOT NULL,
+    "loteMateriaId" INTEGER NOT NULL,
 
-    CONSTRAINT "stock_location_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Ordem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "products" (
+CREATE TABLE "Etapa" (
     "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "code" VARCHAR(255) NOT NULL,
-    "sku" VARCHAR(255) NOT NULL,
-    "origin" "Origin" NOT NULL DEFAULT 'RAW_MATERIAL',
-    "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'UN',
-    "category_id" INTEGER NOT NULL,
-    "group_id" INTEGER NOT NULL,
-    "supplier_id" INTEGER,
-    "nutritional_info" TEXT,
-    "active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "descricao" TEXT NOT NULL,
+    "produtoId" INTEGER NOT NULL,
+    "usuarioId" INTEGER,
 
-    CONSTRAINT "products_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Etapa_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "compositions" (
+CREATE TABLE "EtapaOrdem" (
     "id" SERIAL NOT NULL,
-    "product_id" INTEGER NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "production_steps" JSON,
+    "status" TEXT NOT NULL,
+    "quantidade_inicial" DOUBLE PRECISION NOT NULL,
+    "quantidade_final" DOUBLE PRECISION NOT NULL,
+    "ordemId" INTEGER NOT NULL,
+    "etapaId" INTEGER NOT NULL,
+    "usuarioId" INTEGER NOT NULL,
 
-    CONSTRAINT "compositions_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "EtapaOrdem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "composition_items" (
+CREATE TABLE "Ocorrencia" (
     "id" SERIAL NOT NULL,
-    "composition_id" INTEGER NOT NULL,
-    "sequence" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
-    "quantity" DOUBLE PRECISION NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "titulo" TEXT NOT NULL,
+    "texto" TEXT NOT NULL,
+    "data_ocorrencia" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "imagem" TEXT,
+    "etapaOrdemId" INTEGER NOT NULL,
 
-    CONSTRAINT "composition_items_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Ocorrencia_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "prices" (
+CREATE TABLE "Usuario" (
     "id" SERIAL NOT NULL,
-    "product_id" INTEGER NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "type" "Price_Type" NOT NULL,
-    "is_current" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "nome" TEXT NOT NULL,
+    "senha" TEXT NOT NULL,
 
-    CONSTRAINT "prices_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "suppliers" (
-    "id" SERIAL NOT NULL,
-    "name" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "suppliers_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "customers" (
-    "id" SERIAL NOT NULL,
-    "name" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "customers_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "groups" (
-    "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "father_id" INTEGER,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "groups_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "categories" (
-    "id" SERIAL NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "users" (
-    "id" SERIAL NOT NULL,
-    "username" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
-    "first_name" VARCHAR(255),
-    "last_name" VARCHAR(255),
-    "user_type" "UserType" NOT NULL DEFAULT 'PUBLIC',
-    "gender" "Gender" NOT NULL,
-    "active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "_production_item" (
-    "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "products_code_key" ON "products"("code");
-
--- CreateIndex
-CREATE UNIQUE INDEX "products_sku_key" ON "products"("sku");
-
--- CreateIndex
-CREATE UNIQUE INDEX "categories_description_key" ON "categories"("description");
-
--- CreateIndex
-CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
-
--- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "_production_item_AB_unique" ON "_production_item"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_production_item_B_index" ON "_production_item"("B");
+-- AddForeignKey
+ALTER TABLE "ProdutoFinal" ADD CONSTRAINT "ProdutoFinal_categoriaId_fkey" FOREIGN KEY ("categoriaId") REFERENCES "Categoria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("final_product") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MateriaPrima" ADD CONSTRAINT "MateriaPrima_categoriaId_fkey" FOREIGN KEY ("categoriaId") REFERENCES "Categoria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_work" ADD CONSTRAINT "production_work_production_id_fkey" FOREIGN KEY ("production_id") REFERENCES "production"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MateriaPrima" ADD CONSTRAINT "MateriaPrima_produtoFinalId_fkey" FOREIGN KEY ("produtoFinalId") REFERENCES "ProdutoFinal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_work" ADD CONSTRAINT "production_work_raw_product_id_fkey" FOREIGN KEY ("raw_product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LoteMateria" ADD CONSTRAINT "LoteMateria_localId_fkey" FOREIGN KEY ("localId") REFERENCES "Local"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_work" ADD CONSTRAINT "production_work_step_id_fkey" FOREIGN KEY ("step_id") REFERENCES "production_steps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LoteMateria" ADD CONSTRAINT "LoteMateria_materiaPrimaId_fkey" FOREIGN KEY ("materiaPrimaId") REFERENCES "MateriaPrima"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_costumers_fkey" FOREIGN KEY ("costumers") REFERENCES "customers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_localId_fkey" FOREIGN KEY ("localId") REFERENCES "Local"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_ordemId_fkey" FOREIGN KEY ("ordemId") REFERENCES "Ordem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "stock"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_produtoId_fkey" FOREIGN KEY ("produtoId") REFERENCES "ProdutoFinal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_stock_location_id_fkey" FOREIGN KEY ("stock_location_id") REFERENCES "stock_location"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Ordem" ADD CONSTRAINT "Ordem_loteMateriaId_fkey" FOREIGN KEY ("loteMateriaId") REFERENCES "LoteMateria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_suppliers_fkey" FOREIGN KEY ("suppliers") REFERENCES "suppliers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Ordem" ADD CONSTRAINT "Ordem_produtoFinalId_fkey" FOREIGN KEY ("produtoFinalId") REFERENCES "ProdutoFinal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Etapa" ADD CONSTRAINT "Etapa_produtoId_fkey" FOREIGN KEY ("produtoId") REFERENCES "ProdutoFinal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Etapa" ADD CONSTRAINT "Etapa_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "Usuario"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "EtapaOrdem" ADD CONSTRAINT "EtapaOrdem_etapaId_fkey" FOREIGN KEY ("etapaId") REFERENCES "Etapa"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compositions" ADD CONSTRAINT "compositions_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "EtapaOrdem" ADD CONSTRAINT "EtapaOrdem_ordemId_fkey" FOREIGN KEY ("ordemId") REFERENCES "Ordem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_composition_id_fkey" FOREIGN KEY ("composition_id") REFERENCES "compositions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "EtapaOrdem" ADD CONSTRAINT "EtapaOrdem_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "prices" ADD CONSTRAINT "prices_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "groups" ADD CONSTRAINT "groups_father_id_fkey" FOREIGN KEY ("father_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_production_item" ADD CONSTRAINT "_production_item_A_fkey" FOREIGN KEY ("A") REFERENCES "production"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_production_item" ADD CONSTRAINT "_production_item_B_fkey" FOREIGN KEY ("B") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Ocorrencia" ADD CONSTRAINT "Ocorrencia_etapaOrdemId_fkey" FOREIGN KEY ("etapaOrdemId") REFERENCES "EtapaOrdem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

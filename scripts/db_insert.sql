@@ -1,4 +1,3 @@
--- Insert into usuario
 INSERT INTO "Usuario" ("nome", "senha")
 VALUES 
 	('Cassio', 'cassio'),
@@ -10,7 +9,6 @@ VALUES
     ('Mario', 'mario');
 	
 
--- Insert into categoria
 INSERT INTO "Categoria" ("descricao")
 VALUES 
     ('Legumes'),
@@ -18,15 +16,13 @@ VALUES
     ('Verduras');
 
 
--- Insert into local 
 INSERT INTO "Local" ("descricao")
 VALUES
  ('Freezer 1'),
  ('Freezer 2');
 
 
--- Insert into produto_final
-INSERT INTO "ProdutoFinal" ("descricao", "unidadeMedida","categoriaId")
+INSERT INTO "ProdutoFinal" ("descricao", "unidade_medida","categoriaId")
 VALUES 
 ('Batata cubinhos', 'Kg', 1),
 ('Cenoura cubinhos', 'Kg', 1),
@@ -37,17 +33,15 @@ VALUES
 ('Alface desfolhado', 'Kg', 3);	
 
 
--- Insert into materia_prima
 INSERT INTO "MateriaPrima" ("descricao", "unidade_medida", "preco_custo", "imagem", "categoriaId", "produtoFinalId")
 VALUES 
     ('Batata','Kg', 5.0,'https://images.app.goo.gl/DDnkSGBFhtAJ6LAF7', 1, 1),
     ('Maçã','Kg', 7.0,'https://images.app.goo.gl/xyXxbBfENNM2R1fM9', 2, 1),
     ('Banana', 'Kg', 4.0,'https://th.bing.com/th/id/OIP.iFm2DffdX5eMg2LjmcRovQHaEK?rs=1&pid=ImgDetMain', 2, 1),
     ('Rucula', 'Kg', 5.0,'https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0', 3, 2),
-    ('Alface', 'Kg', 3.4,'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 3, 3)
+    ('Alface', 'Kg', 3.4,'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 3, 3);
 
 
--- Insert into lote_materia
 INSERT INTO "LoteMateria" ("numero", "quantidade_inicial", "quantidade_atual", "fornecedor", "materiaPrimaId", "localId")
 VALUES 
     (1, 50, 50, 'Fazenda Sol', 1, 1),
@@ -58,7 +52,6 @@ VALUES
     (6, 55, 53, 'Fazenda Lua', 1, 2);
 	
 
--- Insert into ordem
 INSERT INTO "Ordem" ("numero", "quantidade_esperada", "status", "produtoFinalId", "loteMateriaId")
 VALUES 
 ('SKU001', 20,'Em Andamento', 1, 4),
@@ -68,7 +61,6 @@ VALUES
 ('SKU005', 50,'Finalizada', 6, 1);
 
 
--- Insert into LoteProduto
 INSERT INTO "LoteProduto" ("numero", "quantidade" , "imagem", "produtoId", "localId", "ordemId")
 VALUES 
     ('1', 11,'https://th.bing.com/th/id/OIP.JRIl232pnbpA16SBAYybKAHaGR?rs=1&pid=ImgDetMain', 1, 1, 1),
@@ -79,7 +71,7 @@ VALUES
     ('6', 66,'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 6, 1, 1),
     ('7', 77,'https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0', 7, 1, 2);
 
--- Insert into etapa
+
 INSERT INTO "Etapa" ("descricao", "produtoId", "usuarioId")
 VALUES 
     ('Corte de Batata', 1, 1),
@@ -91,7 +83,6 @@ VALUES
     ('Desfolhamento de Alface', 7, 3);
 
 
--- Insert into EtapaOrdem
 INSERT INTO "EtapaOrdem" ("status", "quantidade_inicial", "quantidade_final", "ordemId", "etapaId", "usuarioId")
 VALUES 
     ('Em andamento', 30.0, 20.0, 1, 1, 1),
@@ -101,7 +92,6 @@ VALUES
     ('Finalizado', 60.0, 50.0, 5, 5, 5);
     
 
--- Inserir na tabela Ocorrencia
 INSERT INTO "Ocorrencia" ("titulo", "texto", "data_ocorrencia", "imagem", "etapaOrdemId")
 VALUES 
     ('Problema na Linha de Produção', 'Houve um problema na linha de produção que causou um atraso.', '2023-10-01 10:00:00', 'https://images.app.goo.gl/DDnkSGBFhtAJ6LAF7', 1),
