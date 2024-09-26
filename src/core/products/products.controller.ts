@@ -21,7 +21,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
+  async create(@Body() createProductDto: CreateProductDto) {
     // Valida o DTO completo
     const errors = [];
     // Validação do DTO com Zod
@@ -123,35 +123,69 @@ export class ProductsController {
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
+    // verifica se os principais dados informados dão macth com algum produto já cadastrado
+    const matchedProducts = await this.productsService.matchProductByData(
+      createProductDto.code,
+      createProductDto.description,
+      createProductDto.sku
+    );
+    // verifica se já existe
+    if ((await matchedProducts).length > 0) {
+      const existingProduct = matchedProducts[0];
 
+      // se já existe, verifica se tá ativo
+      if (!existingProduct.active) {
+        // se não está ativo, lança uma exceção BadRequestException
+        throw new BadRequestException(
+          `Product already exists but is not active. Activate and update it: ${JSON.stringify(
+            existingProduct
+          )}`
+        );
+      }
+      // se já existe e está ativo, lança uma exceção BadRequestException
+      throw new BadRequestException(
+        'Product already exists. Try update it instead'
+      );
+    }
     return this.productsService.create(createProductDto);
   }
 
   @Get()
-  findAll() {
-    try {
-      return this.productsService.findAll();
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+  async findAll(@Query('orderBy') orderBy: string = 'id') {
+    const validOrderFields = [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
+
+    return this.productsService.findAll(orderBy);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findById(@Param('id') id: string) {
     try {
-      return this.productsService.findOne(+id);
+      return this.productsService.findById(+id);
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
+  // update products by id
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
     @Query() queryParams: Record<string, string>
   ) {
-    const existingProduct = await this.productsService.findOne(+id);
+    const existingProduct = await this.productsService.findById(+id);
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -213,10 +247,55 @@ export class ProductsController {
     return updatedProduct;
   }
 
+  // update multiplos produtos ao mesmo tempo
+  @Patch('bulk-update')
+  async bulkUpdate(
+    @Body() products: Array<{ id: number; data: UpdateProductDto }>
+  ) {
+    //captura os erros
+    const errors = [];
+
+    // Itera sobre cada produto na lista
+    for (const product of products) {
+      const { id, data } = product;
+
+      // Verifica se o produto existe
+      const existingProduct = await this.productsService.findById(id);
+      if (!existingProduct) {
+        errors.push(`Product with ID ${id} not found`);
+        continue; // Continua com o próximo produto da lista
+      }
+
+      // Valida os dados de atualização
+      const validation = UpdateProductSchema.safeParse(data);
+      if (!validation.success) {
+        const zodError = validation.error as ZodError;
+        const firstError = zodError.errors[0];
+        errors.push(`Invalid data for product ID ${id}: ${firstError.message}`);
+        continue; // Continua com o próximo produto da lista
+      }
+
+      // chama o update by id e atualiza o produto
+      try {
+        await this.productsService.update(id, data);
+      } catch (error) {
+        const errorMessage = (error as Error).message || 'Unknown error';
+        errors.push(`Failed to update product with ID ${id}: ${errorMessage}`);
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    return { message: 'Products updated successfully' };
+  }
+
+  // remove produtos pelo id
   @Delete(':id')
   remove(@Param('id') id: string) {
     // Verificar se o produto existe no banco
-    const existingProduct = this.productsService.findOne(+id);
+    const existingProduct = this.productsService.findById(+id);
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -227,5 +306,58 @@ export class ProductsController {
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
+  }
+
+  // reativar um produto
+  @Post(':id/activate')
+  async activate(@Param('id') id: string) {
+    // Verifica se o produto existe
+    const existingProduct = await this.productsService.findById(+id);
+    if (!existingProduct) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    // Verifica se o produto já está ativo
+    if (existingProduct.active) {
+      throw new BadRequestException('Product is already active');
+    }
+
+    // Ativa o produto
+    await this.productsService.reactivateProduct(+id);
+
+    return { message: 'Product activated successfully' };
+  }
+
+  // remover vários produtos ao mesmo tempo
+  @Post('bulk-remove')
+  async bulkDelete(@Body() ids: number[]) {
+    const errors = [];
+
+    if (ids.length === 0) {
+      throw new BadRequestException('No IDs provided');
+    }
+
+    for (const id of ids) {
+      // Verifica se o produto existe
+      const existingProduct = await this.productsService.findById(id);
+      if (!existingProduct) {
+        errors.push(`Product with ID ${id} not found`);
+        continue; // Continua com o próximo ID
+      }
+
+      // Tenta remover o produto
+      try {
+        await this.productsService.remove(id);
+      } catch (error) {
+        const errorMessage = (error as Error).message || 'Unknown error';
+        errors.push(`Failed to remove product with ID ${id}: ${errorMessage}`);
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    return { message: 'Products removed successfully' };
   }
 }
