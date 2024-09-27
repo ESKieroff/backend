@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
@@ -39,10 +43,9 @@ export class ProductsService {
     return findedProducts.map(product => this.formatProductDate(product));
   }
 
-  findById(id: number) {
-    return this.productsRepository
-      .findById(id)
-      .then(product => this.formatProductDate(product));
+  async findById(id: number) {
+    const product = await this.isValid(id);
+    return this.formatProductDate(product);
   }
 
   private formatProductDate(product: products): Omit<
@@ -60,30 +63,40 @@ export class ProductsService {
   }
 
   // verificar se produto está ativo antes de atualizar
-  async isActived(id: number) {
+  async isValid(id: number) {
     const product = await this.productsRepository.findById(id);
+
     if (!product) {
-      throw new Error('Product not found');
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    } else if (!product.active) {
+      throw new BadRequestException(`Product with ID ${id} is not active`);
     }
-    if (!product.active) {
-      throw new Error('Product is not active');
-    }
-    return product.active;
+    return product;
   }
-  // reativar produto antes de atualizar
+
+  // reativar produto
   async reactivateProduct(id: number) {
     const product = await this.productsRepository.findById(id);
-    if (!product) {
-      throw new Error('Product not found');
-    }
-    product.active = true;
 
-    const reactivatedProduct = await this.productsRepository.update(
-      id,
-      product
-    );
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    if (product.active) {
+      throw new BadRequestException(`Product with ID ${id} is already active`);
+    }
+
+    // Reativa o produto
+
+    const reactivatedProduct = await this.productsRepository.update(id, {
+      active: true,
+      updated_at: new Date()
+    });
+
+    // Formata e retorna o produto reativado
     return this.formatProductDate(reactivatedProduct);
   }
+
   // verifica se os dados informados correspondem a um produto do banco
   async matchProductByData(code: string, description: string, sku: string) {
     const matchedProduct = await this.productsRepository.matchProductByData(
@@ -96,18 +109,17 @@ export class ProductsService {
   }
   // atualiza produto
   async update(id: number, updateProductDto: UpdateProductDto) {
-    // Verificar se o produto está ativo
-    const isActive = await this.isActived(id);
+    // Verificar se o produto existe e está ativo antes de atualizar
+    const product = await this.isValid(id);
 
-    if (!isActive) {
-      throw new Error('Product is not active. Activate it before updating');
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
-
     // Atualizar o produto e garantir que ele continue ativo
     const updatedProductDto = {
       ...updateProductDto,
-      active: true,
-      updated_at: new Date() // Atualiza a data atual
+      updated_at: new Date(), // Atualiza a data atual
+      active: product.active // Mantém o status de ativo
     };
 
     const updatedPorduct = await this.productsRepository.update(

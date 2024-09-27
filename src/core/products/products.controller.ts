@@ -316,17 +316,6 @@ export class ProductsController {
   // reativar um produto
   @Post('activate/:id')
   async activate(@Param('id') id: string) {
-    // Verifica se o produto existe
-    const existingProduct = await this.productsService.findById(+id);
-    if (!existingProduct) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
-
-    // Verifica se o produto já está ativo
-    if (existingProduct.active) {
-      throw new BadRequestException(`Product ID ${id} is already active`);
-    }
-
     // Ativa o produto
     await this.productsService.reactivateProduct(+id);
 
