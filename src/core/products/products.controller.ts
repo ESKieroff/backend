@@ -189,6 +189,10 @@ export class ProductsController {
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
+    // verifica se o produto está ativo
+    if (!existingProduct.active) {
+      throw new BadRequestException(`Product ID ${id} is not active`);
+    }
 
     // Obtém os campos permitidos para atualização
     const allowedFields = Object.keys(UpdateProductSchema.shape);
@@ -302,14 +306,15 @@ export class ProductsController {
     // se existe tenta remover (remoção lógica)
     try {
       this.productsService.remove(+id);
-      return { message: 'Product deleted successfully' };
+      // retorna mensagem e o id do produto removido
+      return { message: `Product ID ${id} deleted successfully` };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
   // reativar um produto
-  @Post(':id/activate')
+  @Post('activate/:id')
   async activate(@Param('id') id: string) {
     // Verifica se o produto existe
     const existingProduct = await this.productsService.findById(+id);
@@ -319,45 +324,33 @@ export class ProductsController {
 
     // Verifica se o produto já está ativo
     if (existingProduct.active) {
-      throw new BadRequestException('Product is already active');
+      throw new BadRequestException(`Product ID ${id} is already active`);
     }
 
     // Ativa o produto
     await this.productsService.reactivateProduct(+id);
 
-    return { message: 'Product activated successfully' };
+    return { message: `Product ID ${id} activated successfully` };
   }
 
   // remover vários produtos ao mesmo tempo
   @Post('bulk-remove')
   async bulkDelete(@Body() ids: number[]) {
-    const errors = [];
-
     if (ids.length === 0) {
       throw new BadRequestException('No IDs provided');
     }
 
-    for (const id of ids) {
-      // Verifica se o produto existe
-      const existingProduct = await this.productsService.findById(id);
-      if (!existingProduct) {
-        errors.push(`Product with ID ${id} not found`);
-        continue; // Continua com o próximo ID
-      }
-
-      // Tenta remover o produto
-      try {
-        await this.productsService.remove(id);
-      } catch (error) {
-        const errorMessage = (error as Error).message || 'Unknown error';
-        errors.push(`Failed to remove product with ID ${id}: ${errorMessage}`);
-      }
-    }
+    // Chama o serviço para fazer o bulk remove e retorna os ids removidos com sucesso
+    const { removedIds, errors } = await this.productsService.bulkRemove(ids);
 
     if (errors.length > 0) {
-      throw new BadRequestException(errors);
+      return {
+        message: 'Some products could not be removed',
+        removedIds,
+        errors
+      };
     }
 
-    return { message: 'Products removed successfully' };
+    return { message: 'All products removed successfully', removedIds };
   }
 }

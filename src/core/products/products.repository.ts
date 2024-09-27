@@ -54,6 +54,25 @@ export class ProductsRepository {
     return productWithoutSensitiveFields;
   }
 
+  // Busca vários produtos pelos IDs fornecidos
+  async findManyByIds(ids: number[]): Promise<products[]> {
+    return this.prisma.products.findMany({
+      where: {
+        id: { in: ids }
+      }
+    });
+  }
+
+  // Atualiza o status de vários produtos de uma vez (remover, desativar, etc.)
+  async bulkUpdateStatus(ids: number[], data: Partial<products>) {
+    await this.prisma.products.updateMany({
+      where: {
+        id: { in: ids }
+      },
+      data
+    });
+  }
+
   async matchProductByData(
     code: string,
     description: string,
@@ -93,7 +112,10 @@ export class ProductsRepository {
 
     await this.prisma.products.update({
       where: { id },
-      data: { active: false }
+      data: {
+        active: false,
+        updated_at: new Date()
+      }
     });
   }
 }
