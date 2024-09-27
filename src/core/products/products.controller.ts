@@ -22,9 +22,8 @@ export class ProductsController {
 
   @Post()
   async create(@Body() createProductDto: CreateProductDto) {
-    // Valida o DTO completo
     const errors = [];
-    // Validação do DTO com Zod
+
     const descriptionValidation =
       CreateProductSchema.shape.description.safeParse(
         createProductDto.description
@@ -35,7 +34,7 @@ export class ProductsController {
         message: descriptionValidation.error.errors[0].message
       });
     }
-    // Validação do DTO com Zod
+
     const codeValidation = CreateProductSchema.shape.code.safeParse(
       createProductDto.code
     );
@@ -119,30 +118,28 @@ export class ProductsController {
         message: nutritionalInfoValidation.error.errors[0].message
       });
     }
-    // se houver erros, lança uma exceção BadRequestException
+
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
-    // verifica se os principais dados informados dão macth com algum produto já cadastrado
+
     const matchedProducts = await this.productsService.matchProductByData(
       createProductDto.code,
       createProductDto.description,
       createProductDto.sku
     );
-    // verifica se já existe
+
     if ((await matchedProducts).length > 0) {
       const existingProduct = matchedProducts[0];
 
-      // se já existe, verifica se tá ativo
       if (!existingProduct.active) {
-        // se não está ativo, lança uma exceção BadRequestException
         throw new BadRequestException(
           `Product already exists but is not active. Activate and update it: ${JSON.stringify(
             existingProduct
           )}`
         );
       }
-      // se já existe e está ativo, lança uma exceção BadRequestException
+
       throw new BadRequestException(
         'Product already exists. Try update it instead'
       );
@@ -178,7 +175,6 @@ export class ProductsController {
     }
   }
 
-  // update products by id
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -189,30 +185,27 @@ export class ProductsController {
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    // verifica se o produto está ativo
+
     if (!existingProduct.active) {
       throw new BadRequestException(`Product ID ${id} is not active`);
     }
 
-    // Obtém os campos permitidos para atualização
     const allowedFields = Object.keys(UpdateProductSchema.shape);
     const fieldsToUpdate = Object.keys(queryParams);
 
     if (fieldsToUpdate.length === 0) {
       throw new BadRequestException('No fields provided to update');
     }
-    // Cria um objeto vazio para armazenar os campos que serão atualizados
+
     const updateData: Partial<UpdateProductDto> = {};
 
-    // Itera sobre os campos que estão sendo enviados para atualização
     for (const field of fieldsToUpdate) {
       if (!allowedFields.includes(field)) {
         throw new BadRequestException(`Invalid field: ${field}`);
       }
-      // Obtém o valor do campo nos queryParams
 
       const value = queryParams[field];
-      // Verifica se o campo é category_id, group_id ou supplier_id
+
       if (['category_id', 'group_id', 'supplier_id'].includes(field)) {
         const numericValue = parseInt(value, 10);
         if (isNaN(numericValue)) {
@@ -220,20 +213,17 @@ export class ProductsController {
             `Invalid number format for field: ${field}`
           );
         }
-        updateData[field] = numericValue; // Atribui o valor como número
+        updateData[field] = numericValue;
       } else {
-        // Adiciona o campo ao updateData se o valor não for undefined
         if (value !== undefined) {
           updateData[field] = value;
         }
       }
     }
 
-    // Valida o DTO completo, mas apenas com os campos que foram enviados para atualização
     const validation = UpdateProductSchema.safeParse(updateData);
 
     if (!validation.success) {
-      // Captura e lança o erro com as mensagens corretas do Zod
       const zodError = validation.error as ZodError;
       const firstError = zodError.errors[0];
       throw new BadRequestException(
@@ -241,105 +231,34 @@ export class ProductsController {
       );
     }
 
-    // Atualiza o produto com os campos permitidos e válidos
     const updatedProduct = await this.productsService.update(
       +id,
       updateData as UpdateProductDto
     );
 
-    // Retorna o produto atualizado
     return updatedProduct;
   }
 
-  // update multiplos produtos ao mesmo tempo
-  @Patch('bulk-update')
-  async bulkUpdate(
-    @Body() products: Array<{ id: number; data: UpdateProductDto }>
-  ) {
-    //captura os erros
-    const errors = [];
-
-    // Itera sobre cada produto na lista
-    for (const product of products) {
-      const { id, data } = product;
-
-      // Verifica se o produto existe
-      const existingProduct = await this.productsService.findById(id);
-      if (!existingProduct) {
-        errors.push(`Product with ID ${id} not found`);
-        continue; // Continua com o próximo produto da lista
-      }
-
-      // Valida os dados de atualização
-      const validation = UpdateProductSchema.safeParse(data);
-      if (!validation.success) {
-        const zodError = validation.error as ZodError;
-        const firstError = zodError.errors[0];
-        errors.push(`Invalid data for product ID ${id}: ${firstError.message}`);
-        continue; // Continua com o próximo produto da lista
-      }
-
-      // chama o update by id e atualiza o produto
-      try {
-        await this.productsService.update(id, data);
-      } catch (error) {
-        const errorMessage = (error as Error).message || 'Unknown error';
-        errors.push(`Failed to update product with ID ${id}: ${errorMessage}`);
-      }
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
-    return { message: 'Products updated successfully' };
-  }
-
-  // remove produtos pelo id
   @Delete(':id')
   remove(@Param('id') id: string) {
-    // Verificar se o produto existe no banco
     const existingProduct = this.productsService.findById(+id);
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    // se existe tenta remover (remoção lógica)
+
     try {
       this.productsService.remove(+id);
-      // retorna mensagem e o id do produto removido
+
       return { message: `Product ID ${id} deleted successfully` };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
-  // reativar um produto
   @Post('activate/:id')
   async activate(@Param('id') id: string) {
-    // Ativa o produto
     await this.productsService.reactivateProduct(+id);
 
     return { message: `Product ID ${id} activated successfully` };
-  }
-
-  // remover vários produtos ao mesmo tempo
-  @Post('bulk-remove')
-  async bulkDelete(@Body() ids: number[]) {
-    if (ids.length === 0) {
-      throw new BadRequestException('No IDs provided');
-    }
-
-    // Chama o serviço para fazer o bulk remove e retorna os ids removidos com sucesso
-    const { removedIds, errors } = await this.productsService.bulkRemove(ids);
-
-    if (errors.length > 0) {
-      return {
-        message: 'Some products could not be removed',
-        removedIds,
-        errors
-      };
-    }
-
-    return { message: 'All products removed successfully', removedIds };
   }
 }

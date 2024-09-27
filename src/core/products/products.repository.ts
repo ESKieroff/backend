@@ -45,7 +45,7 @@ export class ProductsRepository {
     const product = this.prisma.products.findUnique({
       where: { id }
     });
-    // cria uma const para armazenar o produto criado e remover campos sensíveis
+
     const productWithoutSensitiveFields = {
       ...product,
       active: undefined
@@ -54,7 +54,6 @@ export class ProductsRepository {
     return productWithoutSensitiveFields;
   }
 
-  // Busca vários produtos pelos IDs fornecidos
   async findManyByIds(ids: number[]): Promise<products[]> {
     return this.prisma.products.findMany({
       where: {
@@ -63,7 +62,6 @@ export class ProductsRepository {
     });
   }
 
-  // Atualiza o status de vários produtos de uma vez (remover, desativar, etc.)
   async bulkUpdateStatus(ids: number[], data: Partial<products>) {
     await this.prisma.products.updateMany({
       where: {
