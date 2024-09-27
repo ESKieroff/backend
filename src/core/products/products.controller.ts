@@ -21,10 +21,9 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    // Valida o DTO completo
+  async create(@Body() createProductDto: CreateProductDto) {
     const errors = [];
-    // Validação do DTO com Zod
+
     const descriptionValidation =
       CreateProductSchema.shape.description.safeParse(
         createProductDto.description
@@ -35,7 +34,7 @@ export class ProductsController {
         message: descriptionValidation.error.errors[0].message
       });
     }
-    // Validação do DTO com Zod
+
     const codeValidation = CreateProductSchema.shape.code.safeParse(
       createProductDto.code
     );
@@ -119,27 +118,58 @@ export class ProductsController {
         message: nutritionalInfoValidation.error.errors[0].message
       });
     }
-    // se houver erros, lança uma exceção BadRequestException
+
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
 
+    const matchedProducts = await this.productsService.matchProductByData(
+      createProductDto.code,
+      createProductDto.description,
+      createProductDto.sku
+    );
+
+    if ((await matchedProducts).length > 0) {
+      const existingProduct = matchedProducts[0];
+
+      if (!existingProduct.active) {
+        throw new BadRequestException(
+          `Product already exists but is not active. Activate and update it: ${JSON.stringify(
+            existingProduct
+          )}`
+        );
+      }
+
+      throw new BadRequestException(
+        'Product already exists. Try update it instead'
+      );
+    }
     return this.productsService.create(createProductDto);
   }
 
   @Get()
-  findAll() {
-    try {
-      return this.productsService.findAll();
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+  async findAll(@Query('orderBy') orderBy: string = 'id') {
+    const validOrderFields = [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
+
+    return this.productsService.findAll(orderBy);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findById(@Param('id') id: string) {
     try {
-      return this.productsService.findOne(+id);
+      return this.productsService.findById(+id);
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
@@ -151,30 +181,31 @@ export class ProductsController {
     @Body() updateProductDto: UpdateProductDto,
     @Query() queryParams: Record<string, string>
   ) {
-    const existingProduct = await this.productsService.findOne(+id);
+    const existingProduct = await this.productsService.findById(+id);
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    // Obtém os campos permitidos para atualização
+    if (!existingProduct.active) {
+      throw new BadRequestException(`Product ID ${id} is not active`);
+    }
+
     const allowedFields = Object.keys(UpdateProductSchema.shape);
     const fieldsToUpdate = Object.keys(queryParams);
 
     if (fieldsToUpdate.length === 0) {
       throw new BadRequestException('No fields provided to update');
     }
-    // Cria um objeto vazio para armazenar os campos que serão atualizados
+
     const updateData: Partial<UpdateProductDto> = {};
 
-    // Itera sobre os campos que estão sendo enviados para atualização
     for (const field of fieldsToUpdate) {
       if (!allowedFields.includes(field)) {
         throw new BadRequestException(`Invalid field: ${field}`);
       }
-      // Obtém o valor do campo nos queryParams
 
       const value = queryParams[field];
-      // Verifica se o campo é category_id, group_id ou supplier_id
+
       if (['category_id', 'group_id', 'supplier_id'].includes(field)) {
         const numericValue = parseInt(value, 10);
         if (isNaN(numericValue)) {
@@ -182,20 +213,17 @@ export class ProductsController {
             `Invalid number format for field: ${field}`
           );
         }
-        updateData[field] = numericValue; // Atribui o valor como número
+        updateData[field] = numericValue;
       } else {
-        // Adiciona o campo ao updateData se o valor não for undefined
         if (value !== undefined) {
           updateData[field] = value;
         }
       }
     }
 
-    // Valida o DTO completo, mas apenas com os campos que foram enviados para atualização
     const validation = UpdateProductSchema.safeParse(updateData);
 
     if (!validation.success) {
-      // Captura e lança o erro com as mensagens corretas do Zod
       const zodError = validation.error as ZodError;
       const firstError = zodError.errors[0];
       throw new BadRequestException(
@@ -203,29 +231,34 @@ export class ProductsController {
       );
     }
 
-    // Atualiza o produto com os campos permitidos e válidos
     const updatedProduct = await this.productsService.update(
       +id,
       updateData as UpdateProductDto
     );
 
-    // Retorna o produto atualizado
     return updatedProduct;
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    // Verificar se o produto existe no banco
-    const existingProduct = this.productsService.findOne(+id);
+    const existingProduct = this.productsService.findById(+id);
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    // se existe tenta remover (remoção lógica)
+
     try {
       this.productsService.remove(+id);
-      return { message: 'Product deleted successfully' };
+
+      return { message: `Product ID ${id} deleted successfully` };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
+  }
+
+  @Post('activate/:id')
+  async activate(@Param('id') id: string) {
+    await this.productsService.reactivateProduct(+id);
+
+    return { message: `Product ID ${id} activated successfully` };
   }
 }
