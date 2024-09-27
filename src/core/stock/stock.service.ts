@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
+import { StockRepository } from './stock.repository';
 
 @Injectable()
 export class StockService {
-  create(_createStockDto: CreateStockDto) {
-    return 'This action adds a new stock';
+  constructor(private readonly stockRepository: StockRepository) {}
+
+  create(createStockDto: CreateStockDto) {
+    return this.stockRepository.create(createStockDto);
   }
 
-  findAll() {
-    return 'This action returns all stock';
+  findAll(orderBy: string) {
+    return this.stockRepository.findAll(orderBy);
   }
 
   findOne(id: number) {
