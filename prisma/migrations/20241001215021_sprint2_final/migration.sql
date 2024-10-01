@@ -67,7 +67,7 @@ CREATE TABLE "LoteProduto" (
 -- CreateTable
 CREATE TABLE "Ordem" (
     "id" SERIAL NOT NULL,
-    "numero" TEXT NOT NULL,
+    "numero" INTEGER NOT NULL,
     "data_ordem" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "quantidade_esperada" INTEGER NOT NULL,
     "status" TEXT NOT NULL,

@@ -75,7 +75,7 @@ model LoteProduto {
 
 model Ordem {
   id                  Int           @id @default(autoincrement())
-  numero              String
+  numero              Int
   data_ordem          DateTime      @default(now()) @db.Timestamp(6)
   quantidade_esperada Int
   status              String

@@ -1,14 +1,3 @@
-INSERT INTO "Usuario" ("nome", "senha")
-VALUES 
-	('Cassio', 'cassio'),
-	('Joao', 'joao'),
-	('Joana', 'joana'),
-	('Laura', 'laura'),
-	('Lauro', 'lauro'),
-    ('Maria', 'maria'),
-    ('Mario', 'mario');
-	
-
 INSERT INTO "Categoria" ("descricao")
 VALUES 
     ('Legumes'),
@@ -22,54 +11,65 @@ VALUES
  ('Freezer 2');
 
 
-INSERT INTO "ProdutoFinal" ("descricao", "unidade_medida","categoriaId")
+INSERT INTO "Usuario" ("nome", "senha")
 VALUES 
-('Batata cubinhos', 'Kg', 1),
-('Cenoura cubinhos', 'Kg', 1),
-('Mandioca descascada', 'Kg', 1),
-('Mirtilos selecionados', 'Kg', 2),
-('Laranja descascada', 'Kg', 2),
-('Maça cubinhos', 'Kg', 2),
-('Alface desfolhado', 'Kg', 3);	
+	('Cassio', 'cassio'),
+	('Joao', 'joao'),
+	('Joana', 'joana'),
+	('Laura', 'laura'),
+	('Lauro', 'lauro'),
+    ('Maria', 'maria'),
+    ('Mario', 'mario');
+	
 
-
-INSERT INTO "MateriaPrima" ("descricao", "unidade_medida", "preco_custo", "imagem", "categoriaId", "produtoFinalId")
+INSERT INTO "ProdutoFinal" ("descricao", "categoriaId")
 VALUES 
-    ('Batata','Kg', 5.0,'https://images.app.goo.gl/DDnkSGBFhtAJ6LAF7', 1, 1),
-    ('Maçã','Kg', 7.0,'https://images.app.goo.gl/xyXxbBfENNM2R1fM9', 2, 1),
-    ('Banana', 'Kg', 4.0,'https://th.bing.com/th/id/OIP.iFm2DffdX5eMg2LjmcRovQHaEK?rs=1&pid=ImgDetMain', 2, 1),
-    ('Rucula', 'Kg', 5.0,'https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0', 3, 2),
-    ('Alface', 'Kg', 3.4,'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 3, 3);
+    ('Batata cubinhos', 1),
+    ('Cenoura cubinhos', 1),
+    ('Mandioca descascada', 1),
+    ('Mirtilos selecionados', 2),
+    ('Laranja descascada', 2),
+    ('Maça cubinhos', 2),
+    ('Alface desfolhado',  3);	
 
 
-INSERT INTO "LoteMateria" ("numero", "quantidade_inicial", "quantidade_atual", "fornecedor", "materiaPrimaId", "localId")
+INSERT INTO "MateriaPrima" ("descricao", "imagem", "categoriaId", "produtoFinalId")
 VALUES 
-    (1, 50, 50, 'Fazenda Sol', 1, 1),
-    (2, 40, 40, 'Fazenda Feliz', 1, 1),
-    (3, 130, 130, 'Fazenda Magica', 2, 2),
-    (4, 20, 20, 'Fazenda Luz', 2, 1),
-    (5, 5, 5, 'Fazenda Verde', 2, 2),
-    (6, 55, 53, 'Fazenda Lua', 1, 2);
+    ('Batata', 'https://images.app.goo.gl/DDnkSGBFhtAJ6LAF7', 1, 1),
+    ('Maçã', 'https://images.app.goo.gl/xyXxbBfENNM2R1fM9', 2, 6),
+    ('Banana', 'https://th.bing.com/th/id/OIP.iFm2DffdX5eMg2LjmcRovQHaEK?rs=1&pid=ImgDetMain', 2, 2),
+    ('Rucula', 'https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0', 3, 6),
+    ('Alface', 'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 3, 6);
+
+
+INSERT INTO "LoteMateria" ("sku", "preco_custo", "quantidade_inicial", "quantidade_atual", "unidade_medida", "fornecedor", "materiaPrimaId", "localId")
+VALUES 
+    ('SKU001', 1234.0, 50, 50, 'kg','Fazenda Sol', 1, 1),
+    ('SKU002', 2221.50, 40, 40, 'kg','Fazenda Feliz', 2, 1),
+    ('SKU003', 777.75, 130, 130, 'kg','Fazenda Magica', 3, 2),
+    ('SKU004', 241.25, 20, 20, 'kg', 'Fazenda Luz', 4, 1),
+    ('SKU005', 250.0, 5, 5, 'kg', 'Fazenda Verde', 2, 2),
+    ('SKU006', 450.0, 55, 53, 'kg', 'Fazenda Lua', 1, 2);
 	
 
 INSERT INTO "Ordem" ("numero", "quantidade_esperada", "status", "produtoFinalId", "loteMateriaId")
 VALUES 
-('SKU001', 20,'Em Andamento', 1, 4),
-('SKU002', 100,'Pendente', 2, 3),	
-('SKU003', 200,'Finalizada', 3, 6),
-('SKU004', 50, 'Em Andamento', 7, 5),
-('SKU005', 50,'Finalizada', 6, 1);
+    (1, 20, 'Em Andamento', 1, 4),
+    (2, 100, 'Pendente', 2, 3),	
+    (3, 200, 'Finalizada', 3, 6),
+    (4, 50, 'Em Andamento', 7, 5),
+    (5, 50, 'Finalizada', 6, 1);
 
 
-INSERT INTO "LoteProduto" ("numero", "quantidade" , "imagem", "produtoId", "localId", "ordemId")
+INSERT INTO "LoteProduto" ("sku", "quantidade", "unidade_medida", "imagem", "produtoId", "localId", "ordemId")
 VALUES 
-    ('1', 11,'https://th.bing.com/th/id/OIP.JRIl232pnbpA16SBAYybKAHaGR?rs=1&pid=ImgDetMain', 1, 1, 1),
-	('2', 22,'https://th.bing.com/th/id/OIP.n8TrCIyMGsoJJYQqXsncvAHaE8?rs=1&pid=ImgDetMain', 2, 1, 2),
-    ('3', 33,'https://th.bing.com/th/id/OIP.iFm2DffdX5eMg2LjmcRovQHaEK?rs=1&pid=ImgDetMain', 3, 1, 3),
-    ('4', 44,'https://th.bing.com/th/id/OIP.pxR1WpT9QADVJm2k5KJV_gHaE8?rs=1&pid=ImgDetMain', 4, 1, 4),
-    ('5', 55,'https://th.bing.com/th/id/OIP.yk1JDwcZ44Y8eQKGfMC7cAHaEo?rs=1&pid=ImgDetMain', 5, 1, 5),
-    ('6', 66,'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 6, 1, 1),
-    ('7', 77,'https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0', 7, 1, 2);
+    ('SKU001', 11, 'kg', 'https://th.bing.com/th/id/OIP.JRIl232pnbpA16SBAYybKAHaGR?rs=1&pid=ImgDetMain', 1, 1, 1),
+	('SKU002', 22, 'kg', 'https://th.bing.com/th/id/OIP.n8TrCIyMGsoJJYQqXsncvAHaE8?rs=1&pid=ImgDetMain', 2, 1, 2),
+    ('SKU003', 33, 'kg', 'https://th.bing.com/th/id/OIP.iFm2DffdX5eMg2LjmcRovQHaEK?rs=1&pid=ImgDetMain', 3, 1, 3),
+    ('SKU004', 44, 'kg', 'https://th.bing.com/th/id/OIP.pxR1WpT9QADVJm2k5KJV_gHaE8?rs=1&pid=ImgDetMain', 4, 1, 4),
+    ('SKU005', 55, 'kg', 'https://th.bing.com/th/id/OIP.yk1JDwcZ44Y8eQKGfMC7cAHaEo?rs=1&pid=ImgDetMain', 5, 1, 5),
+    ('SKU006', 66, 'kg', 'https://th.bing.com/th/id/OIP.0bFqMiCtpbitfhNSc3fd9gHaFj?rs=1&pid=ImgDetMain', 6, 1, 1),
+    ('SKU007', 77, 'kg', 'https://th.bing.com/th/id/R.185f438e71c11e0506d11e41566f22e4?rik=lHVWNPA5HwV8Sg&pid=ImgRaw&r=0', 7, 1, 2);
 
 
 INSERT INTO "Etapa" ("descricao", "produtoId", "usuarioId")

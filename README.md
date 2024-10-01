@@ -197,6 +197,15 @@ Acesse em seu navegador o endereço: [http://localhost:1234/](http://localhost:1
 **Login:** <fulano@gmail.com>  
 **Senha:** abc123
 
+Uma vez rodando coloque:
+
+Name: *(qualquer nome)*
+host/connection: database
+port: 5432
+Maintanance database: postgres
+username: postgres
+password: postgres
+
 #### Registrar o servidor
 
 - **Aba Geral**  
