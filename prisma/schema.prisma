@@ -2,10 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -21,10 +17,9 @@ model Categoria {
 model ProdutoFinal {
   id             Int            @id @default(autoincrement())
   descricao      String
-  unidade_medida String
   categoriaId    Int
   etapa          Etapa[]
-  loteProduto    LoteProduto[]
+  loteProdutos   LoteProduto[]
   materiaPrima   MateriaPrima[]
   ordens         Ordem[]
   categoria      Categoria      @relation(fields: [categoriaId], references: [id])
@@ -33,8 +28,6 @@ model ProdutoFinal {
 model MateriaPrima {
   id             Int           @id @default(autoincrement())
   descricao      String
-  unidade_medida String
-  preco_custo    Float
   imagem         String?
   categoriaId    Int
   produtoFinalId Int
@@ -45,16 +38,18 @@ model MateriaPrima {
 
 model LoteMateria {
   id                 Int          @id @default(autoincrement())
-  numero             String
+  sku                String
+  preco_custo        Float
   quantidade_inicial Float
   quantidade_atual   Float
   data_entrada       DateTime     @default(now()) @db.Timestamp(6)
   fornecedor         String
+  unidade_medida     String
   materiaPrimaId     Int
   localId            Int
+  ordens             Ordem[]
   local              Local        @relation(fields: [localId], references: [id])
   materiaPrima       MateriaPrima @relation(fields: [materiaPrimaId], references: [id])
-  ordens             Ordem[]
 }
 
 model Local {
@@ -66,14 +61,15 @@ model Local {
 
 model LoteProduto {
   id         Int          @id @default(autoincrement())
-  numero     String
+  sku        String
   quantidade Int
   imagem     String?
+  unidade_medida String
   produtoId  Int
   localId    Int
-  ordemId    Int?
+  ordemId    Int
   local      Local        @relation(fields: [localId], references: [id])
-  Ordem      Ordem?       @relation(fields: [ordemId], references: [id])
+  Ordem      Ordem        @relation(fields: [ordemId], references: [id])
   produto    ProdutoFinal @relation(fields: [produtoId], references: [id])
 }
 

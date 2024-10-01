@@ -10,7 +10,6 @@ CREATE TABLE "Categoria" (
 CREATE TABLE "ProdutoFinal" (
     "id" SERIAL NOT NULL,
     "descricao" TEXT NOT NULL,
-    "unidade_medida" TEXT NOT NULL,
     "categoriaId" INTEGER NOT NULL,
 
     CONSTRAINT "ProdutoFinal_pkey" PRIMARY KEY ("id")
@@ -20,8 +19,6 @@ CREATE TABLE "ProdutoFinal" (
 CREATE TABLE "MateriaPrima" (
     "id" SERIAL NOT NULL,
     "descricao" TEXT NOT NULL,
-    "unidade_medida" TEXT NOT NULL,
-    "preco_custo" DOUBLE PRECISION NOT NULL,
     "imagem" TEXT,
     "categoriaId" INTEGER NOT NULL,
     "produtoFinalId" INTEGER NOT NULL,
@@ -32,11 +29,13 @@ CREATE TABLE "MateriaPrima" (
 -- CreateTable
 CREATE TABLE "LoteMateria" (
     "id" SERIAL NOT NULL,
-    "numero" TEXT NOT NULL,
+    "sku" TEXT NOT NULL,
+    "preco_custo" DOUBLE PRECISION NOT NULL,
     "quantidade_inicial" DOUBLE PRECISION NOT NULL,
     "quantidade_atual" DOUBLE PRECISION NOT NULL,
     "data_entrada" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "fornecedor" TEXT NOT NULL,
+    "unidade_medida" TEXT NOT NULL,
     "materiaPrimaId" INTEGER NOT NULL,
     "localId" INTEGER NOT NULL,
 
@@ -54,12 +53,13 @@ CREATE TABLE "Local" (
 -- CreateTable
 CREATE TABLE "LoteProduto" (
     "id" SERIAL NOT NULL,
-    "numero" TEXT NOT NULL,
+    "sku" TEXT NOT NULL,
     "quantidade" INTEGER NOT NULL,
     "imagem" TEXT,
+    "unidade_medida" TEXT NOT NULL,
     "produtoId" INTEGER NOT NULL,
     "localId" INTEGER NOT NULL,
-    "ordemId" INTEGER,
+    "ordemId" INTEGER NOT NULL,
 
     CONSTRAINT "LoteProduto_pkey" PRIMARY KEY ("id")
 );
@@ -140,7 +140,7 @@ ALTER TABLE "LoteMateria" ADD CONSTRAINT "LoteMateria_materiaPrimaId_fkey" FOREI
 ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_localId_fkey" FOREIGN KEY ("localId") REFERENCES "Local"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_ordemId_fkey" FOREIGN KEY ("ordemId") REFERENCES "Ordem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_ordemId_fkey" FOREIGN KEY ("ordemId") REFERENCES "Ordem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LoteProduto" ADD CONSTRAINT "LoteProduto_produtoId_fkey" FOREIGN KEY ("produtoId") REFERENCES "ProdutoFinal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
