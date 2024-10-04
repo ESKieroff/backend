@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Stock_Moviment } from 'src/core/common/enums';
 
 export class CreateStockDto {
   @ApiProperty({
@@ -8,10 +9,16 @@ export class CreateStockDto {
   readonly document_date: Date;
 
   @ApiProperty({
+    description: 'Document number',
+    example: '1'
+  })
+  readonly document_number: string;
+
+  @ApiProperty({
     description: 'Stock moviment',
     example: ['INPUT', 'OUTPUT', 'TRANSIT']
   })
-  readonly stock_moviment: string;
+  readonly stock_moviment: Stock_Moviment;
 
   @ApiProperty({
     description: 'Stock id',

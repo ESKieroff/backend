@@ -21,8 +21,8 @@ export class StockController {
   }
 
   @Get()
-  findAll() {
-    return this.stockService.findAll();
+  findAll(orderBy: string) {
+    return this.stockService.findAll(orderBy);
   }
 
   @Get(':id')
