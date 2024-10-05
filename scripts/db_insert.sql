@@ -1,21 +1,10 @@
-INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
+INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "user_type", "gender")
 VALUES 
-	('Cassio', 'cassio@gmail.com', 'abracadabra', 'Cassio', 'Santos', 'ROOT', 'MALE'),
-    ('Roberto', 'fulano@gmail.com', 'abracadabra', 'Roberto', 'Da Silva', 'DEMO', 'MALE'),
-    ('Ana', 'ana@gmail.com', 'abracadabra', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
-    ('Maria', 'maria@gmail.com', 'abracadabra', 'Maria', 'Silva', 'DEMO', 'FEMALE');
-
--- Insert into people
-INSERT INTO "persons" ("name")
-VALUES 
-    ('Pedro Cabral'),
-    ('Machado Assis'),
-    ('Clarice Lispector'),
-    ('Sebastião Costa'),	
-    ('Produtor Rural'),
-    ('Ecologia na Veia');	
-        
-    
+	('Cassio', 'cassio@gmail.com', 'cassio', 'Cassio', 'Santos', 'PUBLIC', 'MALE'),
+    ('fulano', 'fulano@gmail.com', 'fulano', 'Fulano', 'De Tals', 'PUBLIC', 'MALE'),
+    ('kieroff', 'kieroff@gmail.com', 'abracadabra', 'Rodrigo', 'Oliveira', 'PUBLIC', 'MALE'),
+    ('Maria', 'maria@gmail.com', 'maria', 'Maria', 'Silva', 'PUBLIC', 'FEMALE');
+	
 -- Insert into groups
 INSERT INTO "groups" ("description", "father_id" )
 VALUES 
@@ -39,15 +28,25 @@ VALUES
     ('Top Demais'),
     ('Promoção');
 	
--- Insert into persons
-INSERT INTO "persons" ("name")
+-- Insert into customers
+INSERT INTO "customers" ("name")
 VALUES 
     ('Pedro Cabral'),
     ('Machado Assis'),
     ('Clarice Lispector'),
     ('Sebastião Costa'),	
     ('Produtor Rural'),
-    ('Ecologia na Veia');	
+    ('Ecologia na Veia');
+	
+-- Insert into suppliers
+INSERT INTO "suppliers" ("name")
+VALUES 
+    ('Fazendinha'),
+    ('Feira de Acari'),
+    ('Produtor X'),
+    ('Fulaninho da Feira'),	
+    ('Produtor Rural'),
+    ('Eco-Produtor');
 	
 -- Insert into stock_location
 INSERT INTO "stock_location" ("description")
