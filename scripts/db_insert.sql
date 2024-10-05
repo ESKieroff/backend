@@ -1,10 +1,21 @@
 INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
 VALUES 
-	('Cassio', 'cassio@gmail.com', 'cassio', 'Cassio', 'Santos', 'PUBLIC', 'MALE'),
-    ('fulano', 'fulano@gmail.com', 'fulano', 'Fulano', 'De Tals', 'PUBLIC', 'MALE'),
-    ('kieroff', 'kieroff@gmail.com', 'abracadabra', 'Rodrigo', 'Oliveira', 'PUBLIC', 'MALE'),
-    ('Maria', 'maria@gmail.com', 'maria', 'Maria', 'Silva', 'PUBLIC', 'FEMALE');
-	
+	('Cassio', 'cassio@gmail.com', 'abracadabra', 'Cassio', 'Santos', 'ROOT', 'MALE'),
+    ('Roberto', 'fulano@gmail.com', 'abracadabra', 'Roberto', 'Da Silva', 'DEMO', 'MALE'),
+    ('Ana', 'ana@gmail.com', 'abracadabra', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
+    ('Maria', 'maria@gmail.com', 'abracadabra', 'Maria', 'Silva', 'DEMO', 'FEMALE');
+
+-- Insert into people
+INSERT INTO "persons" ("name")
+VALUES 
+    ('Pedro Cabral'),
+    ('Machado Assis'),
+    ('Clarice Lispector'),
+    ('Sebastião Costa'),	
+    ('Produtor Rural'),
+    ('Ecologia na Veia');	
+        
+    
 -- Insert into groups
 INSERT INTO "groups" ("description", "father_id" )
 VALUES 

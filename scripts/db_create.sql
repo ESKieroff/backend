@@ -234,7 +234,7 @@ CREATE TABLE "stock_location" (
     CONSTRAINT "stock_location_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable persons
 CREATE TABLE "persons" (
     "id" SERIAL NOT NULL,
     "name" VARCHAR(255) NOT NULL,
