@@ -15,6 +15,7 @@ import { FeatureFlagsService } from './feature-flags/feature-flags.service';
 // import { PersonsModule } from './core/persons/persons.module';
 // import { GroupsModule } from './core/groups/groups.module';
 // import { CompositionsModule } from './core/compositions/compositions.module';
+import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { FeatureFlagsService } from './feature-flags/feature-flags.service';
     AuthModule,
     ControlPanelModule,
     Config,
-    PrismaModule
+    PrismaModule,
+    StockLocationsModule
     // CategoriesModule,
     // PersonsModule,
     // GroupsModule,
