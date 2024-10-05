@@ -1,3 +1,5 @@
+-- usar
+-- insert into users
 INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
 VALUES 
 	('Cassio', 'cassio@gmail.com', 'cassio', 'Cassio', 'Santos', 'PUBLIC', 'MALE'),
