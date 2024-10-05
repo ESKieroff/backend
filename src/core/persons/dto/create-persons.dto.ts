@@ -4,7 +4,7 @@ export class CreatePersonsDto {
   @ApiProperty({
     name: 'Person name',
     minLength: 3,
-    example: 'Empresa do fulano ltda'
+    example: 'Fruteira do tio João ltda'
   })
   readonly name: string;
 }
