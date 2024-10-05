@@ -215,11 +215,6 @@ export class GroupsController {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const existingGroup = this.groupsService.findById(idNumber);
-    if (!existingGroup) {
-      throw new NotFoundException(`Group with ID ${id} not found`);
-    }
-
     await this.groupsService.reactivateGroup(idNumber);
 
     return { message: `Group ID ${id} activated successfully` };
