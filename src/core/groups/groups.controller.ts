@@ -189,19 +189,20 @@ export class GroupsController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const idNumber = +id;
+
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const existingGroup = this.groupsService.findById(idNumber);
+    const existingGroup = await this.groupsService.findById(idNumber);
     if (!existingGroup) {
-      throw new NotFoundException(`Group with ID ${id} not found`);
+      throw new NotFoundException(`Group with ID ${idNumber} not found`);
     }
 
     try {
       await this.groupsService.remove(idNumber);
 
-      return { message: `Group ID ${id} deleted successfully` };
+      return { message: `Group with ID ${idNumber} deleted successfully` };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
