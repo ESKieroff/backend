@@ -1,31 +1,80 @@
 stages:
+  - pre-commit-check
+  - commit-msg-check
+  - lint
+  - test
   - build
+  - push
 
 variables:
   DOCKER_REGISTRY: docker.io
-  DOCKER_IMAGE_NODE: norokai/cp-planta-back:node-latest
-  DOCKER_IMAGE_POSTGRES: norokai/cp-planta-back:postgres-latest
+  DOCKER_IMAGE_NODE: norokai/cp-planta-backend:latest 
+  DOCKER_IMAGE_POSTGRES: norokai/cp-planta-database:latest  
 
 before_script:
-  # Docker login using environment variables for credentials
+  - npm ci  # Instala as dependências
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
 
+# Job para simular o pre-commit
+pre-commit-check:
+  stage: pre-commit-check
+  image: node:22.5.0 
+  script:
+    - ./ci/pre-commit-check.sh  # Executa o script de pre-commit
+  only:
+    - merge_requests
+    - branches
+
+# Job para simular o commit-msg
+commit-msg-check:
+  stage: commit-msg-check
+  image: node:22.5.0  
+  script:
+    - ./ci/commit-msg-check.sh "$CI_COMMIT_MESSAGE"  # Passa a mensagem de commit para validação
+  only:
+    - merge_requests
+    - branches
+
+# Job para verificar o lint
+lint:
+  stage: lint
+  image: node:22.5.0  
+  script:
+    - npm run lint  # Comando para verificar o lint
+  only:
+    - merge_requests
+    - branches
+
+# Job para executar os testes
+test:
+  stage: test
+  image: node:22.5.0  
+  script:
+    - npm run test  # Comando para executar os testes
+  only:
+    - merge_requests
+    - branches
+
+# Build da imagem do Node.js e PostgreSQL
 build-node:
   stage: build
   script:
-    # Build the Node.js Docker image
     - docker build -f dockerfile.node -t $DOCKER_IMAGE_NODE .
-    # Push the Node.js image to Docker Hub
-    - docker push $DOCKER_IMAGE_NODE
   only:
     - main
 
 build-postgres:
   stage: build
   script:
-    # Build the PostgreSQL Docker image
     - docker build -f dockerfile.postgres -t $DOCKER_IMAGE_POSTGRES .
-    # Push the PostgreSQL image to Docker Hub
+  only:
+    - main
+
+# Push das imagens para o Docker Hub
+push-images:
+  stage: push
+  script:
+    - docker push $DOCKER_IMAGE_NODE
     - docker push $DOCKER_IMAGE_POSTGRES
   only:
     - main
