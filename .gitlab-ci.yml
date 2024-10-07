@@ -10,7 +10,6 @@ variables:
   DOCKER_REGISTRY: docker.io
   DOCKER_IMAGE_NODE: norohim/cp-planta-backend:latest 
   DOCKER_IMAGE_POSTGRES: norohim/cp-planta-database:latest  
-  SHELL: /bin/bash  # Definindo o shell padrão como bash
 
 default:
   image: node:22.5.0  # Imagem padrão para os jobs de Node.js
@@ -22,7 +21,7 @@ default:
 pre-commit-check:
   stage: pre-commit-check
   script:
-    - ./ci/pre-commit-check.sh  # Executa o script de pre-commit
+    - bash ci/pre-commit-check.sh  # Executa o script de pre-commit
   only:
     - merge_requests
     - branches
@@ -31,7 +30,7 @@ pre-commit-check:
 commit-msg-check:
   stage: commit-msg-check
   script:
-    - ./ci/commit-msg-check.sh "$CI_COMMIT_MESSAGE"  # Passa a mensagem de commit para validação
+    - bash ci/commit-msg-check.sh "$CI_COMMIT_MESSAGE"  # Passa a mensagem de commit para validação
   only:
     - merge_requests
     - branches
