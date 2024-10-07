@@ -10,15 +10,13 @@ variables:
   DOCKER_REGISTRY: docker.io
   DOCKER_IMAGE_NODE: norokai/cp-planta-backend:latest 
   DOCKER_IMAGE_POSTGRES: norokai/cp-planta-database:latest  
-  SHELL: /bin/sh  # Definindo o shell padrão para sh
+  SHELL: /bin/sh  # Definindo o shell padrão como sh
 
 default:
   image: node:22.5.0  # Imagem padrão para os jobs de Node.js
   before_script:
     - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
     - npm ci  # Instala as dependências
-  script:
-    - echo "Usando o shell: $SHELL"
 
 # Job para simular o pre-commit
 pre-commit-check:
