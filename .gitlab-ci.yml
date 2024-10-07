@@ -8,9 +8,9 @@ stages:
 
 variables:
   DOCKER_REGISTRY: docker.io
-  DOCKER_IMAGE_NODE: norokai/cp-planta-backend:latest 
-  DOCKER_IMAGE_POSTGRES: norokai/cp-planta-database:latest  
-  SHELL: /bin/sh  # Definindo o shell padrão como sh
+  DOCKER_IMAGE_NODE: norohim/cp-planta-backend:latest 
+  DOCKER_IMAGE_POSTGRES: norohim/cp-planta-database:latest  
+  SHELL: /bin/bash  # Definindo o shell padrão como bash
 
 default:
   image: node:22.5.0  # Imagem padrão para os jobs de Node.js
