@@ -124,34 +124,34 @@ export class ProductsService {
     return this.productsRepository.delete(id);
   }
 
-  async bulkRemove(ids: number[]) {
-    const existingProducts = await this.productsRepository.findManyByIds(ids);
+  // async bulkRemove(ids: number[]) {
+  //   const existingProducts = await this.productsRepository.findManyByIds(ids);
 
-    const errors = [];
-    const validIds = [];
+  //   const errors = [];
+  //   const validIds = [];
 
-    for (const id of ids) {
-      const product = existingProducts.find(p => p.id === id);
+  //   for (const id of ids) {
+  //     const product = existingProducts.find(p => p.id === id);
 
-      if (!product) {
-        errors.push(`Product with ID ${id} not found`);
-        continue;
-      }
+  //     if (!product) {
+  //       errors.push(`Product with ID ${id} not found`);
+  //       continue;
+  //     }
 
-      if (!product.active) {
-        errors.push(`Product with ID ${id} is not active`);
-        continue;
-      }
+  //     if (!product.active) {
+  //       errors.push(`Product with ID ${id} is not active`);
+  //       continue;
+  //     }
 
-      validIds.push(id);
-    }
+  //     validIds.push(id);
+  //   }
 
-    if (validIds.length > 0) {
-      await this.productsRepository.bulkUpdateStatus(validIds, {
-        active: false
-      });
-    }
+  //   if (validIds.length > 0) {
+  //     await this.productsRepository.bulkUpdateStatus(validIds, {
+  //       active: false
+  //     });
+  //   }
 
-    return { removedIds: validIds, errors };
-  }
+  //   return { removedIds: validIds, errors };
+  // }
 }
