@@ -11,9 +11,16 @@ variables:
   DOCKER_IMAGE_NODE: norokai/cp-planta-backend:latest 
   DOCKER_IMAGE_POSTGRES: norokai/cp-planta-database:latest  
 
+default:
+  script:
+    - echo "Usando o shell: $SHELL"
+  before_script:
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+  variables:
+    SHELL: /bin/sh  # Definindo o shell para sh
+
 before_script:
   - npm ci  # Instala as dependências
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
 
 # Job para simular o pre-commit
 pre-commit-check:
