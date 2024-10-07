@@ -12,10 +12,12 @@ variables:
   DOCKER_IMAGE_POSTGRES: norohim/cp-planta-database:latest  
 
 default:
-  image: node:22.5.0  # Imagem padrão para os jobs de Node.js
+  image: docker:latest  # Usando Docker como imagem base
+  services:
+    - docker:dind  # Habilitando Docker in Docker (DinD)
   before_script:
     - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
-    - npm ci  # Instala as dependências
+    - npm ci  # Instala as dependências do Node.js
 
 # Job para simular o pre-commit
 pre-commit-check:
