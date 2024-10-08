@@ -325,19 +325,14 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    const existingProduct = this.productsService.findById(+id);
-    if (!existingProduct) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
+  async remove(@Param('id') id: string) {
+    const idNumber = +id;
 
-    try {
-      this.productsService.remove(+id);
-
-      return { message: `Product ID ${id} deleted successfully` };
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
     }
+    await this.productsService.remove(idNumber);
+    return { message: `Product ID ${idNumber} deleted successfully` };
   }
 
   @Post('activate/:id')
