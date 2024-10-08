@@ -120,8 +120,9 @@ export class ProductsService {
     return this.formatProductDate(updatedPorduct);
   }
 
-  remove(id: number) {
-    return this.productsRepository.delete(id);
+  async remove(id: number) {
+    await this.isValid(id);
+    await this.productsRepository.delete(id);
   }
 
   // async bulkRemove(ids: number[]) {
