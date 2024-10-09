@@ -1,26 +1,122 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+// import {
+//   BadRequestException,
+//   Injectable,
+//   NotFoundException
+// } from '@nestjs/common';
+// import { CreateUserDto } from './dto/create-user.dto';
+// import { UpdateUserDto } from './dto/update-user.dto';
+// import { UsersRepository } from './users.repository';
+// import { users } from '@prisma/client';
+// import { format } from 'date-fns';
 
-@Injectable()
-export class UsersService {
-  create(_createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
+// @Injectable()
+// export class UsersService {
+//   constructor(private readonly usersRepository: UsersRepository) {}
 
-  findAll() {
-    return 'This action returns all users';
-  }
+//   async create(createUserDto: CreateUserDto) {
+//     const existingUser = await this.matchUserByData(createUserDto.email);
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+//     if (existingUser.length > 0) {
+//       throw new Error(
+//         `User already exists: ${JSON.stringify(existingUser[0])}`
+//       );
+//     }
 
-  update(id: number, _updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+//     const createdUser = await this.usersRepository.create(createUserDto);
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
-}
+//     return this.formatUserDate(createdUser);
+//   }
+
+//   async findAll(orderBy: string): Promise<
+//     (Omit<users, 'created_at' | 'updated_at'> & {
+//       created_at: string;
+//       updated_at: string;
+//     })[]
+//   > {
+//     const findedUsers = await this.usersRepository.findAll(orderBy);
+//     return findedUsers.map(user => this.formatUserDate(user));
+//   }
+
+//   async findById(id: number) {
+//     const user = await this.isValid(id);
+//     return this.formatUserDate(user);
+//   }
+
+//   private formatUserDate(user: users): Omit<
+//     users,
+//     'created_at' | 'updated_at'
+//   > & {
+//     created_at: string;
+//     updated_at: string;
+//   } {
+//     return {
+//       ...user,
+//       created_at: format(new Date(user.created_at), 'dd/MM/yyyy HH:mm:ss'),
+//       updated_at: format(new Date(user.updated_at), 'dd/MM/yyyy HH:mm:ss')
+//     };
+//   }
+
+//   async isValid(id: number) {
+//     const user = await this.usersRepository.findById(id);
+
+//     if (!user) {
+//       throw new NotFoundException(`User with ID ${id} not found`);
+//     } else if (!user.active) {
+//       throw new BadRequestException(`User with ID ${id} is not active`);
+//     }
+//     return user;
+//   }
+
+//   async reactivateUser(id: number) {
+//     const user = await this.usersRepository.findById(id);
+
+//     if (!user) {
+//       throw new NotFoundException(`User with ID ${id} not found`);
+//     }
+
+//     if (user.active) {
+//       throw new BadRequestException(`User with ID ${id} is already active`);
+//     }
+
+//     const reactivatedUser = await this.usersRepository.update(id, {
+//       active: true,
+//       updated_at: new Date()
+//     });
+
+//     return this.formatUserDate(reactivatedUser);
+//   }
+
+//   async matchUserByData(code: string, description: string, sku: string) {
+//     const matchedUser = await this.usersRepository.matchUserByData(
+//       code,
+//       description,
+//       sku
+//     );
+
+//     return matchedUser.map(user => this.formatUserDate(user));
+//   }
+//   async update(id: number, updateUserDto: UpdateUserDto) {
+//     const user = await this.isValid(id);
+
+//     if (!user) {
+//       throw new NotFoundException(`User with ID ${id} not found`);
+//     }
+//     const updatedUserDto = {
+//       ...updateUserDto,
+//       updated_at: new Date(),
+//       active: user.active
+//     };
+
+//     const updatedPorduct = await this.usersRepository.update(
+//       id,
+//       updatedUserDto
+//     );
+
+//     return this.formatUserDate(updatedPorduct);
+//   }
+
+//   async remove(id: number) {
+//     await this.isValid(id);
+//     await this.usersRepository.delete(id);
+//   }
+// }
