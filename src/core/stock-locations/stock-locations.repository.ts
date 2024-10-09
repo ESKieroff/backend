@@ -58,17 +58,11 @@ export class StockLocationsRepository {
   }
 
   async matchstock_locationByData(
-    id: number,
-    description: string,
-    active: boolean
+    description: string
   ): Promise<stock_location[]> {
     return this.prisma.stock_location.findMany({
       where: {
-        OR: [
-          { id: { equals: id } },
-          { description: { equals: description } },
-          { active: { equals: active } }
-        ]
+        OR: [{ description: { equals: description } }]
       }
     });
   }
