@@ -1,4 +1,4 @@
-import { Role, Gender } from 'src/core/common/enums';
+import { Role, Gender } from '../../common/enums';
 
 export class User {
   id: number;

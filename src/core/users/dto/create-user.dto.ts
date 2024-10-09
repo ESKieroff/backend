@@ -1,27 +1,24 @@
+import { Role } from '../../common/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from 'src/core/common/enums';
 
 export class CreateUserDto {
   @ApiProperty({
     example: 'johndoe@email.com',
-    description: 'Email of the user',
-    required: true
+    description: 'Email of the user'
   })
   readonly email: string;
 
   @ApiProperty({
     example: 'abracadabra',
-    description: 'Password of the user',
-    required: true
+    description: 'Password of the user'
   })
   readonly password: string;
 
   @ApiProperty({
     example: 'John',
-    description: 'First name of the user',
+    description: 'Role of the user',
     examples: ['DEFAULT', 'ADMIN', 'ROOT', 'DEMO', 'ERP', 'API', 'SYSTEM'],
-    default: 'DEFAULT',
-    required: true
+    default: Role.DEFAULT
   })
   readonly role: Role;
 }

@@ -1,4 +1,4 @@
-import { Role, Gender } from 'src/core/common/enums';
+import { Role, Gender } from '../../common/enums';
 
 export class ResponseUsersDto {
   id: number;
@@ -10,8 +10,8 @@ export class ResponseUsersDto {
   last_name: string;
   gender: Gender;
   active: boolean;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   //   created_by: number; // Do not return created_by
   //   updated_by: number;  // Do not return updated_by
 }

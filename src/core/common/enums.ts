@@ -7,10 +7,9 @@ export enum Gender {
 
 export enum Role {
   DEFAULT = 'DEFAULT',
-  ADMIN = 'ADMIN',
   ROOT = 'ROOT',
+  ADMIN = 'ADMIN',
   DEMO = 'DEMO',
-  ERP = 'ERP',
   API = 'API',
   SYSTEM = 'SYSTEM'
 }
