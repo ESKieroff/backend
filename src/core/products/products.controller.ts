@@ -251,11 +251,11 @@ export class ProductsController {
 
     const existingProduct = await this.productsService.findById(idNumber);
     if (!existingProduct) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+      throw new NotFoundException(`Product with ID ${idNumber} not found`);
     }
 
     if (!existingProduct.active) {
-      throw new BadRequestException(`Product ID ${id} is not active`);
+      throw new BadRequestException(`Product ID ${idNumber} is not active`);
     }
 
     const allowedFields = Object.keys(UpdateProductSchema.shape);
@@ -300,7 +300,7 @@ export class ProductsController {
     }
 
     const updatedProduct = await this.productsService.update(
-      +id,
+      idNumber,
       updateData as UpdateProductDto
     );
 
@@ -337,7 +337,11 @@ export class ProductsController {
 
   @Post('activate/:id')
   async activate(@Param('id') id: string) {
-    await this.productsService.reactivateProduct(+id);
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    await this.productsService.reactivateProduct(idNumber);
 
     return { message: `Product ID ${id} activated successfully` };
   }
