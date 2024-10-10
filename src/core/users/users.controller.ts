@@ -17,6 +17,7 @@ import { CreateUserSchema, UpdateUserSchema } from './dto/user.schema';
 import { ZodError } from 'zod';
 import { ResponseUsersDto } from './dto/user-response..dto';
 import { Role, Gender } from '../common/enums';
+import * as bcrypt from 'bcrypt';
 
 @Controller('users')
 export class UsersController {
@@ -51,10 +52,17 @@ export class UsersController {
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
-    // aqui precisa converter o password para hash usando o bcript, e substituir na variavel para o banco
+
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const newUserDto = {
+      ...createUserDto,
+      password: hashedPassword
+    };
+
     const matchedUsers = await this.usersService.matchUserByData(
-      createUserDto.email,
-      createUserDto.password
+      newUserDto.email,
+      newUserDto.password
     );
 
     if ((await matchedUsers).length > 0) {
@@ -73,7 +81,7 @@ export class UsersController {
       );
     }
 
-    const createdUser = await this.usersService.create(createUserDto);
+    const createdUser = await this.usersService.create(newUserDto);
     return {
       id: createdUser.id,
       username: createdUser.username,
