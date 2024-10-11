@@ -46,15 +46,13 @@ export class CreateStockDto {
 
   @ApiProperty({
     description: 'Unit price',
-    example: '1.00',
-    required: false
+    example: '1.00'
   })
   readonly unit_price: number;
 
   @ApiProperty({
     description: 'Total price',
-    example: '1.00',
-    required: false
+    example: '1.00'
   })
   readonly total_price: number;
 
@@ -72,29 +70,25 @@ export class CreateStockDto {
 
   @ApiProperty({
     description: 'Supplier',
-    example: '1',
-    required: false
+    example: '1'
   })
   readonly supplier: number;
 
   @ApiProperty({
     description: 'Costumer',
-    example: '1',
-    required: false
+    example: '1'
   })
   readonly costumer: number;
 
   @ApiProperty({
     description: 'Stock location id',
-    example: '1',
-    required: false
+    example: '1'
   })
   readonly stock_location_id: number;
 
   @ApiProperty({
     description: 'Observation',
-    example: '1',
-    required: false
+    example: '1'
   })
   readonly observation: string;
 }

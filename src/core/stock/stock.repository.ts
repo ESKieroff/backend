@@ -17,6 +17,17 @@ export class StockRepository {
     return stockResponse;
   }
 
+  async update(data: Prisma.stockCreateInput): Promise<stock> {
+    const stock = await this.prisma.stock.create({
+      data
+    });
+
+    const stockResponse = {
+      ...stock
+    };
+    return stockResponse;
+  }
+
   async findAll(orderBy: string): Promise<stock[]> {
     const validOrderFields = [
       'id',
