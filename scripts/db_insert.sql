@@ -1,10 +1,11 @@
--- insert into users
+-- insert into users 
+-- o password dos usuários é "cpplanta"
 INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
 VALUES 
-	('Cassio', 'cassio@gmail.com', 'abracadabra', 'Cassio', 'Santos', 'ROOT', 'MALE'),
-    ('Roberto', 'fulano@gmail.com', 'abracadabra', 'Roberto', 'Da Silva', 'DEMO', 'MALE'),
-    ('Ana', 'ana@gmail.com', 'abracadabra', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
-    ('Maria', 'maria@gmail.com', 'abracadabra', 'Maria', 'Silva', 'DEMO', 'FEMALE');
+	('Cassio', 'cassio@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Cassio', 'Santos', 'ROOT', 'MALE'),
+    ('Roberto', 'fulano@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Roberto', 'Da Silva', 'DEMO', 'MALE'),
+    ('Ana', 'ana@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
+    ('Maria', 'maria@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Maria', 'Silva', 'DEMO', 'FEMALE');
 	
     
 -- Insert into persons
