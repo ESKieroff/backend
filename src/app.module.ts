@@ -11,9 +11,9 @@ import { Config } from './config/config.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { PrismaService } from './database/prisma/prisma.service';
 import { FeatureFlagsService } from './feature-flags/feature-flags.service';
+import { PersonsModule } from './core/persons/persons.module';
 // import { CategoriesModule } from './core/categories/categories.module';
-// import { PersonsModule } from './core/persons/persons.module';
-// import { GroupsModule } from './core/groups/groups.module';
+import { GroupsModule } from './core/groups/groups.module';
 // import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
 
@@ -28,10 +28,11 @@ import { StockLocationsModule } from './core/stock-locations/stock_locations.mod
     ControlPanelModule,
     Config,
     PrismaModule,
-    StockLocationsModule
+    StockLocationsModule,
+    PrismaModule,
+    GroupsModule,
+    PersonsModule
     // CategoriesModule,
-    // PersonsModule,
-    // GroupsModule,
     // CompositionsModule
   ],
   controllers: [ControlPanelController],
