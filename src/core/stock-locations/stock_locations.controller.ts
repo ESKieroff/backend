@@ -18,13 +18,16 @@ import {
 import { StockLocationsService } from './stock_locations.service';
 import { UpdateStockLocationDto } from './dto/update-stock-locations.dto';
 import { ZodError } from 'zod';
+import { ResponseStockLocationDto } from './dto/response-stock-locations';
 
 @Controller('stock-locations')
 export class StockLocationsController {
   constructor(private readonly stockLocationService: StockLocationsService) {}
 
   @Post()
-  async create(@Body() createStockLocationDto: CreateStockLocationDto) {
+  async create(
+    @Body() createStockLocationDto: CreateStockLocationDto
+  ): Promise<ResponseStockLocationDto> {
     const errors = [];
 
     const descriptionValidation =
@@ -62,42 +65,79 @@ export class StockLocationsController {
         'Stock Location already exists. Try update it instead'
       );
     }
-    return this.stockLocationService.create(createStockLocationDto);
+    const createdStockLocation = await this.stockLocationService.create(
+      createStockLocationDto
+    );
+    return {
+      id: createdStockLocation.id,
+      description: createdStockLocation.description,
+      active: createdStockLocation.active,
+      created_at: createdStockLocation.created_at,
+      updated_at: createdStockLocation.updated_at
+    };
   }
 
   @Get()
-  async findAll(@Query('orderBy') orderBy: string = 'id') {
+  async findAll(
+    @Query('orderBy') orderBy: string = 'id'
+  ): Promise<ResponseStockLocationDto[]> {
     const validOrderFields = ['id', 'description'];
 
     if (!validOrderFields.includes(orderBy)) {
       throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
 
-    return this.stockLocationService.findAll(orderBy);
+    const stockLocation = await this.stockLocationService.findAll(orderBy);
+
+    return stockLocation.map(stockLocation => ({
+      id: stockLocation.id,
+      description: stockLocation.description,
+      active: stockLocation.active,
+      created_at: stockLocation.created_at,
+      updated_at: stockLocation.updated_at
+    }));
   }
 
   @Get(':id')
-  findById(@Param('id') id: string) {
-    try {
-      return this.stockLocationService.findById(+id);
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(Error));
+  findById(@Param('id') id: string): Promise<ResponseStockLocationDto> {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
     }
+    const stockLocation = this.stockLocationService.findById(idNumber);
+
+    return stockLocation.then(stockLocation => ({
+      id: stockLocation.id,
+      description: stockLocation.description,
+      active: stockLocation.active,
+      created_at: stockLocation.created_at,
+      updated_at: stockLocation.updated_at
+    }));
   }
 
-  @Patch(';id')
+  @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() UpdateStockLocationDto: UpdateStockLocationDto,
     @Query() queryParams: Record<string, string>
-  ) {
-    const existingStockLocation = await this.stockLocationService.findById(+id);
+  ): Promise<ResponseStockLocationDto> {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const existingStockLocation =
+      await this.stockLocationService.findById(idNumber);
     if (!existingStockLocation) {
-      throw new NotFoundException(`Stock Location with ID ${id} not found`);
+      throw new NotFoundException(
+        `Stock Location with ID ${idNumber} not found`
+      );
     }
 
     if (!existingStockLocation.active) {
-      throw new BadRequestException(`Stock Location ID ${id} is not active`);
+      throw new BadRequestException(
+        `Stock Location ID ${idNumber} is not active`
+      );
     }
 
     const allowedFields = Object.keys(UpdateStockLocationSchema.shape);
@@ -114,7 +154,21 @@ export class StockLocationsController {
         throw new BadRequestException(`Invalid field to update: ${field}`);
       }
 
-      updateData[field] = queryParams[field];
+      const value = queryParams[field];
+
+      if (['id', 'otherField_id'].includes(field)) {
+        const numericValue = parseInt(value, 10);
+        if (isNaN(numericValue)) {
+          throw new BadRequestException(
+            `Invalid number format for field: ${field}`
+          );
+        }
+        updateData[field] = numericValue;
+      } else {
+        if (value !== undefined) {
+          updateData[field] = value;
+        }
+      }
     }
 
     const validation = UpdateStockLocationSchema.safeParse(updateData);
@@ -128,37 +182,42 @@ export class StockLocationsController {
     }
 
     const updatedStockLocation = await this.stockLocationService.update(
-      +id,
+      idNumber,
       updateData as UpdateStockLocationDto
     );
 
-    return updatedStockLocation;
+    return {
+      id: updatedStockLocation.id,
+      description: updatedStockLocation.description,
+      active: updatedStockLocation.active,
+      created_at: updatedStockLocation.created_at,
+      updated_at: updatedStockLocation.updated_at
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    const existingStockLocation = this.stockLocationService.findById(+id);
-    if (!existingStockLocation) {
-      throw new NotFoundException(`Stock Location with ID ${id} not found`);
+  async remove(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
     }
+    await this.stockLocationService.remove(idNumber);
 
-    try {
-      this.stockLocationService.remove(+id);
-
-      return {
-        message: `Stock Location with ID ${id} deleted successfully`
-      };
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(Error));
-    }
+    return {
+      message: `Stock Location with ID ${idNumber} deleted successfully`
+    };
   }
 
   @Post('activate/:id')
   async activate(@Param('id') id: string) {
-    await this.stockLocationService.reactivateStockLocation(+id);
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    await this.stockLocationService.reactivate(idNumber);
 
     return {
-      message: `Stock Location with ID ${id} activated successfully`
+      message: `Stock Location with ID ${idNumber} activated successfully`
     };
   }
 }

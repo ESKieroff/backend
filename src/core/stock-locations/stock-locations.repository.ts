@@ -32,32 +32,26 @@ export class StockLocationsRepository {
   }
 
   async findById(id: number): Promise<stock_location | null> {
-    const stock_location = await this.prisma.stock_location.findUnique({
+    const stockLocation = await this.prisma.stock_location.findUnique({
       where: { id }
     });
 
-    if (!stock_location) {
+    if (!stockLocation) {
       return null;
     }
 
-    const stock_locationWithoutSensitiveFields = {
-      ...stock_location,
-      active: undefined
-    };
-
-    return stock_locationWithoutSensitiveFields;
+    return stockLocation;
   }
 
-  async bulkUpdateStatus(ids: number[], data: Partial<stock_location>) {
-    await this.prisma.stock_location.updateMany({
+  async findByIds(ids: number[]): Promise<stock_location[]> {
+    return this.prisma.stock_location.findMany({
       where: {
         id: { in: ids }
-      },
-      data
+      }
     });
   }
 
-  async matchstock_locationByData(
+  async matchStockLocationByData(
     description: string
   ): Promise<stock_location[]> {
     return this.prisma.stock_location.findMany({
@@ -81,19 +75,22 @@ export class StockLocationsRepository {
     };
     return stock_locationResponse;
   }
-  async delete(id: number): Promise<void> {
-    if (!id) {
-      throw new Error('ID not found');
-    }
-    const existingStockLocation = await this.findById(id);
-    if (!existingStockLocation) {
-      throw new Error('Product not found');
-    }
 
+  async delete(id: number): Promise<void> {
     await this.prisma.stock_location.update({
       where: { id },
       data: {
         active: false,
+        updated_at: new Date()
+      }
+    });
+  }
+
+  async reactivate(id: number): Promise<void> {
+    await this.prisma.stock_location.update({
+      where: { id },
+      data: {
+        active: true,
         updated_at: new Date()
       }
     });

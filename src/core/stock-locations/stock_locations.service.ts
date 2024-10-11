@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
 import { StockLocationsRepository } from './stock-locations.repository';
 import { CreateStockLocationDto } from './dto/create-stock-locations.dto';
 import { stock_location } from '@prisma/client';
 import { format } from 'date-fns';
+import { UpdateStockLocationDto } from './dto/update-stock-locations.dto';
 
 @Injectable()
 export class StockLocationsService {
@@ -70,56 +75,72 @@ export class StockLocationsService {
     const stockLocation = await this.stockLocationRepository.findById(id);
 
     if (!stockLocation) {
-      throw new Error(`Stock location not found: ${id}`);
+      throw new NotFoundException(`Stock Location with ID ${id} not found`);
+    } else if (!stockLocation.active) {
+      throw new BadRequestException(
+        `Stock Location with ID ${id} is not active`
+      );
     }
-
     return stockLocation;
   }
 
-  async reactivateStockLocation(id: number) {
+  async reactivate(id: number) {
     const stockLocation = await this.stockLocationRepository.findById(id);
 
     if (!stockLocation) {
-      throw new Error(`Stock location not found: ${id}`);
+      throw new NotFoundException(`Stock Location with ID ${id} not found`);
     }
-
     if (stockLocation.active) {
-      throw new Error(`Stock location already active: ${id}`);
+      throw new BadRequestException(
+        `Stock Location with ID ${id} is already active`
+      );
     }
-
-    await this.stockLocationRepository.update(id, {
-      active: true,
-      updated_at: new Date()
-    });
-
-    return this.formatStockLocationDate(stockLocation);
+    return this.stockLocationRepository.reactivate(id);
   }
 
   async matchStockLocationByData(description: string) {
     const matchedStockLocation =
-      await this.stockLocationRepository.matchstock_locationByData(description);
+      await this.stockLocationRepository.matchStockLocationByData(description);
 
     return matchedStockLocation.map(stockLocation =>
       this.formatStockLocationDate(stockLocation)
     );
   }
 
-  async update(id: number, data: Partial<stock_location>) {
+  async update(id: number, updateStockLocationDto: UpdateStockLocationDto) {
     const stockLocation = await this.isValid(id);
-
     if (!stockLocation) {
       throw new Error(`Stock location not found: ${id}`);
     }
+    if (updateStockLocationDto.description) {
+      const existingStockLocation = await this.matchStockLocationByData(
+        updateStockLocationDto.description
+      );
+      if (
+        existingStockLocation.length > 0 &&
+        existingStockLocation[0].id !== id
+      ) {
+        throw new BadRequestException(
+          `This description "${updateStockLocationDto.description}" already exists in other Stock Location.`
+        );
+      }
+    }
+    const updatedStockLocationDto = {
+      ...updateStockLocationDto,
+      updated_at: new Date(),
+      active: stockLocation.active
+    };
 
     const updatedStockLocation = await this.stockLocationRepository.update(
       id,
-      data
+      updatedStockLocationDto
     );
 
     return this.formatStockLocationDate(updatedStockLocation);
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    await this.isValid(id);
     return this.stockLocationRepository.delete(id);
   }
 }
