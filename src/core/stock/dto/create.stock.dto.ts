@@ -21,6 +21,16 @@ export class CreateStockDto {
   readonly stock_moviment: Stock_Moviment;
 
   @ApiProperty({
+    description: 'Flag for create balance and consolidate counts',
+    default: 'false'
+  })
+  readonly is_balance: boolean;
+
+  readonly items: CreateStockItemsDto[];
+}
+
+export class CreateStockItemsDto {
+  @ApiProperty({
     description: 'Stock id',
     example: '1'
   })

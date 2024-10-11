@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
-import { UpdateStockDto } from './dto/update.stock.dto';
+import { UpdateStockItemsDto } from './dto/update.stock.dto';
 
 @Controller('stock')
 export class StockController {
@@ -10,6 +10,7 @@ export class StockController {
   @Post()
   create(@Body() createStockDto: CreateStockDto) {
     return this.stockService.create(createStockDto);
+    // valida campos válidos
   }
 
   @Get()
@@ -23,8 +24,11 @@ export class StockController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {
-    return this.stockService.update(+id, updateStockDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateStockItemsDto: UpdateStockItemsDto
+  ) {
+    return this.stockService.update(+id, updateStockItemsDto);
   }
 
   // @Delete(':id')
