@@ -3,6 +3,7 @@ import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockItemsDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
 import { Settings } from 'src/config/settings';
+//simport { stock_items } from '@prisma/client';
 // import { stock_items } from '@prisma/client';
 //import {Settings} from '../../config/settings';
 
@@ -92,7 +93,8 @@ export class StockService {
 
   //   stockItems.forEach(item => {
   //     const { product_id, lote, quantity, unit_price } = item;
-  //     const total_price = quantity * unit_price;
+  //     let total_price = quantity * unit_price;
+  //     let total_quantity = quantity;
 
   //     if (!produtosMap.has(product_id)) {
   //       produtosMap.set(product_id, {
@@ -116,6 +118,6 @@ export class StockService {
   //     }
   //   });
 
-  //   return Array.from(produtosMap.values());
-  // }
+  // return Array.from(produtosMap.values());
+  //}
 }

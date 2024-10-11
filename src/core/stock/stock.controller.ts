@@ -31,6 +31,10 @@ export class StockController {
     return this.stockService.update(+id, updateStockItemsDto);
   }
 
+  // criar endpoint que lista os produtos em estoque com os lotes
+  // orderby = 'product_id' | 'lote' | 'quantity' |'description' |
+  // campos que pode receber: product_id, lote, quantity, unit_price, total_price
+
   // @Delete(':id')
   // remove(@Param('id') id: string) {
   //   return this.stockService.remove(+id);
