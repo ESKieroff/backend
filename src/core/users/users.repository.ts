@@ -18,18 +18,6 @@ export class UsersRepository {
   }
 
   async findAll(orderBy: string): Promise<users[]> {
-    const validOrderFields = [
-      'id',
-      'username',
-      'email',
-      'first_name',
-      'last_name'
-    ];
-
-    if (!validOrderFields.includes(orderBy)) {
-      throw new Error('Invalid order field');
-    }
-
     const result = await this.prisma.users.findMany({
       where: { active: true },
       orderBy: { [orderBy]: 'asc' }

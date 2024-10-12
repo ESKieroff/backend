@@ -18,6 +18,7 @@ import { ZodError } from 'zod';
 import { ResponseUsersDto } from './dto/user-response..dto';
 import { Role, Gender } from '../common/enums';
 import * as bcrypt from 'bcrypt';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -97,17 +98,36 @@ export class UsersController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description:
+      'Field to order by. Valid fields: id, username, email, first_name, last_name, gender, role, created_at, updated_at',
+    enum: [
+      'id',
+      'username',
+      'email',
+      'first_name',
+      'last_name',
+      'gender',
+      'role',
+      'created_at',
+      'updated_at'
+    ]
+  })
   async findAll(
     @Query('orderBy') orderBy: string = 'id'
   ): Promise<ResponseUsersDto[]> {
     const validOrderFields = [
       'id',
-      'description',
-      'code',
-      'sku',
-      'category_id',
-      'group_id',
-      'supplier_id'
+      'username',
+      'email',
+      'first_name',
+      'last_name',
+      'gender',
+      'role',
+      'created_at',
+      'updated_at'
     ];
 
     if (!validOrderFields.includes(orderBy)) {

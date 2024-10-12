@@ -29,8 +29,6 @@ export class UsersService {
     return this.formatUserDate(createdUser);
   }
 
-  //////////////////////////////////////////
-
   async findAll(orderBy: string): Promise<
     (Omit<users, 'created_at' | 'updated_at'> & {
       created_at: string;
