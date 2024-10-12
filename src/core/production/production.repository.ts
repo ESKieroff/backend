@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { Prisma, production } from '@prisma/client';
-import { Production_Status } from '@prisma/client';
+import { Prisma, Production } from '@prisma/client';
 @Injectable()
 export class ProductionRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: Prisma.productionCreateInput): Promise<production> {
-    return this.prisma.production.create({ data });
+  async create(data: Prisma.productionCreateInput): Promise<Production> {
+    return this.prisma.Production.create({ data });
   }
 
-  async findAll(orderBy: string): Promise<production[]> {
+  async findAll(orderBy: string): Promise<Production[]> {
     const validOrderFields = [
       'id',
       'description',
@@ -25,13 +24,13 @@ export class ProductionRepository {
       throw new Error('Invalid order field');
     }
 
-    return this.prisma.production.findMany({
+    return this.prisma.Production.findMany({
       orderBy: { [orderBy]: 'asc' }
     });
   }
 
-  async findById(id: number): Promise<production | null> {
-    return this.prisma.production.findUnique({
+  async findById(id: number): Promise<Production | null> {
+    return this.prisma.Production.findUnique({
       where: { id }
     });
   }
@@ -39,8 +38,8 @@ export class ProductionRepository {
   async update(
     id: number,
     data: Prisma.productionUpdateInput
-  ): Promise<production> {
-    return this.prisma.production.update({
+  ): Promise<Production> {
+    return this.prisma.Production.update({
       where: { id },
       data
     });
@@ -49,7 +48,7 @@ export class ProductionRepository {
   async updateStatus(
     id: number,
     newStatus: Production_Status
-  ): Promise<production> {
+  ): Promise<Production> {
     const currentProduction = await this.findById(id);
 
     if (!currentProduction) {
@@ -60,7 +59,7 @@ export class ProductionRepository {
       throw new Error('Invalid status transition');
     }
 
-    return this.prisma.production.update({
+    return this.prisma.Production.update({
       where: { id },
       data: { Production_Status: newStatus, updated_at: new Date() }
     });
