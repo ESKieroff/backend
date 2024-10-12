@@ -2,25 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockItemsDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
-import { Settings } from 'src/config/settings';
-//simport { stock_items } from '@prisma/client';
-// import { stock_items } from '@prisma/client';
-//import {Settings} from '../../config/settings';
+import { Settings } from '../../config/settings';
 
 @Injectable()
 export class StockService {
   constructor(private readonly stockRepository: StockRepository) {}
 
-  async create(createStockDto: CreateStockDto) {
-    // se movimento for output, verifica o parametro em Settings.enableNegativeStock
-    // se for false, chama função consulta estoque pra ver se é negativo
-    // se for negativo, exibe mensagem informativa
-    // const contador da sequencia
-    // cria docto em stock e recupera dados pra inserir no item
-    // verifica se já tem intens incluídos e última sequencia
-    // insere dados do item, itera sequencia
-    // se não tem mais itens termina e exibe ResponseStockDTo
+  // criar estoque
+  // se movimento for output, verifica o parametro em Settings.enableNegativeStock
+  // se for false, chama função consulta estoque pra ver se é negativo
+  // se for negativo, exibe mensagem informativa
+  // const contador da sequencia
+  // cria docto em stock e recupera dados pra inserir no item
+  // verifica se já tem intens incluídos e última sequencia
+  // insere dados do item, itera sequencia
+  // se não tem mais itens termina e exibe ResponseStockDTo
 
+  async create(createStockDto: CreateStockDto) {
     // Passo 1: Verifica se é operação de saída e o parametro do settings para validar saldo, se for o caso
     if (
       createStockDto.stock_moviment === 'OUTPUT' &&
@@ -35,35 +33,51 @@ export class StockService {
         }
       }
     }
-
-    // Passo 2: Cria o documento `Stock` e obtém seu ID
-    const stockDocument = await this.stockRepository.createStock({
-      document_date: createStockDto.document_date,
+    // Mostra os campos da request no terminal
+    console.log('Creating stock document with the following data:', {
       document_number: createStockDto.document_number,
-      stock_moviment: createStockDto.stock_moviment
+      document_date: new Date(),
+      stock_moviment: createStockDto.stock_moviment,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+    // Passo 2: Cria o documento `Stock` e obtém seu ID
+    // precisa converter a data que recebe no DTO para o formato Date
+    const stockDocument = await this.stockRepository.createStock({
+      document_number: createStockDto.document_number,
+      document_date: new Date(),
+      stock_moviment: createStockDto.stock_moviment,
+      created_at: new Date(),
+      updated_at: new Date()
     });
 
-    // Passo 3: Insere cada item associado ao documento `Stock` criado
-    // let sequencia = 1;
-    // for (const item of createStockDto.items) {
-    //   await this.stockRepository.createStockItems({
-    //     stock: { connect: { id: stockDocument.id } },
-    //     //product_id: item.product_id,
-    //     quantity: item.quantity,
-    //     unit_price: item.unit_price,
-    //     total_price: item.unit_price * item.quantity,
-    //     lote: item.lote,
-    //     expiration: item.expiration,
-    //     sequence: sequencia,
-    //     //supplier: item.supplier,
-    //     //costumer: item.costumer,
-    //     //stock_location_id: item.stock_location_id,
-    //     observation: item.observation
-    //   });
-    //   sequencia++;
-    // }
+    console.log('Stock document created:', stockDocument);
 
-    // Retorna o documento de estoque e os itens adicionados
+    // Passo 3: Insere cada item associado ao documento `Stock` criado
+    // pensa num bagulho chato de fazer
+    let sequencia = 1;
+    for (const item of createStockDto.items) {
+      await this.stockRepository.createStockItems({
+        stock_id: stockDocument.id,
+        product_id: item.product_id,
+        stock_location_id: item.stock_location_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.unit_price * item.quantity,
+        lote: item.lote,
+        expiration: item.expiration,
+        sequence: sequencia,
+        supplier: item.supplier,
+        costumer: item.costumer,
+        observation: item.observation,
+        image_link: item.image_link,
+        created_at: new Date(),
+        updated_at: new Date()
+      });
+      sequencia++;
+    }
+
+    //Retorna o documento de estoque e os itens adicionados
     return {
       ...stockDocument,
       items: createStockDto.items

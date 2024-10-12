@@ -6,28 +6,12 @@ import { PrismaService } from 'src/database/prisma/prisma.service';
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
 
-  async createStock(data: Prisma.stockCreateInput): Promise<stock> {
-    const stock = await this.prisma.stock.create({
-      data
-    });
-
-    const stockResponse = {
-      ...stock
-    };
-    return stockResponse;
+  async createStock(data: Prisma.stockCreateInput) {
+    return await this.prisma.stock.create({ data });
   }
 
-  async createStockItems(
-    data: Prisma.stock_itemsCreateInput
-  ): Promise<stock_items> {
-    const stock = await this.prisma.stock_items.create({
-      data
-    });
-
-    const stockItemsResponse = {
-      ...stock
-    };
-    return stockItemsResponse;
+  async createStockItems(data: Prisma.stock_itemsUncheckedCreateInput) {
+    return await this.prisma.stock_items.create({ data });
   }
 
   async checkStock(product_id: number, lote: string): Promise<number> {
