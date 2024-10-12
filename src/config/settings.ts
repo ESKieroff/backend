@@ -3,5 +3,7 @@ export const Settings = {
   defaultStockLocation: 1,
   defaultRoleForNewUser: 'DEFAULT',
   defaultLoteInputMask: 'P',
-  defaultLoteOutputMask: 'PD'
+  defaultLoteOutputMask: 'PD',
+  lastDocumentNumber: 3000,
+  lastLoteNumber: 1000
 };

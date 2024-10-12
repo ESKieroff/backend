@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateStockDto } from './dto/create.stock.dto';
+import { CreateStockDto, CreateStockItemsDto } from './dto/create.stock.dto';
 import { UpdateStockItemsDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
 import { Settings } from '../../config/settings';
@@ -7,7 +7,7 @@ import { Settings } from '../../config/settings';
 @Injectable()
 export class StockService {
   constructor(private readonly stockRepository: StockRepository) {}
-
+  // ATENÇÃO: NÃO REMOVER COMENTÁRIOS - SERVEM PRA EU ME LOCALIZAR NO CÓDIGO E O QUE TEM PRA FAZER
   // criar estoque
   // se movimento for output, verifica o parametro em Settings.enableNegativeStock
   // se for false, chama função consulta estoque pra ver se é negativo
@@ -20,27 +20,26 @@ export class StockService {
 
   async create(createStockDto: CreateStockDto) {
     // Passo 1: Verifica se é operação de saída e o parametro do settings para validar saldo, se for o caso
-    if (
-      createStockDto.stock_moviment === 'OUTPUT' &&
-      !Settings.enableNegativeStock
-    ) {
-      for (const item of createStockDto.items) {
-        const saldoAtual = await this.checkStock(item.product_id, item.lote);
-        if (item.quantity > saldoAtual) {
-          throw new Error(
-            `Saldo insuficiente para o produto ${item.product_id} no lote ${item.lote}.`
-          );
-        }
+
+    const errorMessages = [];
+
+    // verifica se stock_moviment é output
+    if (createStockDto.stock_moviment === 'OUTPUT') {
+      // se sim verifica se enableNegativeStock é false
+      if (!Settings.enableNegativeStock) {
+        // se for chama função checkStock para verificar estoque disponível
+        await this.validateStock(createStockDto.items, errorMessages);
       }
     }
-    // Mostra os campos da request no terminal
-    console.log('Creating stock document with the following data:', {
-      document_number: createStockDto.document_number,
-      document_date: new Date(),
-      stock_moviment: createStockDto.stock_moviment,
-      created_at: new Date(),
-      updated_at: new Date()
-    });
+
+    if (errorMessages.length > 0) {
+      return {
+        success: false,
+        errors: errorMessages,
+        message:
+          'Não foi possível processar todos os itens devido a saldos insuficientes.'
+      };
+    }
     // Passo 2: Cria o documento `Stock` e obtém seu ID
     // precisa converter a data que recebe no DTO para o formato Date
     const stockDocument = await this.stockRepository.createStock({
@@ -82,6 +81,20 @@ export class StockService {
       ...stockDocument,
       items: createStockDto.items
     };
+  }
+
+  private async validateStock(
+    items: CreateStockItemsDto[],
+    errorMessages: string[]
+  ) {
+    for (const item of items) {
+      const saldoAtual = await this.checkStock(item.product_id, item.lote);
+      if (item.quantity > saldoAtual) {
+        errorMessages.push(
+          `Saldo insuficiente para o produto ${item.product_id} no lote ${item.lote}. \nQuantidade atual: ${saldoAtual}.`
+        );
+      }
+    }
   }
 
   async checkStock(product_id: number, lote: string): Promise<number> {

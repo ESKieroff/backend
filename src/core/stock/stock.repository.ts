@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, stock, stock_items } from '@prisma/client';
+import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 
 @Injectable()
@@ -15,17 +15,39 @@ export class StockRepository {
   }
 
   async checkStock(product_id: number, lote: string): Promise<number> {
-    const result = await this.prisma.stock_items.aggregate({
+    const inputs = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
-        lote: lote
+        lote: lote,
+        stock: {
+          stock_moviment: Stock_Moviment.INPUT
+        }
       },
       _sum: {
         quantity: true
       }
     });
 
-    return result._sum.quantity || 0;
+    const totalInput = inputs._sum.quantity || 0;
+
+    const outputs = await this.prisma.stock_items.aggregate({
+      where: {
+        product_id: product_id,
+        lote: lote,
+        stock: {
+          stock_moviment: Stock_Moviment.OUTPUT
+        }
+      },
+      _sum: {
+        quantity: true
+      }
+    });
+
+    const totalOutput = outputs._sum.quantity || 0;
+
+    const totalQuantity = totalInput - totalOutput;
+
+    return totalQuantity;
   }
 
   async findItemsByStockId(stock_id: number): Promise<stock_items[]> {
