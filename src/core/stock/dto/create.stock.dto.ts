@@ -1,6 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Stock_Moviment } from 'src/core/common/enums';
 
+// export class CreateStockDto {
+//   readonly document_date: Date;
+//   readonly document_number: string;
+//   readonly stock_moviment: Stock_Moviment;
+//   readonly is_balance: boolean;
+//   readonly items: CreateStockItemsDto[];
+// }
+
+// export class CreateStockItemsDto {
+//   readonly stock_id: number;
+//   readonly sequence: number;
+//   readonly product_id: number;
+//   readonly quantity: number;
+//   readonly unit_price: number;
+//   readonly total_price: number;
+//   readonly lote: string;
+//   readonly expiration: Date;
+//   readonly supplier: number;
+//   readonly costumer: number;
+//   readonly stock_location_id: number;
+//   readonly observation: string;
+//   readonly image_link: string;
+// }
+
 export class CreateStockDto {
   @ApiProperty({
     description: 'Document date',
@@ -101,4 +125,16 @@ export class CreateStockItemsDto {
     example: '1'
   })
   readonly observation: string;
+
+  @ApiProperty({
+    description: 'Image link',
+    example: 'http://example.com/image.jpg'
+  })
+  readonly image_link: string;
+
+  // @ApiProperty({
+  //   description: 'Photo',
+  //   example: 'Buffer[]'
+  // })
+  // readonly photo: Buffer[];
 }
