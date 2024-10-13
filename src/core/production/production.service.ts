@@ -1,26 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductionDto } from './dto/create-production.dto';
-import { UpdateProductionDto } from './dto/update-production.dto';
+// import { Test, TestingModule } from '@nestjs/testing';
+// import { OrderService } from './order.service';
+// import { describe, it, expect, beforeEach } from '@jest/globals';
 
-@Injectable()
-export class ProductionService {
-  create(_createProductionDto: CreateProductionDto) {
-    return 'This action adds a new production';
-  }
+// describe('OrderService', () => {
+//   let service: OrderService;
 
-  findAll() {
-    return 'This action returns all production';
-  }
+//   beforeEach(async () => {
+//     const module: TestingModule = await Test.createTestingModule({
+//       providers: [OrderService]
+//     }).compile();
 
-  findOne(id: number) {
-    return `This action returns a #${id} production`;
-  }
+//     service = module.get<OrderService>(OrderService);
+//   });
 
-  update(id: number, _updateProductionDto: UpdateProductionDto) {
-    return `This action updates a #${id} production`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} production`;
-  }
-}
+//   it('should be defined', () => {
+//     expect(service).toBeDefined();
+//   });
+// });

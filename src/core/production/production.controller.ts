@@ -1,45 +1,42 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete
-} from '@nestjs/common';
-import { ProductionService } from './production.service';
-import { CreateProductionDto } from './dto/create-production.dto';
-import { UpdateProductionDto } from './dto/update-production.dto';
+// import {
+//   Controller,
+//   Get,
+//   Post,
+//   Body,
+//   Patch,
+//   Param,
+//   Delete
+// } from '@nestjs/common';
+// import { OrderService } from './order.service';
+// import { CreateOrderDto } from './dto/create-order.dto';
+// import { UpdateOrderDto } from './dto/update-order.dto';
 
-@Controller('production')
-export class ProductionController {
-  constructor(private readonly productionService: ProductionService) {}
+// @Controller('order')
+// export class OrderController {
+//   constructor(private readonly orderService: OrderService) {}
 
-  @Post()
-  create(@Body() createProductionDto: CreateProductionDto) {
-    return this.productionService.create(createProductionDto);
-  }
+//   @Post()
+//   create(@Body() createOrderDto: CreateOrderDto) {
+//     return this.orderService.create(createOrderDto);
+//   }
 
-  @Get()
-  findAll() {
-    return this.productionService.findAll();
-  }
+//   @Get()
+//   findAll() {
+//     return this.orderService.findAll();
+//   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productionService.findOne(+id);
-  }
+//   @Get(':id')
+//   findOne(@Param('id') id: string) {
+//     return this.orderService.findOne(+id);
+//   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateProductionDto: UpdateProductionDto
-  ) {
-    return this.productionService.update(+id, updateProductionDto);
-  }
+//   @Patch(':id')
+//   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+//     return this.orderService.update(+id, updateOrderDto);
+//   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productionService.remove(+id);
-  }
-}
+//   @Delete(':id')
+//   remove(@Param('id') id: string) {
+//     return this.orderService.remove(+id);
+//   }
+// }
