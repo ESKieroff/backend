@@ -1,42 +1,45 @@
-// import {
-//   Controller,
-//   Get,
-//   Post,
-//   Body,
-//   Patch,
-//   Param,
-//   Delete
-// } from '@nestjs/common';
-// import { OrderService } from './order.service';
-// import { CreateOrderDto } from './dto/create-order.dto';
-// import { UpdateOrderDto } from './dto/update-order.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete
+} from '@nestjs/common';
+import { ProductionService } from './production.service';
+import { CreateProductionDto } from './dto/create-production.dto';
+import { UpdateProductionDto } from './dto/update-production.dto';
 
-// @Controller('order')
-// export class OrderController {
-//   constructor(private readonly orderService: OrderService) {}
+@Controller('production')
+export class ProductionController {
+  constructor(private readonly productionService: ProductionService) {}
 
-//   @Post()
-//   create(@Body() createOrderDto: CreateOrderDto) {
-//     return this.orderService.create(createOrderDto);
-//   }
+  @Post()
+  create(@Body() createProductionDto: CreateProductionDto) {
+    return this.productionService.create(createProductionDto);
+  }
 
-//   @Get()
-//   findAll() {
-//     return this.orderService.findAll();
-//   }
+  @Get()
+  findAll() {
+    return this.productionService.findAll();
+  }
 
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.orderService.findOne(+id);
-//   }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.productionService.findOne(+id);
+  }
 
-//   @Patch(':id')
-//   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-//     return this.orderService.update(+id, updateOrderDto);
-//   }
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateProductionDto: UpdateProductionDto
+  ) {
+    return this.productionService.update(+id, updateProductionDto);
+  }
 
-//   @Delete(':id')
-//   remove(@Param('id') id: string) {
-//     return this.orderService.remove(+id);
-//   }
-// }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.productionService.remove(+id);
+  }
+}
