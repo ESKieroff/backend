@@ -21,6 +21,7 @@ cache:
 default:
   image: node:20
   before_script:
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
     - npm cache clean --force
     - rm -rf node_modules/ # Remove node_modules directory
     - npm install --force # Install dependencies cleanly
@@ -38,6 +39,7 @@ commit-msg-check:
 lint:
   stage: lint
   before_script:
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
     - npm install -g eslint@8.x.x prettier@3.x.x
   script:
     - npm run lint
