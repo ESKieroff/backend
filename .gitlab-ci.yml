@@ -69,6 +69,8 @@ build_docker_image:
     DOCKER_TLS_CERTDIR: ""
   before_script:
     - docker info
+    - cp .env.example .env
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
   script:
     - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
     - docker save "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" -o image1.tar
