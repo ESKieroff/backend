@@ -39,6 +39,31 @@ export class ProductionRepository {
     return result;
   }
 
+  // buscar os dados da tabela production_orders join production_orders_items
+  async findAllProductionItems(orderBy: string): Promise<production_orders[]> {
+    const order = [
+      'id',
+      'number',
+      'description',
+      'production_date',
+      'Production_Status',
+      'created_by',
+      'updated_by'
+    ];
+    if (!order.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
+    // fazer join das duas tabelas production_orders join production_orders_items usando agregate
+    const result = await this.prisma.production_orders.findMany({
+      orderBy: { [orderBy]: 'asc' },
+      include: {
+        production_item: true
+      }
+    });
+
+    return result;
+  }
+
   async findById(id: number): Promise<production_orders | null> {
     const order = this.prisma.production_orders.findUnique({
       where: { id }

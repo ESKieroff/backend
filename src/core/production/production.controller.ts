@@ -66,8 +66,6 @@ export class ProductionController {
       number: production.number,
       description: production.description,
       production_date: production.production_date,
-      created_by: production.created_by,
-      updated_by: production.updated_by,
       Production_Status: production.Production_Status
     }));
   }
