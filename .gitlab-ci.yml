@@ -114,6 +114,7 @@ push_docker_image:
   only:
     - master
 
+# trigger deploy when build an push succeed
 trigger-infra-pipeline:
   stage: deploy
   script:
