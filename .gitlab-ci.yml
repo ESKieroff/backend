@@ -25,7 +25,7 @@ default:
     - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
     - npm cache clean --force
     - rm -rf node_modules/ package-lock.json # Remove node_modules directory
-    - npm install --force # Install dependencies cleanly
+    - npm install --force --ignore-scripts # Install dependencies cleanly
 
 # Commit message check using commitlint
 commit-msg-check:
