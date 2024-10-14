@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductionDto {
   @ApiProperty()
+  readonly number: number;
+  @ApiProperty()
   readonly name: string;
 
   @ApiProperty()
