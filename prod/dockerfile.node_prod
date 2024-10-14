@@ -29,6 +29,8 @@ RUN which nest
 # Copy the rest of the application source code
 COPY . .
 
+RUN npx prisma generate
+
 # Build the application
 RUN npm run build:only
 
