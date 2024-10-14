@@ -35,7 +35,7 @@
     "prettier": "npx prettier --write --ignore-unknown .",
     "format": "npm run prettier",
     "commit": "git-cz",
-    "prepare": "cross-env NODE_ENV=dev if [ \"$NODE_ENV\" = \"dev\" ]; then npx husky install; fi",
+    "prepare": "npx husky install",
     "release": "semantic-release"
   },
   "husky": {
