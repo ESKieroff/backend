@@ -51,7 +51,8 @@ export class ProductionService {
       updated_at: string;
     })[]
   > {
-    const findedProduction = await this.productionRepository.findAll(orderBy);
+    const findedProduction =
+      await this.productionRepository.findAllProductionItems(orderBy);
     return findedProduction.map(production =>
       this.formatProductionDate(production)
     );
