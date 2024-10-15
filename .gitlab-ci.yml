@@ -83,7 +83,7 @@ build_and_push_docker_image:
 trigger-infra-pipeline:
   stage: deploy
   before_script:
-    - echo "Triggering infrastructure pipeline..."
+    - apk add --no-cache curl jq bash 
   script:
     - echo "Triggering infrastructure pipeline..."
     - curl -X POST \
