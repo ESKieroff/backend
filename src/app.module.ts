@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './core/users/users.module';
 import { ProductsModule } from './core/products/products.module';
-import { ProductionModule } from './core/production/production.module';
+//import { ProductionModule } from './core/production/production.module';
 import { StockModule } from './core/stock/stock.module';
 import { AuthModule } from './auth/auth.module';
 import { ControlPanelController } from './control-panel/control-panel.controller';
@@ -22,7 +22,7 @@ import { StockLocationsModule } from './core/stock-locations/stock_locations.mod
     ConfigModule.forRoot(),
     UsersModule,
     ProductsModule,
-    ProductionModule,
+    //ProductionModule,
     StockModule,
     AuthModule,
     ControlPanelModule,
