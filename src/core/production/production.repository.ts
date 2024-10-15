@@ -53,11 +53,28 @@ export class ProductionRepository {
     if (!order.includes(orderBy)) {
       throw new Error('Invalid order field');
     }
-    // fazer join das duas tabelas production_orders join production_orders_items usando agregate
+    // fazer join das duas tabelas production_orders join production_orders_items
     const result = await this.prisma.production_orders.findMany({
       orderBy: { [orderBy]: 'asc' },
       include: {
-        production_item: true
+        production_item: {
+          select: {
+            id: true,
+            production_order_id: true,
+            sequence: true,
+            final_product_id: true,
+            prodution_quantity_estimated: true,
+            production_quantity_real: true,
+            production_quantity_loss: true,
+            lote: true,
+            lote_expiration: true,
+            created_at: true,
+            updated_at: true,
+            created_by: true,
+            updated_by: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
       }
     });
 
@@ -66,7 +83,31 @@ export class ProductionRepository {
 
   async findById(id: number): Promise<production_orders | null> {
     const order = this.prisma.production_orders.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        production_item: {
+          select: {
+            id: true,
+            production_order_id: true,
+            sequence: true,
+            final_product_id: true,
+            final_product_made: {
+              select: {
+                description: true
+              }
+            },
+            prodution_quantity_estimated: true,
+            production_quantity_real: true,
+            production_quantity_loss: true,
+            lote: true,
+            lote_expiration: true,
+            created_at: true,
+            updated_at: true,
+            created_by: true,
+            updated_by: true
+          }
+        }
+      }
     });
 
     if (!order) {
@@ -75,19 +116,7 @@ export class ProductionRepository {
 
     return order;
   }
-  async matchProductionByData(
-    number: number
-    //   name:string,
-    //   price:number,
-    //   stock:number,
-    //   items
-  ): Promise<production_orders[]> {
-    return this.prisma.production_orders.findMany({
-      where: {
-        OR: [{ id: { equals: number } }]
-      }
-    });
-  }
+
   async update(
     id: number,
     data: Prisma.production_ordersUpdateInput

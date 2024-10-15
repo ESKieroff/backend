@@ -30,7 +30,7 @@ enum Price_Type {
   SALE = 'SALE'
 }
 
-enum Production_Status {
+export enum Production_Status {
   CREATED = 'CREATED',
   SCHEDULED = 'SCHEDULED',
   OPEN = 'OPEN',
@@ -40,7 +40,7 @@ enum Production_Status {
   CANCELED = 'CANCELED'
 }
 
-enum Stock_Moviment {
+export enum Stock_Moviment {
   INPUT = 'INPUT',
   TRANSIT = 'TRANSIT',
   OUTPUT = 'OUTPUT'
