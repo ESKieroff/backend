@@ -10,8 +10,7 @@ stages:
   - commit-msg-check
   - lint
   - test
-  - build
-  - push
+  - build_and_push
   - deploy
 
 cache:
@@ -61,40 +60,9 @@ test:
     - merge_requests
     - branches
 
-# Build Docker image job
-build_docker_image:
-  stage: build
-  image: docker:20.10.16
-  services:
-    - name: docker:20.10.16-dind
-      alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_TLS_CERTDIR: ""
-  before_script:
-    - docker info
-    - cp .env.example .env
-    - sed -i "s/NODE_ENV=dev/NODE_ENV=production/g" .env
-    - rm -rf node_modules/ package-lock.json # Remove node_modules directory
-    - df -h
-  script:
-    - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
-    - docker save "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" -o image1.tar
-    - cd prod
-    - docker build -f ./dockerfile.postgres_prod -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
-    - docker save "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" -o image2.tar
-    - cd ..
-  artifacts:
-    paths:
-      - image1.tar
-      - image2.tar
-    expire_in: 1 hour
-  only:
-    - master
-
-# Push Docker image job
-push_docker_image:
-  stage: push
+# Build and Push Docker image job
+build_and_push_docker_image:
+  stage: build_and_push
   image: docker:20.10.16
   services:
     - name: docker:20.10.16-dind
@@ -106,12 +74,12 @@ push_docker_image:
     - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker load -i image1.tar
+    - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG"
-    - docker load -i image2.tar
+    - cd prod
+    - docker build -f ./dockerfile.postgres_prod -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG"
-  dependencies:
-    - build_docker_image
+    - cd ..
   only:
     - master
 
@@ -128,5 +96,4 @@ trigger-infra-pipeline:
   only:
     - main
   dependencies:
-    - build_docker_image
-    - push_docker_image
+    - build_and_push_docker_image
