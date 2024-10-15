@@ -16,7 +16,6 @@ import { UpdateProductionDto } from './dto/update-production.dto';
 //import { ResponseProductionDto } from './dto/response.production.dto';
 import { ApiQuery } from '@nestjs/swagger';
 // import { ZodError } from 'zod';
-// import { Production } from './entities/production.entity';
 
 @Controller('production')
 export class ProductionController {

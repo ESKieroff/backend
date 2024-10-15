@@ -15,4 +15,8 @@ export class UpdateProductionItemsDto {
   readonly production_quantity_loss: number;
   readonly updated_at: Date;
   readonly updated_by: number;
+  production_order_id?: number;
+  final_product_id?: number;
+  lote?: string;
+  lote_expiration?: string;
 }

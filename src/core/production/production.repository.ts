@@ -23,6 +23,15 @@ export class ProductionRepository {
       data
     });
   }
+
+  async getLastSequence(productionOrderId: number): Promise<number> {
+    const lastItem = await this.prisma.production_orders_items.findFirst({
+      where: { production_order_id: productionOrderId },
+      orderBy: { sequence: 'desc' }
+    });
+    return lastItem ? lastItem.sequence : 0;
+  }
+
   //Precisa da order no bd
   async findAll(orderBy: string): Promise<production_orders[]> {
     const order = [
@@ -139,7 +148,7 @@ export class ProductionRepository {
 
   async updateOrderItem(
     id: number,
-    data: Prisma.production_orders_itemsUpdateInput
+    data: Prisma.production_orders_itemsUncheckedUpdateInput
   ): Promise<production_orders_items> {
     const product = this.prisma.production_orders_items.update({
       where: { id },

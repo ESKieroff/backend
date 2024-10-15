@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductionDto } from './dto/create-production.dto';
-//import { CreateProductionItemsDto } from './dto/create-production.dto';
+import { CreateProductionItemsDto } from './dto/create-production.dto';
 import { UpdateProductionDto } from './dto/update-production.dto';
 import { ProductionRepository } from './production.repository';
 import { production_orders } from '@prisma/client';
@@ -84,23 +84,80 @@ export class ProductionService {
     return this.formatProductionDate(order);
   }
 
-  async update(id: number, _updateProductionDto: UpdateProductionDto) {
+  async update(id: number, updateProductionDto: UpdateProductionDto) {
+    // verifica se id é válido
     const order = await this.isValid(id);
 
     if (!order) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    const updatedProductionDto = {
-      ..._updateProductionDto,
-      updated_at: new Date()
-    };
 
-    const updatedOrder = await this.productionRepository.updateOrder(
-      id,
-      updatedProductionDto
-    );
+    // Atualiza o pedido de produção
+    const updatedProduction = await this.productionRepository.updateOrder(id, {
+      description: updateProductionDto.description,
+      production_date: new Date(updateProductionDto.production_date),
+      Production_Status: updateProductionDto.Production_Status,
+      updated_at: new Date(),
+      updated_by: updateProductionDto.updated_by
+    });
+    console.log('updatedProduction', updatedProduction);
 
-    return this.formatProductionDate(updatedOrder);
+    const updatedItems = [];
+    // preciso ver como pegar a ultima sequencia de item do docto para iterar
+    let sequence = (await this.productionRepository.getLastSequence(id)) + 1;
+
+    for (const item of updateProductionDto.production_items || []) {
+      if (item.production_order_id) {
+        // Atualiza o item existente
+        const updatedItem = await this.productionRepository.updateOrderItem(
+          item.production_order_id,
+          {
+            sequence: sequence,
+            prodution_quantity_estimated:
+              item.prodution_quantity_estimated ?? undefined,
+            production_quantity_real:
+              item.production_quantity_real ?? undefined,
+            production_quantity_loss:
+              item.prodution_quantity_estimated && item.production_quantity_real
+                ? item.prodution_quantity_estimated -
+                  item.production_quantity_real
+                : undefined,
+            updated_at: new Date(),
+            updated_by: updateProductionDto.updated_by ?? undefined
+          }
+        );
+        updatedItems.push(updatedItem);
+        console.log('updatedItem', updatedItem);
+      } else {
+        // se ainda não existe, cria um novo item usando `CreateProductionItemsDto`
+        const newItemData: CreateProductionItemsDto = {
+          production_order_id: id,
+          sequence: sequence,
+          final_product_id: item.final_product_id!,
+          prodution_quantity_estimated: item.prodution_quantity_estimated!,
+          production_quantity_real: item.production_quantity_real!,
+          production_quantity_loss:
+            item.prodution_quantity_estimated && item.production_quantity_real
+              ? item.prodution_quantity_estimated -
+                item.production_quantity_real
+              : 0,
+          lote: item.lote!,
+          lote_expiration: item.lote_expiration!,
+          created_at: new Date(),
+          updated_at: new Date(),
+          created_by: updateProductionDto.updated_by!,
+          updated_by: updateProductionDto.updated_by!
+        };
+
+        const newItem =
+          await this.productionRepository.createOrderItem(newItemData);
+        updatedItems.push(newItem);
+        console.log('newItem', newItem);
+      }
+      sequence++;
+    }
+    // Retorna produção atualizada junto com os itens
+    return { production: updatedProduction, items: updatedItems };
   }
 
   async remove(id: number) {
