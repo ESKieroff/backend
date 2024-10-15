@@ -10,7 +10,8 @@ ENV DATABASE_URL="postgresql://postgres:postgres@postgres_primary:5432/postgres"
 COPY package.json ./
 
 # Install dependencies
-RUN npm install --ignore-scripts
+RUN npm cache clean --force
+RUN npm install --ignore-scripts --no-audit
 
 RUN npm install --save @nestjs/cli
 RUN npm install --save @prisma/client
@@ -38,8 +39,9 @@ ENV NODE_ENV=production
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+RUN npm cache clean --force
 # Install only production dependencies
-RUN npm install --ignore-scripts
+RUN npm install --ignore-scripts --no-audit
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist
