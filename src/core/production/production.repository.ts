@@ -16,7 +16,9 @@ export class ProductionRepository {
     });
   }
 
-  async createOrderItem(data: Prisma.production_orders_itemsCreateInput) {
+  async createOrderItem(
+    data: Prisma.production_orders_itemsUncheckedCreateInput
+  ) {
     return await this.prisma.production_orders_items.create({
       data
     });

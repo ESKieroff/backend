@@ -11,38 +11,34 @@ export class ProductionService {
   constructor(private readonly productionRepository: ProductionRepository) {}
 
   async create(createProductionDto: CreateProductionDto) {
-    const existingOrder = await this.matchProductionByData(
-      createProductionDto.number
-      // createProductionDto.name,
-      // createProductionDto.price,
-      // createProductionDto.stock,
-      // createProductionDto.items
-    );
+    // cria documento de produção e pega objeto para criar os itens
+    const production = await this.productionRepository.createOrder({
+      ...createProductionDto,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
 
-    if (existingOrder.length > 0) {
-      throw new Error(
-        `Product already exists: ${JSON.stringify(existingOrder[0])}`
-      );
+    console.log('production', production);
+
+    // insere cada item associado ao docto de produção gerado acima
+    let sequence = 1;
+    for (const item of createProductionDto.production_items) {
+      await this.productionRepository.createOrderItem({
+        production_order_id: production.id,
+        sequence: sequence,
+        final_product_id: item.final_product_id,
+        prodution_quantity_estimated: item.prodution_quantity_estimated,
+        production_quantity_real: item.production_quantity_real,
+        production_quantity_loss:
+          item.prodution_quantity_estimated - item.production_quantity_real,
+        lote: item.lote,
+        lote_expiration: item.lote_expiration,
+        created_at: new Date(),
+        updated_at: new Date()
+      });
+      console.log('item', item);
+      sequence++;
     }
-
-    const createdOrder =
-      await this.productionRepository.create(createProductionDto);
-
-    return this.formatProductionDate(createdOrder);
-  }
-  async matchProductionByData(number: number) {
-    //, name:string, price:number, stock: number, items: CreateProductionItemsDto[]) {
-    const matchedOrder = await this.productionRepository.matchProductionByData(
-      number
-      // name,
-      // price,
-      // stock,
-      // items
-    );
-
-    return matchedOrder.map(production =>
-      this.formatProductionDate(production)
-    );
   }
 
   async findAll(orderBy: string): Promise<
@@ -84,7 +80,7 @@ export class ProductionService {
       updated_at: new Date()
     };
 
-    const updatedOrder = await this.productionRepository.update(
+    const updatedOrder = await this.productionRepository.updateOrder(
       id,
       updatedProductionDto
     );
@@ -113,6 +109,7 @@ export class ProductionService {
       updated_at: format(new Date(production.updated_at), 'dd/MM/yyyy HH:mm:ss')
     };
   }
+
   async isValid(id: number) {
     const order = await this.productionRepository.findById(id);
 
