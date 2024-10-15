@@ -17,6 +17,7 @@ import { CreateProductSchema, UpdateProductSchema } from './dto/product.schema';
 import { ZodError } from 'zod';
 import { ResponseProductsDto } from './dto/product-response.dto';
 import { Origin, Unit_Measure } from '../common/enums';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('products')
 export class ProductsController {
@@ -171,6 +172,21 @@ export class ProductsController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description:
+      'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
+    enum: [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ]
+  })
   async findAll(
     @Query('orderBy') orderBy: string = 'id'
   ): Promise<ResponseProductsDto[]> {
