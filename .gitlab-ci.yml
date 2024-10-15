@@ -73,8 +73,7 @@ build_docker_image:
   before_script:
     - docker info
     - cp .env.example .env
-    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
-    - npm cache clean --force
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=production/g" .env
     - rm -rf node_modules/ package-lock.json # Remove node_modules directory
   script:
     - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
