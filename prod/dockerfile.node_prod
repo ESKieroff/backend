@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Set NODE_ENV to development to install devDependencies
 ENV NODE_ENV=development
-
+ENV DATABASE_URL="postgresql://postgres:postgres@postgres_primary:5432/postgres"
 # Copy package.json and package-lock.json
 COPY package.json ./
 
