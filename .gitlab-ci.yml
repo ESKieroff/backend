@@ -37,8 +37,6 @@ commit-msg-check:
 lint:
   image: node:20-alpine
   stage: lint
-  before_script:
-    - npm install -g eslint@8.x.x prettier@3.x.x
   script:
     - npm run lint
     - npm run prettier
@@ -50,8 +48,6 @@ lint:
 test:
   image: node:20-alpine
   stage: test
-  before_script:
-    - npm install -g jest@29.x.x
   script:
     - npm run test:ci
   only:
