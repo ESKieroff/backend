@@ -12,8 +12,12 @@ neste diretório tem um arquivo de importação do INSOMNIA pra testar os endpoi
 - FindById
 - Create
 - Update
+- Delete
 
-  precisa resolver problema do response, ta vindo fora da ordem
+# A FAZER
+- validações de campos no controller - formato do request, campos que são criados dentro do controller
+- validações do service
+- precisa resolver problema do response, ta vindo fora da ordem, não tá fazendo orderby id
 
 # os testes são:
 
