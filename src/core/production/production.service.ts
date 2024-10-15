@@ -10,10 +10,24 @@ import { format } from 'date-fns';
 export class ProductionService {
   constructor(private readonly productionRepository: ProductionRepository) {}
 
+  // id: number;
+  // number: number;
+  // description: string;
+  // production_date: Date;
+  // created_at: Date;
+  // updated_at: Date;
+  // created_by: number;
+  // updated_by: number;
+  // Production_Status: Production_Status;
+  // production_items: ProductionItem[];
+
   async create(createProductionDto: CreateProductionDto) {
     // cria documento de produção e pega objeto para criar os itens
     const production = await this.productionRepository.createOrder({
-      ...createProductionDto,
+      number: createProductionDto.number,
+      description: createProductionDto.description,
+      production_date: new Date(createProductionDto.production_date),
+      Production_Status: createProductionDto.Production_Status,
       created_at: new Date(),
       updated_at: new Date()
     });
@@ -39,6 +53,7 @@ export class ProductionService {
       console.log('item', item);
       sequence++;
     }
+    return { production, items: createProductionDto.production_items };
   }
 
   async findAll(orderBy: string): Promise<
