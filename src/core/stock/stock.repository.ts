@@ -110,4 +110,21 @@ export class StockRepository {
       }
     });
   }
+
+  async findAllWithLots(orderBy: string): Promise<stock_items[]> {
+    const validOrderFields = ['product_id'];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
+
+    const result = await this.prisma.stock_items.findMany({
+      include: {
+        stock: true
+      },
+      orderBy: { [orderBy]: 'asc' }
+    });
+
+    return result;
+  }
 }

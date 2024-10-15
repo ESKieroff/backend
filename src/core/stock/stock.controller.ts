@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Query
+} from '@nestjs/common';
 import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockItemsDto } from './dto/update.stock.dto';
@@ -31,7 +39,13 @@ export class StockController {
     return this.stockService.update(+id, updateStockItemsDto);
   }
 
+  @Get('with-lots')
+  findAllWithLots(@Query('orderBy') orderBy: string) {
+    return this.stockService.findAllWithLots(orderBy);
+  }
+
   // criar endpoint que lista os produtos em estoque com os lotes
+
   // orderby = 'product_id' | 'lote' | 'quantity' |'description' |
   // campos que pode receber: product_id, lote, quantity, unit_price, total_price
 

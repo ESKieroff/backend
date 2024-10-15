@@ -103,8 +103,12 @@ export class StockService {
     return estoque || 0;
   }
 
-  findAll(orderBy: string) {
-    return this.stockRepository.findAll(orderBy);
+  async findAll(orderBy: string) {
+    // const findedUsers = await this.usersRepository.findAll(orderBy);
+    // return findedUsers.map(user => this.formatUserDate(user));
+
+    const findStocks = await this.stockRepository.findAll(orderBy);
+    return findStocks;
   }
 
   findOne(id: number) {
@@ -113,6 +117,10 @@ export class StockService {
 
   update(id: number, _updateStockDto: UpdateStockItemsDto) {
     return `This action updates a #${id} stock`;
+  }
+
+  async findAllWithLots(orderBy: string) {
+    return this.stockRepository.findAllWithLots(orderBy);
   }
 
   // organizeResponseByProduct(stockItems: any[]): stock_items[] {
