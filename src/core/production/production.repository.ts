@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { production_orders, Prisma } from '@prisma/client';
+import {
+  production_orders,
+  Prisma,
+  production_orders_items
+} from '@prisma/client';
 
 @Injectable()
 export class ProductionRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(
-    data: Prisma.production_ordersCreateInput
-  ): Promise<production_orders> {
-    const order = await this.prisma.production_orders.create({
+  async createOrder(data: Prisma.production_ordersCreateInput) {
+    return await this.prisma.production_orders.create({
       data
     });
+  }
 
-    const productionResponse = {
-      ...order
-    };
-    return productionResponse;
+  async createOrderItem(data: Prisma.production_orders_itemsCreateInput) {
+    return await this.prisma.production_orders_items.create({
+      data
+    });
   }
   //Precisa da order no bd
   async findAll(orderBy: string): Promise<production_orders[]> {
@@ -117,7 +120,7 @@ export class ProductionRepository {
     return order;
   }
 
-  async update(
+  async updateOrder(
     id: number,
     data: Prisma.production_ordersUpdateInput
   ): Promise<production_orders> {
@@ -131,6 +134,22 @@ export class ProductionRepository {
     };
     return productionResponse;
   }
+
+  async updateOrderItem(
+    id: number,
+    data: Prisma.production_orders_itemsUpdateInput
+  ): Promise<production_orders_items> {
+    const product = this.prisma.production_orders_items.update({
+      where: { id },
+      data
+    });
+
+    const productionResponse = {
+      ...product
+    };
+    return productionResponse;
+  }
+
   async delete(id: number): Promise<void> {
     await this.prisma.production_orders.update({
       where: { id },
