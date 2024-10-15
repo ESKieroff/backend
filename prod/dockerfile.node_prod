@@ -10,7 +10,7 @@ ENV DATABASE_URL="postgresql://postgres:postgres@postgres_primary:5432/postgres"
 COPY package.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --ignore-scripts
 
 RUN npm install --save @nestjs/cli
 RUN npm install --save @prisma/client
@@ -18,10 +18,6 @@ RUN npm install --save @prisma/client
 # Verify that @nestjs/cli adn prisma is installed
 RUN npm list @nestjs/cli
 RUN npm list @prisma/client
-
-#vVerify that nest and rpsima are accessible
-# RUN which nest
-# RUN which prisma
 
 # Copy the rest of the application source code
 COPY . .
@@ -43,7 +39,7 @@ ENV NODE_ENV=production
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist

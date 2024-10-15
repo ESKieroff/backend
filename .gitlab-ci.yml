@@ -27,6 +27,7 @@ default:
     - npm cache clean --force
     - rm -rf node_modules/ package-lock.json # Remove node_modules directory
     - npm install --force --ignore-scripts # Install dependencies cleanly
+    - df -h
 
 # Commit message check using commitlint
 commit-msg-check:
@@ -75,6 +76,7 @@ build_docker_image:
     - cp .env.example .env
     - sed -i "s/NODE_ENV=dev/NODE_ENV=production/g" .env
     - rm -rf node_modules/ package-lock.json # Remove node_modules directory
+    - df -h
   script:
     - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
     - docker save "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" -o image1.tar
