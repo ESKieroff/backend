@@ -32,6 +32,14 @@ export class ProductionRepository {
     return lastItem ? lastItem.sequence : 0;
   }
 
+  async getOrderItems(
+    productionOrderId: number
+  ): Promise<production_orders_items[]> {
+    return await this.prisma.production_orders_items.findMany({
+      where: { production_order_id: productionOrderId },
+      orderBy: { sequence: 'asc' }
+    });
+  }
   //Precisa da order no bd
   async findAll(orderBy: string): Promise<production_orders[]> {
     const order = [

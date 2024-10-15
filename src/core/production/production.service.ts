@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductionDto } from './dto/create-production.dto';
-import { CreateProductionItemsDto } from './dto/create-production.dto';
+//import { CreateProductionItemsDto } from './dto/create-production.dto';
 import { UpdateProductionDto } from './dto/update-production.dto';
 import { ProductionRepository } from './production.repository';
 import { production_orders } from '@prisma/client';
@@ -9,17 +9,6 @@ import { format } from 'date-fns';
 @Injectable()
 export class ProductionService {
   constructor(private readonly productionRepository: ProductionRepository) {}
-
-  // id: number;
-  // number: number;
-  // description: string;
-  // production_date: Date;
-  // created_at: Date;
-  // updated_at: Date;
-  // created_by: number;
-  // updated_by: number;
-  // Production_Status: Production_Status;
-  // production_items: ProductionItem[];
 
   async create(createProductionDto: CreateProductionDto) {
     // cria documento de produção e pega objeto para criar os itens
@@ -85,34 +74,34 @@ export class ProductionService {
   }
 
   async update(id: number, updateProductionDto: UpdateProductionDto) {
-    // verifica se id é válido
-    const order = await this.isValid(id);
-
-    if (!order) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
-
-    // Atualiza o pedido de produção
-    const updatedProduction = await this.productionRepository.updateOrder(id, {
-      description: updateProductionDto.description,
-      production_date: new Date(updateProductionDto.production_date),
-      Production_Status: updateProductionDto.Production_Status,
+    // Atualiza os dados da produção
+    await this.productionRepository.updateOrder(id, {
+      description: updateProductionDto.description ?? undefined,
+      production_date: updateProductionDto.production_date
+        ? new Date(updateProductionDto.production_date)
+        : undefined,
+      Production_Status: updateProductionDto.Production_Status ?? undefined,
       updated_at: new Date(),
-      updated_by: updateProductionDto.updated_by
+      updated_by: updateProductionDto.updated_by ?? undefined
     });
-    console.log('updatedProduction', updatedProduction);
 
+    // Busca todos os itens existentes para a produção
+    const existingItems = await this.productionRepository.getOrderItems(id);
     const updatedItems = [];
-    // preciso ver como pegar a ultima sequencia de item do docto para iterar
+    // Pega a última sequência de item do documento para iterar
     let sequence = (await this.productionRepository.getLastSequence(id)) + 1;
 
-    for (const item of updateProductionDto.production_items || []) {
-      if (item.production_order_id) {
-        // Atualiza o item existente
-        const updatedItem = await this.productionRepository.updateOrderItem(
+    // Atualiza ou cria novos itens
+    for (const item of updateProductionDto.production_items) {
+      const existingItem = existingItems.find(
+        i => i.final_product_id === item.final_product_id
+      );
+
+      if (existingItem) {
+        await this.productionRepository.updateOrderItem(
           item.production_order_id,
           {
-            sequence: sequence,
+            final_product_id: item.final_product_id,
             prodution_quantity_estimated:
               item.prodution_quantity_estimated ?? undefined,
             production_quantity_real:
@@ -126,11 +115,10 @@ export class ProductionService {
             updated_by: updateProductionDto.updated_by ?? undefined
           }
         );
-        updatedItems.push(updatedItem);
-        console.log('updatedItem', updatedItem);
+        updatedItems.push({ ...existingItem, ...item });
       } else {
-        // se ainda não existe, cria um novo item usando `CreateProductionItemsDto`
-        const newItemData: CreateProductionItemsDto = {
+        // Cria um novo item
+        const newItem = await this.productionRepository.createOrderItem({
           production_order_id: id,
           sequence: sequence,
           final_product_id: item.final_product_id!,
@@ -147,17 +135,27 @@ export class ProductionService {
           updated_at: new Date(),
           created_by: updateProductionDto.updated_by!,
           updated_by: updateProductionDto.updated_by!
-        };
-
-        const newItem =
-          await this.productionRepository.createOrderItem(newItemData);
+        });
         updatedItems.push(newItem);
-        console.log('newItem', newItem);
+        sequence++;
       }
-      sequence++;
     }
-    // Retorna produção atualizada junto com os itens
-    return { production: updatedProduction, items: updatedItems };
+
+    // ordenar os itens pela sequência
+    const allItems = updatedItems.concat(existingItems);
+    allItems.sort((a, b) => a.sequence - b.sequence);
+    // Retorna a produção atualizada com todos os itens
+    return {
+      production: {
+        id,
+        description: updateProductionDto.description,
+        updated_at: new Date(),
+        updated_by: updateProductionDto.updated_by,
+        items: updatedItems.concat(
+          existingItems.filter(i => !updatedItems.includes(i))
+        )
+      }
+    };
   }
 
   async remove(id: number) {

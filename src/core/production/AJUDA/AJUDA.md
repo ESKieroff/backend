@@ -13,7 +13,9 @@ neste diretório tem um arquivo de importação do INSOMNIA pra testar os endpoi
 - Create
 - Update
 
-os testes são:
+  precisa resolver problema do response, ta vindo fora da ordem
+
+# os testes são:
 
 # caminho feliz
 
