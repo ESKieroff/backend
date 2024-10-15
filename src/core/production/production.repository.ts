@@ -170,11 +170,33 @@ export class ProductionRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.prisma.production_orders.update({
-      where: { id },
-      data: {
-        updated_at: new Date()
-      }
+    // Exclui todos os itens relacionados a 'production_orders_items' pelo 'production_order_id'
+    await this.prisma.production_orders_items.deleteMany({
+      where: { production_order_id: id }
+    });
+
+    // Encontra IDs em 'production_steps_progress' relacionados e exclui 'ocurrences_of_production_stages'
+    const progressIds = await this.prisma.production_steps_progress
+      .findMany({
+        where: { production_id: id },
+        select: { id: true }
+      })
+      .then(results => results.map(result => result.id));
+
+    if (progressIds.length > 0) {
+      await this.prisma.ocurrences_of_production_stages.deleteMany({
+        where: { stage_ocurred_id: { in: progressIds } }
+      });
+    }
+
+    // Exclui registros de 'production_steps_progress' associados ao 'production_order_id'
+    await this.prisma.production_steps_progress.deleteMany({
+      where: { production_id: id }
+    });
+
+    // Finalmente, exclui o registro em 'production_orders'
+    await this.prisma.production_orders.delete({
+      where: { id }
     });
   }
 }
