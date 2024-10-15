@@ -5,7 +5,7 @@ ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=postgres
 ENV POSTGRES_DB=postgres
 ENV POSTGRES_REPLICATE_ROLE=primary
-ENV POSTGRES_PRIMARY_HOST=database
+ENV POSTGRES_PRIMARY_HOST=postgres_primary
 ENV POSTGRES_PRIMARY_PORT=5432
 
 # Copy the custom entrypoint script and configuration files

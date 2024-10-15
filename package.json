@@ -35,7 +35,7 @@
     "prettier": "npx prettier --write --ignore-unknown .",
     "format": "npm run prettier",
     "commit": "git-cz",
-    "prepare": "if [ \"$NODE_ENV\" = \"development\" ]; then husky install; fi",
+    "prepare": "npx husky install",
     "release": "semantic-release"
   },
   "husky": {
@@ -99,7 +99,7 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
-    "husky": "^9.1.5",
+    "husky": "^9.1.6",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.9",
     "prettier": "3.3.3",
