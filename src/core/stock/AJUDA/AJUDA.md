@@ -6,6 +6,9 @@
 [ ] findAll
 [ ] formatar resposta objeto com info uteis e organizadas
 [ ] funcionalidade para gerar lote
+[ ] função para varrer as tabelas que não possuem relacionamento e remover elas, ou não deixar criar
+[ ]     // precisa converter a data que recebe no DTO para o formato Date
+
 
 - de forma autonoma (function)
 - pegando ultimo lote gerado (sequencial)
@@ -18,7 +21,6 @@
 - valor inexistente (número fora da sequencia)
   [ ] validar no service
 - registro já existe, não tem campos para atualizar, incluir campos que precisa e não vieram no request
-
 
   // ATENÇÃO: NÃO REMOVER COMENTÁRIOS - SERVEM PRA EU ME LOCALIZAR NO CÓDIGO E O QUE TEM PRA FAZER
 

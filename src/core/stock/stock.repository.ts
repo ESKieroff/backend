@@ -11,7 +11,20 @@ export class StockRepository {
   }
 
   async createStockItems(data: Prisma.stock_itemsUncheckedCreateInput) {
-    return await this.prisma.stock_items.create({ data });
+    return await this.prisma.stock_items.create({
+      data: {
+        products: { connect: { id: data.product_id } },
+        stock: { connect: { id: data.stock_id } },
+        sequence: data.sequence,
+        quantity: data.quantity,
+        unit_price: data.unit_price,
+        total_price: data.total_price,
+        lote: data.lote,
+        expiration: data.expiration,
+        image_link: data.image_link,
+        stock_location: { connect: { id: data.stock_location_id } }
+      }
+    });
   }
 
   async updateStock(id: number, data: Prisma.stockUpdateInput): Promise<stock> {
@@ -43,6 +56,12 @@ export class StockRepository {
     return lastItem ? lastItem.sequence : 0;
   }
 
+  async findByDocumentNumber(document_number: string): Promise<stock | null> {
+    return this.prisma.stock.findUnique({
+      where: { document_number }
+    });
+  }
+
   async getStockItems(stockId: number): Promise<stock_items[]> {
     return await this.prisma.stock_items.findMany({
       where: { stock_id: stockId },
@@ -65,6 +84,7 @@ export class StockRepository {
     });
 
     const totalInput = inputs._sum.quantity || 0;
+    console.log('totalInput', totalInput);
 
     const outputs = await this.prisma.stock_items.aggregate({
       where: {
@@ -80,6 +100,7 @@ export class StockRepository {
     });
 
     const totalOutput = outputs._sum.quantity || 0;
+    console.log('totalOutput', totalOutput);
 
     const reserved = await this.prisma.stock_items.aggregate({
       where: {
@@ -96,6 +117,8 @@ export class StockRepository {
 
     const totalReserved = reserved._sum.quantity || 0;
 
+    console.log('totalReserved', totalReserved);
+
     const transit = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
@@ -110,11 +133,14 @@ export class StockRepository {
     });
 
     const totalTransit = transit._sum.quantity || 0;
-
+    console.log('totalTransit', totalTransit);
     // total
-    const totalQuantity =
-      totalInput - (totalOutput + totalReserved + totalTransit);
+    const totalUndisponible = totalOutput + totalReserved + totalTransit;
+    console.log('totalUndisponible', totalUndisponible);
 
+    const totalQuantity =
+      totalInput - totalUndisponible > 0 ? totalInput - totalUndisponible : 0;
+    console.log('totalQuantity', totalQuantity);
     return totalQuantity;
   }
 

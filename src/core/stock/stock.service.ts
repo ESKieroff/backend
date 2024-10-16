@@ -1,27 +1,48 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
 import { CreateStockDto, CreateStockItemsDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
 import { Settings } from '../../config/settings';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
+import { Stock_Moviment } from '../common/enums';
 
 @Injectable()
 export class StockService {
   constructor(private readonly stockRepository: StockRepository) {}
 
+  stockMovimentsToCheck = new Set([
+    Stock_Moviment.OUTPUT,
+    Stock_Moviment.RESERVED,
+    Stock_Moviment.ADJUST
+  ]);
+
   async create(createStockDto: CreateStockDto) {
     // Passo 1: Verifica se é operação de saída e o parametro do settings para validar saldo, se for o caso
 
     const errorMessages = [];
+    if (!Array.isArray(createStockDto.stock_items)) {
+      throw new BadRequestException('Items must be an array');
+    }
 
-    // verifica se stock_moviment é OUTPUT, RESERVED ou ADJUST (movimentos que podem diminuir o estoque)
-    const stockMovimentsToCheck = new Set(['OUTPUT', 'RESERVED', 'ADJUST']);
-    if (stockMovimentsToCheck.has(createStockDto.stock_moviment)) {
-      // se sim verifica se enableNegativeStock é false
+    const existingStock = await this.stockRepository.findByDocumentNumber(
+      createStockDto.document_number
+    );
+    if (existingStock) {
+      throw new BadRequestException(
+        `Document number ${createStockDto.document_number} already exists`
+      );
+    }
+    // Verifica se stock_moviment é OUTPUT, RESERVED ou ADJUST (movimentos que podem diminuir o estoque)
+    if (this.stockMovimentsToCheck.has(createStockDto.stock_moviment)) {
+      // Checa se o ajuste de estoque negativo está desabilitado
       if (!Settings.enableNegativeStock) {
-        // se for chama função checkStock para verificar estoque disponível
-        await this.validateStock(createStockDto.items, errorMessages);
+        // Valida o estoque disponível
+        await this.validateStock(createStockDto.stock_items, errorMessages);
       }
     }
 
@@ -33,46 +54,71 @@ export class StockService {
           'Não foi possível processar todos os itens devido a saldos insuficientes.'
       };
     }
-    // Passo 2: Cria o documento `Stock` e obtém seu ID
-    // precisa converter a data que recebe no DTO para o formato Date
-    const stockDocument = await this.stockRepository.createStock({
-      document_number: createStockDto.document_number,
-      document_date: new Date(),
-      stock_moviment: createStockDto.stock_moviment,
-      created_at: new Date(),
-      updated_at: new Date()
-    });
-
-    console.log('Stock document created:', stockDocument);
-
-    // Passo 3: Insere cada item associado ao documento `Stock` criado
-    let sequencia = 1;
-    for (const item of createStockDto.items) {
-      await this.stockRepository.createStockItems({
-        stock_id: stockDocument.id,
-        product_id: item.product_id,
-        stock_location_id: item.stock_location_id,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        total_price: item.unit_price * item.quantity,
-        lote: item.lote,
-        expiration: item.expiration,
-        sequence: sequencia,
-        supplier: item.supplier,
-        costumer: item.costumer,
-        observation: item.observation,
-        image_link: item.image_link,
+    let stockDocument;
+    try {
+      stockDocument = await this.stockRepository.createStock({
+        document_number: createStockDto.document_number,
+        document_date: new Date(createStockDto.document_date),
+        stock_moviment: createStockDto.stock_moviment,
         created_at: new Date(),
         updated_at: new Date()
       });
-      sequencia++;
-    }
 
-    //Retorna o documento de estoque e os itens adicionados
-    return {
-      ...stockDocument,
-      items: createStockDto.items
-    };
+      let sequencia = 1;
+      const stock_location = 1;
+      for (const item of createStockDto.stock_items) {
+        console.log('item', item);
+
+        await this.stockRepository.createStockItems({
+          stock_id: stockDocument.id,
+          product_id: item.product_id,
+          sequence: sequencia,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.unit_price * item.quantity,
+          lote: item.lote,
+          expiration: item.expiration,
+          stock_location_id: stock_location,
+          supplier: item.supplier!,
+          costumer: item.costumer!,
+          observation: item.observation!,
+          image_link: item.image_link!,
+          created_at: new Date(),
+          updated_at: new Date()
+        });
+        sequencia++;
+      }
+
+      return {
+        success: true,
+        message: 'Documento de estoque e itens criados com sucesso.',
+        stockDocument
+      };
+    } catch (error) {
+      console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
+
+      // Tenta remover o documento se ele foi criado
+      if (stockDocument?.id) {
+        try {
+          await this.stockRepository.deleteStock(stockDocument.id);
+          console.log(
+            `Stock document with ID ${stockDocument.id} removed due to error.`
+          );
+        } catch (deleteError) {
+          console.error(
+            'Error removing stock document:',
+            (deleteError as Error).message
+          );
+        }
+      }
+
+      // Retorna uma mensagem amigável em vez de quebrar o servidor
+      return {
+        success: false,
+        message:
+          'Erro ao criar itens do documento de estoque. Documento foi removido.'
+      };
+    }
   }
 
   private async validateStock(

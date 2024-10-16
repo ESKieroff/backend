@@ -13,6 +13,7 @@ import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
+//import { ResponseStockDto } from './dto/response.stock.dto';
 @Controller('stock')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
@@ -39,8 +40,23 @@ export class StockController {
       'updated_by'
     ]
   })
-  findAll(orderBy: string) {
-    return this.stockService.findAll(orderBy);
+  async findAll(@Query('orderBy') orderBy: string = 'id') {
+    const validOrderFields = [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    }
+
+    const stock = await this.stockService.findAll(orderBy);
+    return stock;
   }
 
   @Get(':id')
@@ -67,11 +83,13 @@ export class StockController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     const idNumber = +id;
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
-    return this.stockService.remove(idNumber);
+    await this.stockService.remove(idNumber);
+
+    return { message: `Stock ID ${idNumber} parmanently removed successfully` };
   }
 }
