@@ -144,15 +144,29 @@ export class StockRepository {
 
   async findById(id: number): Promise<stock | null> {
     const stock = this.prisma.stock.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        stock_items: {
+          select: {
+            id: true,
+            product_id: true,
+            lote: true,
+            quantity: true,
+            stock_id: true,
+            sequence: true,
+            created_at: true,
+            updated_at: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
+      }
     });
 
-    const stockWithoutSensitiveFields = {
-      ...stock,
-      active: undefined
-    };
+    if (!stock) {
+      throw new Error('Stock not found');
+    }
 
-    return stockWithoutSensitiveFields;
+    return stock;
   }
 
   async findManyByIds(ids: number[]): Promise<stock[]> {
