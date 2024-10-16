@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStockDto, CreateStockItemsDto } from './dto/create.stock.dto';
 import { UpdateStockItemsDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
 import { Settings } from '../../config/settings';
+import { format } from 'date-fns';
+import { stock } from '@prisma/client';
 
 @Injectable()
 export class StockService {
@@ -104,16 +106,29 @@ export class StockService {
     return estoque || 0;
   }
 
-  async findAll(orderBy: string) {
-    // const findedUsers = await this.usersRepository.findAll(orderBy);
-    // return findedUsers.map(user => this.formatUserDate(user));
-
-    const findStocks = await this.stockRepository.findAll(orderBy);
-    return findStocks;
+  async findAll(orderBy: string): Promise<
+    (Omit<stock, 'created_at' | 'updated_at'> & {
+      created_at: string;
+      updated_at: string;
+    })[]
+  > {
+    const findedStock = await this.stockRepository.findAllStockItems(orderBy);
+    return findedStock.map(stock => this.formatDate(stock));
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} stock`;
+  async findOne(id: number): Promise<
+    Omit<stock, 'created_at' | 'updated_at'> & {
+      created_at: string;
+      updated_at: string;
+    }
+  > {
+    const order = await this.stockRepository.findById(id);
+
+    if (!order) {
+      throw new NotFoundException(`Stock with ID ${id} not found`);
+    }
+
+    return this.formatDate(order);
   }
 
   update(id: number, _updateStockDto: UpdateStockItemsDto) {
@@ -124,36 +139,28 @@ export class StockService {
     return this.stockRepository.findAllWithLots(orderBy);
   }
 
-  // organizeResponseByProduct(stockItems: any[]): stock_items[] {
-  //   const produtosMap = new Map<number, stock_items>();
+  async remove(id: number) {
+    await this.isValid(id);
+    return this.stockRepository.deleteStock(id);
+  }
 
-  //   stockItems.forEach(item => {
-  //     const { product_id, lote, quantity, unit_price } = item;
-  //     let total_price = quantity * unit_price;
-  //     let total_quantity = quantity;
+  private formatDate(stock: stock): Omit<stock, 'created_at' | 'updated_at'> & {
+    created_at: string;
+    updated_at: string;
+  } {
+    return {
+      ...stock,
+      created_at: format(new Date(stock.created_at), 'dd/MM/yyyy HH:mm:ss'),
+      updated_at: format(new Date(stock.updated_at), 'dd/MM/yyyy HH:mm:ss')
+    };
+  }
 
-  //     if (!produtosMap.has(product_id)) {
-  //       produtosMap.set(product_id, {
-  //         product_id,
-  //         total_quantity: 0,
-  //         total_price: 0,
-  //         lotes: []
-  //       });
-  //     }
+  async isValid(id: number) {
+    const stock = await this.stockRepository.findById(id);
 
-  //     const produto = produtosMap.get(product_id)!;
-  //     produto.total_quantity += quantity;
-  //     produto.total_price += total_price;
-
-  //     const loteExistente = produto.lotes.find(l => l.lote === lote);
-  //     if (loteExistente) {
-  //       loteExistente.quantity += quantity;
-  //       loteExistente.total_price += total_price;
-  //     } else {
-  //       produto.lotes.push({ lote, quantity, total_price });
-  //     }
-  //   });
-
-  // return Array.from(produtosMap.values());
-  //}
+    if (!stock) {
+      throw new NotFoundException('Stock with ID ${id} not found');
+    }
+    return stock;
+  }
 }
