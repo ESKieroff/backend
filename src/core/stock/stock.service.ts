@@ -23,8 +23,9 @@ export class StockService {
 
     const errorMessages = [];
 
-    // verifica se stock_moviment é output
-    if (createStockDto.stock_moviment === 'OUTPUT') {
+    // verifica se stock_moviment é OUTPUT, RESERVED ou ADJUST (movimentos que podem diminuir o estoque)
+    const stockMovimentsToCheck = new Set(['OUTPUT', 'RESERVED', 'ADJUST']);
+    if (stockMovimentsToCheck.has(createStockDto.stock_moviment)) {
       // se sim verifica se enableNegativeStock é false
       if (!Settings.enableNegativeStock) {
         // se for chama função checkStock para verificar estoque disponível
