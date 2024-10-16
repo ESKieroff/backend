@@ -1,9 +1,11 @@
 # Stage 1: Build the backend
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
 # Set NODE_ENV to development to install devDependencies
+RUN apk add --no-cache make gcc g++ python3
+
 ENV NODE_ENV=development
 ENV DATABASE_URL="postgresql://postgres:postgres@postgres_primary:5432/postgres"
 # Copy package.json and package-lock.json
@@ -12,7 +14,6 @@ COPY package.json ./
 # Install dependencies
 RUN npm cache clean --force
 RUN npm install --ignore-scripts --no-audit
-
 RUN npm install --save @nestjs/cli
 RUN npm install --save @prisma/client
 
