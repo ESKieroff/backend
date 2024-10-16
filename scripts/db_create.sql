@@ -17,7 +17,7 @@ CREATE TYPE "Price_Type" AS ENUM ('COST', 'SALE');
 CREATE TYPE "Unit_Measure" AS ENUM ('UN', 'PC', 'PCT', 'ML', 'L', 'GR', 'KG', 'TON');
 
 -- CreateEnum
-CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT');
+CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 'BALANCE', 'ADJUST', 'INVENTORY');
 
 -- CreateEnum
 CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
@@ -27,7 +27,7 @@ CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "email" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'DEMO',
+    "role" "Role" NOT NULL DEFAULT 'DEFAULT',
     "username" VARCHAR(255),
     "first_name" VARCHAR(255),
     "last_name" VARCHAR(255),
@@ -241,6 +241,7 @@ CREATE TABLE "production_orders_items" (
 CREATE TABLE "production_order_steps" (
     "id" SERIAL NOT NULL,
     "description" VARCHAR(255) NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" INTEGER,
@@ -263,7 +264,7 @@ CREATE TABLE "production_lines" (
 );
 
 -- CreateTable
-CREATE TABLE "progress_of_productions_orders_steps" (
+CREATE TABLE "production_steps_progress" (
     "id" SERIAL NOT NULL,
     "production_id" INTEGER NOT NULL,
     "step_id" INTEGER NOT NULL,
@@ -287,7 +288,7 @@ CREATE TABLE "progress_of_productions_orders_steps" (
     "created_by" INTEGER,
     "updated_by" INTEGER,
 
-    CONSTRAINT "progress_of_productions_orders_steps_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "production_steps_progress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -380,28 +381,28 @@ ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_stock_location_id_fkey" FO
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_supplier_fkey" FOREIGN KEY ("supplier") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("final_product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "progress_of_productions_orders_steps" ADD CONSTRAINT "progress_of_productions_orders_steps_line_id_fkey" FOREIGN KEY ("line_id") REFERENCES "production_lines"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "progress_of_productions_orders_steps" ADD CONSTRAINT "progress_of_productions_orders_steps_operator_id_fkey" FOREIGN KEY ("operator_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_line_id_fkey" FOREIGN KEY ("line_id") REFERENCES "production_lines"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "progress_of_productions_orders_steps" ADD CONSTRAINT "progress_of_productions_orders_steps_production_id_fkey" FOREIGN KEY ("production_id") REFERENCES "production_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_operator_id_fkey" FOREIGN KEY ("operator_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "progress_of_productions_orders_steps" ADD CONSTRAINT "progress_of_productions_orders_steps_raw_product_id_fkey" FOREIGN KEY ("raw_product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_production_id_fkey" FOREIGN KEY ("production_id") REFERENCES "production_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "progress_of_productions_orders_steps" ADD CONSTRAINT "progress_of_productions_orders_steps_step_id_fkey" FOREIGN KEY ("step_id") REFERENCES "production_order_steps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_raw_product_id_fkey" FOREIGN KEY ("raw_product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ocurrences_of_production_stages" ADD CONSTRAINT "ocurrences_of_production_stages_stage_ocurred_id_fkey" FOREIGN KEY ("stage_ocurred_id") REFERENCES "progress_of_productions_orders_steps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_step_id_fkey" FOREIGN KEY ("step_id") REFERENCES "production_order_steps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ocurrences_of_production_stages" ADD CONSTRAINT "ocurrences_of_production_stages_ocurrence_id_fkey" FOREIGN KEY ("ocurrence_id") REFERENCES "ocurrences"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ocurrences_of_production_stages" ADD CONSTRAINT "ocurrences_of_production_stages_stage_ocurred_id_fkey" FOREIGN KEY ("stage_ocurred_id") REFERENCES "production_steps_progress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

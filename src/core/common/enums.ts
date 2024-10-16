@@ -42,7 +42,11 @@ export enum Production_Status {
 export enum Stock_Moviment {
   INPUT = 'INPUT',
   TRANSIT = 'TRANSIT',
-  OUTPUT = 'OUTPUT'
+  OUTPUT = 'OUTPUT',
+  RESERVED = 'RESERVED',
+  BALANCE = 'BALANCE',
+  ADJUST = 'ADJUST',
+  INVENTORY = 'INVENTORY'
 }
 
 export enum Unit_Measure {

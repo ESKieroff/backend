@@ -371,8 +371,8 @@ VALUES
 
 
 
--- INSERT INTO "progress_of_productions_orders_steps"
-INSERT INTO "progress_of_productions_orders_steps" (
+-- INSERT INTO "production_steps_progress"
+INSERT INTO "production_steps_progress" (
     "production_id",
     "step_id",
     "raw_product_id",
