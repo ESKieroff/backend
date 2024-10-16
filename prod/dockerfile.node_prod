@@ -1,5 +1,5 @@
 # Stage 1: Build the backend
-FROM node:20-alpine  AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -8,6 +8,7 @@ RUN apk add --no-cache make gcc g++ python3
 
 ENV NODE_ENV=development
 ENV DATABASE_URL="postgresql://postgres:postgres@postgres_primary:5432/postgres"
+
 # Copy package.json and package-lock.json
 COPY package.json ./
 
@@ -17,7 +18,7 @@ RUN npm install --ignore-scripts --no-audit
 RUN npm install --save @nestjs/cli
 RUN npm install --save @prisma/client
 
-# Verify that @nestjs/cli adn prisma is installed
+# Verify that @nestjs/cli and prisma are installed
 RUN npm list @nestjs/cli
 RUN npm list @prisma/client
 
@@ -38,16 +39,20 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 RUN npm cache clean --force
+
 # Install only production dependencies
 RUN npm install --ignore-scripts --no-audit
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy Prisma client from builder stage
+# Copy the entire node_modules directory from the builder stage
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy the Prisma client from the builder stage
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
