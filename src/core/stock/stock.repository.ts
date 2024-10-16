@@ -14,6 +14,14 @@ export class StockRepository {
     return await this.prisma.stock_items.create({ data });
   }
 
+  async getLastSequence(stockId: number): Promise<number> {
+    const lastItem = await this.prisma.stock_items.findFirst({
+      where: { stock_id: stockId },
+      orderBy: { sequence: 'desc' }
+    });
+    return lastItem ? lastItem.sequence : 0;
+  }
+
   async checkStock(product_id: number, lote: string): Promise<number> {
     const inputs = await this.prisma.stock_items.aggregate({
       where: {
