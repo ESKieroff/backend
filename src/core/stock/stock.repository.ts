@@ -214,4 +214,19 @@ export class StockRepository {
 
     return result;
   }
+
+  async deleteStock(id: number): Promise<void> {
+    // deleta os registros de stock_items
+    await this.prisma.stock_items.deleteMany({
+      where: {
+        stock_id: id
+      }
+    });
+    // deleta o registro de stock
+    await this.prisma.stock.delete({
+      where: {
+        id
+      }
+    });
+  }
 }
