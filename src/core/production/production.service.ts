@@ -21,7 +21,7 @@ export class ProductionService {
       updated_at: new Date()
     });
 
-    console.log('production', production);
+    // console.log('production', production);
 
     // insere cada item associado ao docto de produção gerado acima
     let sequence = 1;
@@ -39,16 +39,20 @@ export class ProductionService {
         created_at: new Date(),
         updated_at: new Date()
       });
-      console.log('item', item);
+      // console.log('item', item);
       sequence++;
     }
     return { production, items: createProductionDto.production_items };
   }
 
   async findAll(orderBy: string): Promise<
-    (Omit<production_orders, 'created_at' | 'updated_at'> & {
+    (Omit<
+      production_orders,
+      'created_at' | 'updated_at' | 'production_date'
+    > & {
       created_at: string;
       updated_at: string;
+      production_date: string;
     })[]
   > {
     const findedProduction =
@@ -59,9 +63,10 @@ export class ProductionService {
   }
 
   async findOne(id: number): Promise<
-    Omit<production_orders, 'created_at' | 'updated_at'> & {
+    Omit<production_orders, 'created_at' | 'updated_at' | 'production_date'> & {
       created_at: string;
       updated_at: string;
+      production_date: string;
     }
   > {
     const order = await this.productionRepository.findById(id);
@@ -165,10 +170,11 @@ export class ProductionService {
 
   private formatProductionDate(production: production_orders): Omit<
     production_orders,
-    'created_at' | 'updated_at'
+    'created_at' | 'updated_at' | 'production_date'
   > & {
     created_at: string;
     updated_at: string;
+    production_date: string;
   } {
     return {
       ...production,
@@ -176,7 +182,14 @@ export class ProductionService {
         new Date(production.created_at),
         'dd/MM/yyyy HH:mm:ss'
       ),
-      updated_at: format(new Date(production.updated_at), 'dd/MM/yyyy HH:mm:ss')
+      updated_at: format(
+        new Date(production.updated_at),
+        'dd/MM/yyyy HH:mm:ss'
+      ),
+      production_date: format(
+        new Date(production.production_date),
+        'dd/MM/yyyy HH:mm:ss'
+      )
     };
   }
 
@@ -186,6 +199,7 @@ export class ProductionService {
     if (!order) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
+
     return order;
   }
 }
