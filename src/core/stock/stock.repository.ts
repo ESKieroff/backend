@@ -14,6 +14,27 @@ export class StockRepository {
     return await this.prisma.stock_items.create({ data });
   }
 
+  async updateStock(id: number, data: Prisma.stockUpdateInput): Promise<stock> {
+    const stock = await this.prisma.stock.update({
+      where: { id },
+      data
+    });
+
+    return stock;
+  }
+
+  async updateStockItems(
+    id: number,
+    data: Prisma.stock_itemsUncheckedCreateInput
+  ) {
+    const stock_items = await this.prisma.stock_items.update({
+      where: { id },
+      data
+    });
+
+    return stock_items;
+  }
+
   async getLastSequence(stockId: number): Promise<number> {
     const lastItem = await this.prisma.stock_items.findFirst({
       where: { stock_id: stockId },
