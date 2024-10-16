@@ -81,7 +81,39 @@ export class StockRepository {
 
     const totalOutput = outputs._sum.quantity || 0;
 
-    const totalQuantity = totalInput - totalOutput;
+    const reserved = await this.prisma.stock_items.aggregate({
+      where: {
+        product_id: product_id,
+        lote: lote,
+        stock: {
+          stock_moviment: Stock_Moviment.RESERVED
+        }
+      },
+      _sum: {
+        quantity: true
+      }
+    });
+
+    const totalReserved = reserved._sum.quantity || 0;
+
+    const transit = await this.prisma.stock_items.aggregate({
+      where: {
+        product_id: product_id,
+        lote: lote,
+        stock: {
+          stock_moviment: Stock_Moviment.TRANSIT
+        }
+      },
+      _sum: {
+        quantity: true
+      }
+    });
+
+    const totalTransit = transit._sum.quantity || 0;
+
+    // total
+    const totalQuantity =
+      totalInput - (totalOutput + totalReserved + totalTransit);
 
     return totalQuantity;
   }
