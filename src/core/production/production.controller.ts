@@ -6,16 +6,19 @@ import {
   Patch,
   Param,
   Delete,
-  Query
-  //NotFoundException,
+  Query,
+  BadRequestException
+  //NotFoundException
   //  BadRequestException
 } from '@nestjs/common';
 import { ProductionService } from './production.service';
 import { CreateProductionDto } from './dto/create-production.dto';
 import { UpdateProductionDto } from './dto/update-production.dto';
+//import { UpdateProductionSchema } from './dto/production.schema.dto';
 //import { ResponseProductionDto } from './dto/response.production.dto';
 import { ApiQuery } from '@nestjs/swagger';
-// import { ZodError } from 'zod';
+//import { ResponseProductionDto } from './dto/response.production.dto';
+//import { ZodError } from 'zod';
 
 @Controller('production')
 export class ProductionController {
@@ -43,6 +46,18 @@ export class ProductionController {
     ]
   })
   async findAll(@Query('orderBy') orderBy: string = 'id') {
+    const validOrderFields = [
+      'id',
+      'number',
+      'description',
+      'production_date',
+      'Production_Status',
+      'created_by',
+      'updated_by'
+    ];
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    }
     return this.productionService.findAll(orderBy);
 
     // return production.map(prod => ({
@@ -75,14 +90,73 @@ export class ProductionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('ID is a number');
+    }
     return this.productionService.findOne(+id);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateProductionDto: UpdateProductionDto
+    // @Query() queryParams: Record<string, string>
   ) {
+    // const idNumber = +id;
+    // if (isNaN(idNumber)) {
+    //   throw new BadRequestException('Invalid ID format');
+    // }
+    // // Verificar se a ordem de produção existe
+    // const existingProduction = await this.productionService.findOne(idNumber);
+    // if (!existingProduction) {
+    //   throw new NotFoundException(`Production order with ID ${idNumber} not found`);
+    // }
+    // const allowedFields = Object.keys(UpdateProductionSchema.shape);
+    // const fieldsToUpdate = Object.keys(queryParams);
+
+    // if (fieldsToUpdate.length === 0) {
+    //   throw new BadRequestException('No fields provided to update');
+    // }
+    // const updateData: Partial<UpdateProductionDto> = {};
+
+    // for (const field of fieldsToUpdate) {
+    //   if (!allowedFields.includes(field)) {
+    //     throw new BadRequestException(`Invalid field: ${field}`);
+    //   }
+
+    //   const value = queryParams[field];
+
+    //   if (['created_by', 'updated_by', 'Production_Status'].includes(field)) {
+    //     const numericValue = parseInt(value, 10);
+    //     if (isNaN(numericValue)) {
+    //       throw new BadRequestException(`Invalid number format for field: ${field}`);
+    //     }
+    //     updateData[field] = numericValue;
+    //   } else {
+    //     if (value !== undefined) {
+    //       updateData[field] = value;
+    //     }
+    //   }
+    // }
+
+    // // Validar os dados utilizando o schema definido para a ordem de produção
+    // const validation = UpdateProductionSchema.safeParse(updateData);
+
+    // if (!validation.success) {
+    //   const zodError = validation.error as ZodError;
+    //   const firstError = zodError.errors[0];
+    //   throw new BadRequestException(
+    //     `${firstError.path[0]} is invalid: ${firstError.message}`
+    //   );
+    // }
+
+    // // Atualizar a ordem de produção
+    // const updatedProduction = await this.productionService.update(
+    //   idNumber,
+    //   updateData as UpdateProductionDto
+    // );
+
     return this.productionService.update(+id, updateProductionDto);
   }
 
