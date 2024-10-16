@@ -5,12 +5,14 @@ import {
   Body,
   Patch,
   Param,
-  Query
+  Query,
+  BadRequestException,
+  Delete
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
-import { UpdateStockItemsDto } from './dto/update.stock.dto';
-
+import { UpdateStockDto } from './dto/update.stock.dto';
+import { ApiQuery } from '@nestjs/swagger';
 @Controller('stock')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
@@ -22,21 +24,41 @@ export class StockController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description:
+      'Field to order by. Valid fields: id, description, production_date, Production_Status, created_by, updated_by',
+    enum: [
+      'id',
+      'number',
+      'description',
+      'production_date',
+      'Production_Status',
+      'created_by',
+      'updated_by'
+    ]
+  })
   findAll(orderBy: string) {
     return this.stockService.findAll(orderBy);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.stockService.findOne(+id);
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return this.stockService.findOne(idNumber);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateStockItemsDto: UpdateStockItemsDto
-  ) {
-    return this.stockService.update(+id, updateStockItemsDto);
+  update(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return this.stockService.update(idNumber, updateStockDto);
   }
 
   @Get('with-lots')
@@ -44,26 +66,12 @@ export class StockController {
     return this.stockService.findAllWithLots(orderBy);
   }
 
-  // criar endpoint que lista os produtos em estoque com os lotes
-
-  // orderby = 'product_id' | 'lote' | 'quantity' |'description' |
-  // campos que pode receber: product_id, lote, quantity, unit_price, total_price
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.stockService.remove(+id);
-  // }
-
-  // @Post('add-raw-material/:id')
-  // addRawMaterial(@Param('id') id: string, @Body('quantity') quantity: number) {
-  //   return this.stockService.addRawMaterial(+id, quantity);
-  // }
-
-  // @Post('remove-raw-material/:id')
-  // removeRawMaterial(
-  //   @Param('id') id: string,
-  //   @Body('quantity') quantity: number
-  // ) {
-  //   return this.stockService.removeRawMaterial(+id, quantity);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return this.stockService.remove(idNumber);
+  }
 }
