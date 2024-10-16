@@ -65,6 +65,43 @@ export class StockRepository {
     return totalQuantity;
   }
 
+  async findAllStockItems(orderBy: string): Promise<stock[]> {
+    const validOrderFields = [
+      'id',
+      'product_id',
+      'lote',
+      'quantity',
+      'stock_id',
+      'sequence',
+      'created_at',
+      'updated_at'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
+
+    const result = await this.prisma.stock.findMany({
+      orderBy: { [orderBy]: 'asc' },
+      include: {
+        stock_items: {
+          select: {
+            id: true,
+            product_id: true,
+            lote: true,
+            quantity: true,
+            stock_id: true,
+            sequence: true,
+            created_at: true,
+            updated_at: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
+      }
+    });
+    return result;
+  }
+
   async findItemsByStockId(stock_id: number): Promise<stock_items[]> {
     return await this.prisma.stock_items.findMany({
       where: { stock_id },
