@@ -17,7 +17,7 @@ CREATE TYPE "Price_Type" AS ENUM ('COST', 'SALE');
 CREATE TYPE "Unit_Measure" AS ENUM ('UN', 'PC', 'PCT', 'ML', 'L', 'GR', 'KG', 'TON');
 
 -- CreateEnum
-CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT');
+CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 'BALANCE', 'ADJUST', 'INVENTORY');
 
 -- CreateEnum
 CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
