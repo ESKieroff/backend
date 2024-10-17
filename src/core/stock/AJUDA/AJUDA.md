@@ -23,6 +23,9 @@
 [ ] validar no service
 - registro já existe, não tem campos para atualizar, incluir campos que precisa e não vieram no request
 
+pg_dump -U postgres -h localhost -d cebola --encoding=UTF8 > database/backup.sql
+psql -U postgres -h localhost -d cebola < database/backup.sql
+
 
 ## outras
 [ ] formatar resposta objeto com info uteis e organizadas
