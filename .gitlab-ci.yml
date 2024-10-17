@@ -83,7 +83,6 @@ build_and_push_docker_image:
     - cd ..
   only:
     - master
-  privileged: true
   after_script:
     - docker image prune -af  # Optional cleanup
 
