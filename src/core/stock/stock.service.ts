@@ -224,8 +224,8 @@ export class StockService {
     };
   }
 
-  async getAllProductLots(orderBy) {
-    return this.stockRepository.getAllProductLots(orderBy);
+  async getAllProductLots(orderBy, origin) {
+    return this.stockRepository.getAllProductLots(orderBy, origin);
   }
 
   async remove(id: number) {

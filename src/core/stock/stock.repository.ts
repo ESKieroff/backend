@@ -366,10 +366,16 @@ export class StockRepository {
   }
 
   async getAllProductLots(
-    orderBy: 'asc' | 'desc' = 'asc'
+    orderBy: 'asc' | 'desc' = 'asc',
+    origin?: 'RAW_MATERIAL' | 'MADE'
   ): Promise<ProductLot[]> {
+    const productFilter = origin ? { origin } : {};
+
     const lots = await this.prisma.stock_items.findMany({
       distinct: ['product_id', 'lote'],
+      where: {
+        products: productFilter
+      },
       select: {
         product_id: true,
         lote: true,

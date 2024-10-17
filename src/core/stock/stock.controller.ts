@@ -61,8 +61,11 @@ export class StockController {
   }
 
   @Get('lots')
-  async getAllProductLots(@Query('orderBy') orderBy: 'asc' | 'desc' = 'asc') {
-    const result = await this.stockService.getAllProductLots(orderBy);
+  async getAllProductLots(
+    @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc',
+    @Query('origin') origin?: 'RAW_MATERIAL' | 'MADE'
+  ) {
+    const result = await this.stockService.getAllProductLots(orderBy, origin);
     return result;
   }
   @Get(':id')
