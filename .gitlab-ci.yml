@@ -63,9 +63,13 @@ build_and_push_docker_image:
   services:
     - name: docker:20.10.16-dind
       alias: docker
+      command: ["--storage-driver=overlay2"]
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
+    GITLAB_RUNNER_TIMEOUT: 120
+    DOCKER_DRIVER: overlay2
+    DNS_SERVER: 8.8.8.8
   before_script:
     - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
