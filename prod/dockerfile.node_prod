@@ -17,6 +17,8 @@ RUN npm cache clean --force
 RUN npm install --ignore-scripts --no-audit
 RUN npm install --save @nestjs/cli
 RUN npm install --save @prisma/client
+# Add PostgreSQL client dependency 
+RUN npm install pg --save
 
 # Verify that @nestjs/cli and prisma are installed
 RUN npm list @nestjs/cli
