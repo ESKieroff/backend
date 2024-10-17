@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -13,8 +12,6 @@ export class StockRepository {
   async createStockItems(data: Prisma.stock_itemsUncheckedCreateInput) {
     return await this.prisma.stock_items.create({
       data: {
-        products: { connect: { id: data.product_id } },
-        stock: { connect: { id: data.stock_id } },
         sequence: data.sequence,
         quantity: data.quantity,
         unit_price: data.unit_price,
@@ -22,7 +19,11 @@ export class StockRepository {
         lote: data.lote,
         expiration: data.expiration,
         image_link: data.image_link,
-        stock_location: { connect: { id: data.stock_location_id } }
+        products: { connect: { id: data.product_id } },
+        stock: { connect: { id: data.stock_id } },
+        stock_location: { connect: { id: data.stock_location_id } },
+        suppliers: { connect: { id: data.supplier } },
+        costumers: { connect: { id: data.costumer } }
       }
     });
   }
@@ -38,11 +39,30 @@ export class StockRepository {
 
   async updateStockItems(
     id: number,
-    data: Prisma.stock_itemsUncheckedCreateInput
+    data: Partial<Prisma.stock_itemsUncheckedCreateInput>
   ) {
+    console.log('data', data);
+
     const stock_items = await this.prisma.stock_items.update({
       where: { id },
-      data
+      data: {
+        sequence: data.sequence,
+        quantity: data.quantity,
+        unit_price: data.unit_price,
+        total_price: data.total_price,
+        lote: data.lote,
+        expiration: data.expiration,
+        image_link: data.image_link,
+        ...(data.stock_location_id
+          ? { stock_location: { connect: { id: data.stock_location_id } } }
+          : {}),
+        ...(data.supplier
+          ? { suppliers: { connect: { id: data.supplier } } }
+          : {}),
+        ...(data.costumer
+          ? { costumers: { connect: { id: data.costumer } } }
+          : {})
+      }
     });
 
     return stock_items;
@@ -84,7 +104,6 @@ export class StockRepository {
     });
 
     const totalInput = inputs._sum.quantity || 0;
-    console.log('totalInput', totalInput);
 
     const outputs = await this.prisma.stock_items.aggregate({
       where: {
@@ -100,7 +119,6 @@ export class StockRepository {
     });
 
     const totalOutput = outputs._sum.quantity || 0;
-    console.log('totalOutput', totalOutput);
 
     const reserved = await this.prisma.stock_items.aggregate({
       where: {
@@ -117,8 +135,6 @@ export class StockRepository {
 
     const totalReserved = reserved._sum.quantity || 0;
 
-    console.log('totalReserved', totalReserved);
-
     const transit = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
@@ -133,14 +149,12 @@ export class StockRepository {
     });
 
     const totalTransit = transit._sum.quantity || 0;
-    console.log('totalTransit', totalTransit);
     // total
     const totalUndisponible = totalOutput + totalReserved + totalTransit;
-    console.log('totalUndisponible', totalUndisponible);
 
     const totalQuantity =
       totalInput - totalUndisponible > 0 ? totalInput - totalUndisponible : 0;
-    console.log('totalQuantity', totalQuantity);
+
     return totalQuantity;
   }
 
@@ -228,11 +242,33 @@ export class StockRepository {
         stock_items: {
           select: {
             id: true,
-            product_id: true,
-            lote: true,
-            quantity: true,
-            stock_id: true,
             sequence: true,
+            products: {
+              select: {
+                id: true,
+                description: true,
+                code: true,
+                sku: true
+              }
+            },
+            lote: true,
+            expiration: true,
+            quantity: true,
+            unit_price: true,
+            total_price: true,
+            image_link: true,
+            suppliers: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            stock_location: {
+              select: {
+                id: true,
+                description: true
+              }
+            },
             created_at: true,
             updated_at: true
           },

@@ -89,11 +89,7 @@ export class StockService {
         sequencia++;
       }
 
-      return {
-        success: true,
-        message: 'Documento de estoque e itens criados com sucesso.',
-        stockDocument
-      };
+      return stockDocument;
     } catch (error) {
       console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
 
@@ -168,73 +164,71 @@ export class StockService {
 
   // tomar cuidado porque esta usando a função uncheckedupdate
   async update(id: number, updateStockDto: UpdateStockDto) {
-    // busca usuário e insere no dto updated_by
-    // FALTA IMPLEMENTAR
     // Atualiza os dados do estoque
     await this.stockRepository.updateStock(id, {
       updated_at: new Date(),
       updated_by: updateStockDto.updated_by ?? undefined
     });
-    // Busca todos os itens existentes no docto
-    const existingItems = await this.stockRepository.getStockItems(id);
-    const updatedItems = [];
-    // Pega a última sequência de item do documento para iterar
-    let sequence = (await this.stockRepository.getLastSequence(id)) + 1;
 
-    // Atualiza ou cria novos itens
+    // Busca todos os itens existentes no documento
+    const existingItems = await this.stockRepository.getStockItems(id);
+
+    const updatedItems = [];
+
+    // Itera sobre os itens enviados na requisição
     for (const item of updateStockDto.stock_items) {
-      const existingItem = existingItems.find(
-        i => i.id === item.stock_id && i.sequence === item.sequence
-      );
+      const existingItem = existingItems.find(i => i.id === item.id);
 
       if (existingItem) {
-        await this.stockRepository.updateStockItems(item.product_id, {
-          stock_id: id,
-          sequence: item.sequence,
-          product_id: item.product_id,
-          quantity: item.quantity,
-          unit_price: item.unit_price ?? undefined,
-          total_price: item.unit_price * item.quantity,
-          lote: item.lote ?? undefined,
-          expiration: item.expiration ?? undefined,
-          supplier: item.supplier ?? undefined,
-          costumer: item.costumer ?? undefined,
-          stock_location_id: item.stock_location_id ?? undefined,
-          observation: item.observation ?? undefined,
-          updated_at: new Date(),
-          updated_by: updateStockDto.updated_by ?? undefined
-        });
-        updatedItems.push({ ...existingItem, ...item });
-      } else {
-        // Cria um novo item
-        const newItem = await this.stockRepository.createStockItems({
-          stock_id: id,
-          sequence: sequence,
-          product_id: item.product_id,
-          quantity: item.quantity,
-          unit_price: item.unit_price ?? undefined,
-          total_price: item.unit_price * item.quantity,
-          lote: item.lote!,
-          expiration: item.expiration!,
-          supplier: item.supplier!,
-          costumer: item.costumer!,
-          stock_location_id: item.stock_location_id!,
-          observation: item.observation!,
-          image_link: item.image_link!,
-          created_at: new Date(),
-          updated_at: new Date(),
-          created_by: updateStockDto.updated_by!,
-          updated_by: updateStockDto.updated_by!
-        });
-        updatedItems.push(newItem);
-        sequence++;
+        // Prepara um objeto com os campos que precisam ser atualizados
+        const fieldsToUpdate: Partial<typeof item> = {};
+        console.log('existingItem', existingItem);
+        // Só atualiza campos que estão `null` ou com valores padrão
+        if (existingItem.unit_price !== undefined)
+          fieldsToUpdate['unit_price'] = item.unit_price;
+        if (existingItem.quantity === null)
+          fieldsToUpdate['quantity'] = item.quantity;
+        if (existingItem.supplier !== undefined)
+          fieldsToUpdate['supplier'] = item.supplier;
+        if (existingItem.costumer !== undefined)
+          fieldsToUpdate['costumer'] = item.costumer;
+        if (existingItem.stock_location_id !== undefined)
+          fieldsToUpdate['stock_location_id'] = item.stock_location_id;
+        if (existingItem.observation !== undefined)
+          fieldsToUpdate['observation'] = item.observation;
+        if (existingItem.total_price !== undefined)
+          fieldsToUpdate['total_price'] =
+            item.unit_price * existingItem.quantity;
+        if (existingItem.image_link !== undefined)
+          fieldsToUpdate['image_link'] = item.image_link;
+        if (existingItem.updated_at !== undefined)
+          fieldsToUpdate['updated_at'] = new Date();
+
+        // Realiza a atualização se houver campos a serem atualizados
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          await this.stockRepository.updateStockItems(item.id, {
+            ...fieldsToUpdate,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.total_price,
+            observation: item.observation,
+            image_link: item.image_link,
+            updated_at: new Date(),
+            updated_by: updateStockDto.updated_by ?? undefined,
+            supplier: item.supplier,
+            costumer: item.costumer,
+            stock_location_id: item.stock_location_id
+          });
+          updatedItems.push({ ...existingItem, ...fieldsToUpdate });
+        } else {
+          updatedItems.push(existingItem); // Se nenhum campo mudou, mantém o item original
+        }
       }
     }
 
-    // ordenar os itens pela sequência -- NÃO TA FUNCIONANDO :(
-    const allItems = updatedItems.concat(existingItems);
-    allItems.sort((a, b) => a.sequence - b.sequence);
-    // Retorna a produção atualizada com todos os itens
+    // Ordena os itens atualizados pela sequência e retorna o estoque atualizado
+    updatedItems.sort((a, b) => a.sequence - b.sequence);
+
     return {
       stock: {
         id,
@@ -244,9 +238,7 @@ export class StockService {
         is_balance: updateStockDto.is_balance,
         updated_at: new Date(),
         updated_by: updateStockDto.updated_by,
-        items: updatedItems.concat(
-          existingItems.filter(i => !updatedItems.includes(i))
-        )
+        items: updatedItems
       }
     };
   }
