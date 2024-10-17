@@ -7,11 +7,12 @@
 [x] GET findAll
 [x] DELETE delete (exclusão física com cascade - remove docto e itens)
 [x] UPDATE update registro campos que ficaram null ou podem atualizar
-[ ] endpoint para lote validade com totais
+[x] endpoint para lote validade com totais
 [-] funcionalidade para gerar lote
 [x] calcular totais de estoque atual disponível
 [ ] funcionalidade para controlar data validade lote  (pegar de algum lugar o valor ou qtde dias)
 [ ] funcionalidade para gerar número docto - document_number
+## tratamento de erros
 [ ] precisa converter a data que recebe no DTO para o formato Date
 [ ] validar campos no controller
 - se são válidos (usar zod)

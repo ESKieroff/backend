@@ -13,7 +13,7 @@ import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
-//import { ResponseStockDto } from './dto/response.stock.dto';
+
 @Controller('stock')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
@@ -21,7 +21,6 @@ export class StockController {
   @Post()
   create(@Body() createStockDto: CreateStockDto) {
     return this.stockService.create(createStockDto);
-    // valida campos válidos
   }
 
   @Get()
@@ -29,26 +28,28 @@ export class StockController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, production_date, Production_Status, created_by, updated_by',
+      'Field to order by. Valid fields: id, product_id, lote, quantity, stock_id, sequence, created_at, updated_at',
     enum: [
       'id',
-      'number',
-      'description',
-      'production_date',
-      'Production_Status',
-      'created_by',
-      'updated_by'
+      'product_id',
+      'lote',
+      'quantity',
+      'stock_id',
+      'sequence',
+      'created_at',
+      'updated_at'
     ]
   })
   async findAll(@Query('orderBy') orderBy: string = 'id') {
     const validOrderFields = [
       'id',
-      'description',
-      'code',
-      'sku',
-      'category_id',
-      'group_id',
-      'supplier_id'
+      'product_id',
+      'lote',
+      'quantity',
+      'stock_id',
+      'sequence',
+      'created_at',
+      'updated_at'
     ];
 
     if (!validOrderFields.includes(orderBy)) {
@@ -59,6 +60,11 @@ export class StockController {
     return stock;
   }
 
+  @Get('lots')
+  async getAllProductLots(@Query('orderBy') orderBy: 'asc' | 'desc' = 'asc') {
+    const result = await this.stockService.getAllProductLots(orderBy);
+    return result;
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     const idNumber = +id;
@@ -77,19 +83,14 @@ export class StockController {
     return this.stockService.update(idNumber, updateStockDto);
   }
 
-  @Get('with-lots')
-  findAllWithLots(@Query('orderBy') orderBy: string) {
-    return this.stockService.findAllWithLots(orderBy);
-  }
-
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const idNumber = +id;
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
-    await this.stockService.remove(idNumber);
 
-    return { message: `Stock ID ${idNumber} parmanently removed successfully` };
+    await this.stockService.remove(idNumber);
+    return { message: `Stock ID ${idNumber} permanently removed successfully` };
   }
 }

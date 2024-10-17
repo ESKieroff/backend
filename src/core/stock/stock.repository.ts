@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
+import { ProductLot } from './dto/response.stock.dto';
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -41,8 +42,6 @@ export class StockRepository {
     id: number,
     data: Partial<Prisma.stock_itemsUncheckedCreateInput>
   ) {
-    console.log('data', data);
-
     const stock_items = await this.prisma.stock_items.update({
       where: { id },
       data: {
@@ -310,17 +309,106 @@ export class StockRepository {
   }
 
   async deleteStock(id: number): Promise<void> {
-    // deleta os registros de stock_items
     await this.prisma.stock_items.deleteMany({
       where: {
         stock_id: id
       }
     });
-    // deleta o registro de stock
+
     await this.prisma.stock.delete({
       where: {
         id
       }
     });
+  }
+
+  async teste(orderBy: 'asc' | 'desc'): Promise<ProductLot[]> {
+    const lots = await this.prisma.stock_items.findMany({
+      select: {
+        product_id: true,
+        lote: true,
+        expiration: true,
+        quantity: true
+      },
+      orderBy: {
+        product_id: orderBy
+      }
+    });
+
+    const productLotSummary: Record<number, ProductLot> = {};
+
+    for (const lot of lots) {
+      const productId = lot.product_id;
+      const lote = lot.lote || 'sem lote';
+      const expiration = lot.expiration || new Date('1900-01-01');
+
+      if (!productLotSummary[productId]) {
+        const description = await this.prisma.products.findUnique({
+          where: { id: productId },
+          select: { description: true }
+        });
+
+        productLotSummary[productId] = {
+          productId,
+          description: description?.description || '',
+          lots: []
+        };
+      }
+
+      productLotSummary[productId].lots.push({
+        lote: lote,
+        totalQuantity: 0,
+        expiration: expiration
+      });
+    }
+
+    return Object.values(productLotSummary);
+  }
+
+  async getAllProductLots(
+    orderBy: 'asc' | 'desc' = 'asc'
+  ): Promise<ProductLot[]> {
+    const lots = await this.prisma.stock_items.findMany({
+      distinct: ['product_id', 'lote'],
+      select: {
+        product_id: true,
+        lote: true,
+        expiration: true,
+        quantity: true
+      },
+      orderBy: { product_id: orderBy }
+    });
+
+    const productLotSummary: Record<number, ProductLot> = {};
+
+    for (const lot of lots) {
+      const productId = lot.product_id;
+      const lote = lot.lote;
+
+      if (typeof productId !== 'number') {
+        console.error(`Product ID ${productId} tem um formato inválido!`);
+      }
+      if (!productLotSummary[productId]) {
+        const description = await this.prisma.products.findUnique({
+          where: { id: productId },
+          select: { description: true }
+        });
+
+        productLotSummary[productId] = {
+          productId,
+          description: description?.description || '',
+          lots: []
+        };
+      }
+      const availableStock = await this.checkStock(productId, lote);
+
+      productLotSummary[productId].lots.push({
+        lote: lote,
+        totalQuantity: availableStock,
+        expiration: lot.expiration
+      });
+    }
+
+    return Object.values(productLotSummary);
   }
 }

@@ -17,35 +17,12 @@ export class ResponseStockDto {
   updated_at: string;
 }
 
-// export function formatStockResponse(stock: any):{
-//   return {
-//     id: stock.id,
-//     stockItems: stock.stock_items.map((item: any) => ({
-//       id: item.id,
-//       sequence: item.sequence,
-//       product: {
-//         id: item.products.id,
-//         description: item.products.description,
-//         code: item.products.code,
-//         sku: item.products.sku
-//       },
-//       lote: item.lote,
-//       expiration: item.expiration,
-//       quantity: item.quantity,
-//       unitPrice: item.unit_price,
-//       totalPrice: item.total_price,
-//       imageLink: item.image_link,
-//       supplier: {
-//         id: item.suppliers_stock_items_suppliersTosuppliers?.id,
-//         name: item.suppliers_stock_items_suppliersTosuppliers?.name
-//       },
-//       stockLocation: {
-//         id: item.stock_location?.id,
-//         description: item.stock_location?.description
-//       },
-//       createdAt: item.created_at,
-//       updatedAt: item.updated_at
-//     }))
-//     : [],
-//   };
-// }
+export class ProductLot {
+  productId: number;
+  description: string;
+  lots: {
+    lote: string;
+    totalQuantity: number;
+    expiration: Date | null;
+  }[];
+}

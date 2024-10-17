@@ -22,8 +22,6 @@ export class StockService {
   ]);
 
   async create(createStockDto: CreateStockDto) {
-    // Passo 1: Verifica se é operação de saída e o parametro do settings para validar saldo, se for o caso
-
     const errorMessages = [];
     if (!Array.isArray(createStockDto.stock_items)) {
       throw new BadRequestException('Items must be an array');
@@ -37,11 +35,9 @@ export class StockService {
         `Document number ${createStockDto.document_number} already exists`
       );
     }
-    // Verifica se stock_moviment é OUTPUT, RESERVED ou ADJUST (movimentos que podem diminuir o estoque)
+
     if (this.stockMovimentsToCheck.has(createStockDto.stock_moviment)) {
-      // Checa se o ajuste de estoque negativo está desabilitado
       if (!Settings.enableNegativeStock) {
-        // Valida o estoque disponível
         await this.validateStock(createStockDto.stock_items, errorMessages);
       }
     }
@@ -67,8 +63,6 @@ export class StockService {
       let sequencia = 1;
       const stock_location = 1;
       for (const item of createStockDto.stock_items) {
-        console.log('item', item);
-
         await this.stockRepository.createStockItems({
           stock_id: stockDocument.id,
           product_id: item.product_id,
@@ -93,13 +87,9 @@ export class StockService {
     } catch (error) {
       console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
 
-      // Tenta remover o documento se ele foi criado
       if (stockDocument?.id) {
         try {
           await this.stockRepository.deleteStock(stockDocument.id);
-          console.log(
-            `Stock document with ID ${stockDocument.id} removed due to error.`
-          );
         } catch (deleteError) {
           console.error(
             'Error removing stock document:',
@@ -108,7 +98,6 @@ export class StockService {
         }
       }
 
-      // Retorna uma mensagem amigável em vez de quebrar o servidor
       return {
         success: false,
         message:
@@ -162,28 +151,22 @@ export class StockService {
     return this.formatDate(order);
   }
 
-  // tomar cuidado porque esta usando a função uncheckedupdate
   async update(id: number, updateStockDto: UpdateStockDto) {
-    // Atualiza os dados do estoque
     await this.stockRepository.updateStock(id, {
       updated_at: new Date(),
       updated_by: updateStockDto.updated_by ?? undefined
     });
 
-    // Busca todos os itens existentes no documento
     const existingItems = await this.stockRepository.getStockItems(id);
 
     const updatedItems = [];
 
-    // Itera sobre os itens enviados na requisição
     for (const item of updateStockDto.stock_items) {
       const existingItem = existingItems.find(i => i.id === item.id);
 
       if (existingItem) {
-        // Prepara um objeto com os campos que precisam ser atualizados
         const fieldsToUpdate: Partial<typeof item> = {};
-        console.log('existingItem', existingItem);
-        // Só atualiza campos que estão `null` ou com valores padrão
+
         if (existingItem.unit_price !== undefined)
           fieldsToUpdate['unit_price'] = item.unit_price;
         if (existingItem.quantity === null)
@@ -204,7 +187,6 @@ export class StockService {
         if (existingItem.updated_at !== undefined)
           fieldsToUpdate['updated_at'] = new Date();
 
-        // Realiza a atualização se houver campos a serem atualizados
         if (Object.keys(fieldsToUpdate).length > 0) {
           await this.stockRepository.updateStockItems(item.id, {
             ...fieldsToUpdate,
@@ -221,12 +203,11 @@ export class StockService {
           });
           updatedItems.push({ ...existingItem, ...fieldsToUpdate });
         } else {
-          updatedItems.push(existingItem); // Se nenhum campo mudou, mantém o item original
+          updatedItems.push(existingItem);
         }
       }
     }
 
-    // Ordena os itens atualizados pela sequência e retorna o estoque atualizado
     updatedItems.sort((a, b) => a.sequence - b.sequence);
 
     return {
@@ -243,8 +224,8 @@ export class StockService {
     };
   }
 
-  async findAllWithLots(orderBy: string) {
-    return this.stockRepository.findAllWithLots(orderBy);
+  async getAllProductLots(orderBy) {
+    return this.stockRepository.getAllProductLots(orderBy);
   }
 
   async remove(id: number) {
