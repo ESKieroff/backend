@@ -5,7 +5,6 @@ variables:
   DOCKER_IMAGE_TAG: "latest"
   DOCKER_DRIVER: "overlay2"
   PUPPETEER_SKIP_DOWNLOAD: "true"
-  DOCKER_REGISTRY: docker.io 
 
 stages:
   - commit-msg-check
@@ -65,17 +64,12 @@ test:
 # Build and Push Docker image job
 build_and_push_docker_image:
   stage: build_and_push
-  image: docker:20.10.16
+  image: docker:latest
   services:
-    - name: docker:20.10.16-dind
-      alias: docker
-      command: ["--storage-driver=overlay2", "--dns=8.8.8.8"]
+    - name: docker:dind
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
-    GITLAB_RUNNER_TIMEOUT: 300
-    DOCKER_DRIVER: overlay2
-    DNS_SERVER: 8.8.8.8
   before_script:
     - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
