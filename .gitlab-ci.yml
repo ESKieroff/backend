@@ -66,13 +66,12 @@ build_and_push_docker_image:
       alias: docker
       command: ["--storage-driver=overlay2"]
   variables:
-    DOCKER_HOST: tcp://docker:2375
+    DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
     GITLAB_RUNNER_TIMEOUT: 120
     DOCKER_DRIVER: overlay2
     DNS_SERVER: 8.8.8.8
   before_script:
-    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
@@ -83,8 +82,6 @@ build_and_push_docker_image:
     - cd ..
   only:
     - master
-  after_script:
-    - docker image prune -af  # Optional cleanup
 
 # trigger deploy when build an push succeed
 trigger-infra-pipeline:
