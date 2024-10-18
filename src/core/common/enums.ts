@@ -24,12 +24,12 @@ export enum Origin {
   MADE = 'MADE'
 }
 
-enum Price_Type {
+export enum Price_Type {
   COST = 'COST',
   SALE = 'SALE'
 }
 
-enum Production_Status {
+export enum Production_Status {
   CREATED = 'CREATED',
   SCHEDULED = 'SCHEDULED',
   OPEN = 'OPEN',
@@ -39,10 +39,14 @@ enum Production_Status {
   CANCELED = 'CANCELED'
 }
 
-enum Stock_Moviment {
+export enum Stock_Moviment {
   INPUT = 'INPUT',
   TRANSIT = 'TRANSIT',
-  OUTPUT = 'OUTPUT'
+  OUTPUT = 'OUTPUT',
+  RESERVED = 'RESERVED',
+  BALANCE = 'BALANCE',
+  ADJUST = 'ADJUST',
+  INVENTORY = 'INVENTORY'
 }
 
 export enum Unit_Measure {
