@@ -60,14 +60,19 @@ test:
 # Build and Push Docker image job
 build_and_push_docker_image:
   stage: build_and_push
-  image: docker:latest
+  image: docker:latest:20.10.16
   services:
-    - name: docker:dind
+    - name: docker:20.10.16-dind
       alias: docker
   variables:
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ""
   before_script:
+    - sleep 10
+    - docker --version
+    - docker info
+    - netstat -tuln
+    - nslookup docker
     - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
