@@ -60,7 +60,7 @@ test:
 # Build and Push Docker image job
 build_and_push_docker_image:
   stage: build_and_push
-  image: docker:latest:20.10.16
+  image: docker:20.10.16
   services:
     - name: docker:20.10.16-dind
       alias: docker
