@@ -6,14 +6,19 @@ import {
 import { CreateStockDto, CreateStockItemsDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
-import { Settings } from '../../config/settings';
+import { SettingsService } from 'src/settings/settings.service';
+import { LoteService } from '../common/lote.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
 
 @Injectable()
 export class StockService {
-  constructor(private readonly stockRepository: StockRepository) {}
+  constructor(
+    private readonly stockRepository: StockRepository,
+    private readonly settingsService: SettingsService,
+    private readonly loteService: LoteService
+  ) {}
 
   stockMovimentsToCheck = new Set([
     Stock_Moviment.OUTPUT,
@@ -37,7 +42,11 @@ export class StockService {
     }
 
     if (this.stockMovimentsToCheck.has(createStockDto.stock_moviment)) {
-      if (!Settings.enableNegativeStock) {
+      const enableNegativeStock = await this.settingsService.get(
+        'enableNegativeStock'
+      );
+
+      if (enableNegativeStock == 'false') {
         await this.validateStock(createStockDto.stock_items, errorMessages);
       }
     }
@@ -50,7 +59,9 @@ export class StockService {
           'Não foi possível processar todos os itens devido a saldos insuficientes.'
       };
     }
+
     let stockDocument;
+    const createdItems = [];
     try {
       stockDocument = await this.stockRepository.createStock({
         document_number: createStockDto.document_number,
@@ -61,29 +72,51 @@ export class StockService {
       });
 
       let sequencia = 1;
-      const stock_location = 1;
+
+      const stock_location_default_str = await this.settingsService.get(
+        'defaultStockLocation'
+      );
+      const stock_location_default = parseInt(stock_location_default_str, 10);
+
       for (const item of createStockDto.stock_items) {
-        await this.stockRepository.createStockItems({
+        const loteGenetated = await this.loteService.generateLote(
+          stockDocument.stock_moviment
+        );
+        const [lote, expiration] = loteGenetated.split('-');
+
+        const createdItem = await this.stockRepository.createStockItems({
           stock_id: stockDocument.id,
           product_id: item.product_id,
           sequence: sequencia,
           quantity: item.quantity,
           unit_price: item.unit_price,
           total_price: item.unit_price * item.quantity,
-          lote: item.lote,
-          expiration: item.expiration,
-          stock_location_id: stock_location,
+          lote: lote,
+          expiration: new Date(expiration).toISOString(),
+          observation: item.observation!,
           supplier: item.supplier!,
           costumer: item.costumer!,
-          observation: item.observation!,
+          stock_location_id: item.stock_location_id || stock_location_default,
           image_link: item.image_link!,
+
           created_at: new Date(),
           updated_at: new Date()
         });
         sequencia++;
+        createdItems.push(createdItem);
       }
 
-      return stockDocument;
+      return {
+        stockDocument: {
+          id: stockDocument.id,
+          document_number: stockDocument.document_number,
+          document_date: stockDocument.document_date,
+          stock_moviment: stockDocument.stock_moviment,
+          created_at: stockDocument.created_at,
+          updated_at: stockDocument.updated_at,
+          items: createdItems
+        }
+      };
     } catch (error) {
       console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
 
@@ -151,6 +184,10 @@ export class StockService {
     return this.formatDate(order);
   }
 
+  async getAllProductLots(orderBy, origin) {
+    return this.stockRepository.getAllProductLots(orderBy, origin);
+  }
+
   async update(id: number, updateStockDto: UpdateStockDto) {
     await this.stockRepository.updateStock(id, {
       updated_at: new Date(),
@@ -202,34 +239,18 @@ export class StockService {
             stock_location_id: item.stock_location_id
           });
           updatedItems.push({ ...existingItem, ...fieldsToUpdate });
-        } else {
-          updatedItems.push(existingItem);
         }
       }
     }
 
-    updatedItems.sort((a, b) => a.sequence - b.sequence);
-
     return {
-      stock: {
-        id,
-        document_number: updateStockDto.document_number,
-        document_date: new Date(),
-        stock_moviment: updateStockDto.stock_moviment,
-        is_balance: updateStockDto.is_balance,
-        updated_at: new Date(),
-        updated_by: updateStockDto.updated_by,
-        items: updatedItems
-      }
+      success: true,
+      message: 'Stock updated successfully',
+      updatedItems
     };
   }
 
-  async getAllProductLots(orderBy, origin) {
-    return this.stockRepository.getAllProductLots(orderBy, origin);
-  }
-
   async remove(id: number) {
-    await this.isValid(id);
     return this.stockRepository.deleteStock(id);
   }
 
@@ -239,17 +260,8 @@ export class StockService {
   } {
     return {
       ...stock,
-      created_at: format(new Date(stock.created_at), 'dd/MM/yyyy HH:mm:ss'),
-      updated_at: format(new Date(stock.updated_at), 'dd/MM/yyyy HH:mm:ss')
+      created_at: format(stock.created_at, 'dd/MM/yyyy'),
+      updated_at: format(stock.updated_at, 'dd/MM/yyyy')
     };
-  }
-
-  async isValid(id: number) {
-    const stock = await this.stockRepository.findById(id);
-
-    if (!stock) {
-      throw new NotFoundException('Stock with ID ${id} not found');
-    }
-    return stock;
   }
 }

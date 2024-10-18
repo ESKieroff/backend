@@ -10,7 +10,9 @@ export class StockRepository {
     return await this.prisma.stock.create({ data });
   }
 
-  async createStockItems(data: Prisma.stock_itemsUncheckedCreateInput) {
+  async createStockItems(
+    data: Partial<Prisma.stock_itemsUncheckedCreateInput>
+  ) {
     return await this.prisma.stock_items.create({
       data: {
         sequence: data.sequence,
@@ -22,9 +24,17 @@ export class StockRepository {
         image_link: data.image_link,
         products: { connect: { id: data.product_id } },
         stock: { connect: { id: data.stock_id } },
-        stock_location: { connect: { id: data.stock_location_id } },
-        suppliers: { connect: { id: data.supplier } },
-        costumers: { connect: { id: data.costumer } }
+        stock_location: data.stock_location_id
+          ? { connect: { id: data.stock_location_id } }
+          : undefined,
+        ...((data.supplier && {
+          suppliers: { connect: { id: data.supplier } }
+        }) ||
+          {}),
+        ...((data.costumer && {
+          costumers: { connect: { id: data.costumer } }
+        }) ||
+          {})
       }
     });
   }

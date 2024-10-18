@@ -7,7 +7,18 @@ VALUES
     ('Ana', 'ana@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
     ('Maria', 'maria@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Maria', 'Silva', 'DEMO', 'FEMALE');
 	
-    
+-- Insert into settings
+INSERT INTO "settings" ("key", "value", "description", "created_by", "updated_by") 
+VALUES
+('enableNegativeStock', 'true', 'Serve para habilitar ou desabilitar o controle de estoque negativo','root','root'),
+('defaultStockLocation', '1', 'Serve para definir o local de estoque padrão','root','root'),
+('defaultRoleForNewUser', 'DEFAULT', 'Serve para definir o papel padrão para novos usuários','root','root'),
+('defaultLoteInputMask', 'P', 'Define o padrão de máscara para lote de entrada','root','root'),
+('defaultLoteOutputMask', 'PD', 'Define o padrão de máscara para lote de saída','root','root'),
+('lastDocumentNumber', '3000', 'Serve para guardar o último número de documento criado para incrementar a partir dele','root','root'),
+('lastLoteNumber', '1000', 'Serve para guardar o último número de lote criado para incrementar a partir dele','root','root'),
+('loteNumberLength', '5', 'Define o tamanho do número do lote para preenchimento com zeros à esquerda (ex: 00001)','root','root');
+
 -- Insert into persons
 INSERT INTO "persons" ("name")
 VALUES 

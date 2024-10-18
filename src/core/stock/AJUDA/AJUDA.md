@@ -23,8 +23,23 @@
 [ ] validar no service
 - registro já existe, não tem campos para atualizar, incluir campos que precisa e não vieram no request
 
+
+backup
 pg_dump -U postgres -h localhost -d cebola --encoding=UTF8 > database/backup.sql
+restaura
 psql -U postgres -h localhost -d cebola < database/backup.sql
+backup inserts
+pg_dump -U postgres -d cebola --data-only --inserts -f database/inserts.sql
+backup create
+pg_dump -U postgres -h localhost -d cebola --encoding=UTF8 > database/backup.sql
+
+create table
+backup 
+pg_dump -U postgres -d cebola -s > database/backup_schema.sql
+restore
+pg_dump -U postgres -d morango -f backup_schema.sql 
+inserts
+psql -U postgres -d cebola -f inserts.sql
 
 
 ## outras
