@@ -2,6 +2,7 @@ variables:
   # Docker image details
   DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
   DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
+  DOCKER_IMAGE_NAME3: "norohim/pgbouncer"
   DOCKER_IMAGE_TAG: "latest"
   DOCKER_DRIVER: "overlay2"
   PUPPETEER_SKIP_DOWNLOAD: "true"
@@ -69,11 +70,13 @@ build_and_push_docker_image:
     - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
+    - docker build -f ./prod/dockerfile.node_backend -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG"
     - cd prod
-    - docker build -f ./dockerfile.postgres_prod -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
+    - docker build -f ./dockerfile.postgres_optimal -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG"
+    - docker build -f ./dockerfile.pgbouncer -t "$DOCKER_IMAGE_NAME3:DOCKER_IMAGE_TAG" .
+    - docker push "$DOCKER_IMAGE_NAME3:$DOCKER_IMAGE_TAG"
     - cd ..
   only:
     - master
