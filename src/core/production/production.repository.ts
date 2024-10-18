@@ -61,7 +61,6 @@ export class ProductionRepository {
     return result;
   }
 
-  // buscar os dados da tabela production_orders join production_orders_items
   async findAllProductionItems(orderBy: string): Promise<production_orders[]> {
     const order = [
       'id',
@@ -75,7 +74,7 @@ export class ProductionRepository {
     if (!order.includes(orderBy)) {
       throw new Error('Invalid order field');
     }
-    // fazer join das duas tabelas production_orders join production_orders_items
+
     const result = await this.prisma.production_orders.findMany({
       orderBy: { [orderBy]: 'asc' },
       include: {
@@ -170,12 +169,10 @@ export class ProductionRepository {
   }
 
   async delete(id: number): Promise<void> {
-    // Exclui todos os itens relacionados a 'production_orders_items' pelo 'production_order_id'
     await this.prisma.production_orders_items.deleteMany({
       where: { production_order_id: id }
     });
 
-    // Encontra IDs em 'production_steps_progress' relacionados e exclui 'ocurrences_of_production_stages'
     const progressIds = await this.prisma.production_steps_progress
       .findMany({
         where: { production_id: id },
@@ -189,12 +186,10 @@ export class ProductionRepository {
       });
     }
 
-    // Exclui registros de 'production_steps_progress' associados ao 'production_order_id'
     await this.prisma.production_steps_progress.deleteMany({
       where: { production_id: id }
     });
 
-    // Finalmente, exclui o registro em 'production_orders'
     await this.prisma.production_orders.delete({
       where: { id }
     });

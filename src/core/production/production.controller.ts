@@ -110,7 +110,9 @@ export class ProductionController {
     // // Verificar se a ordem de produção existe
     // const existingProduction = await this.productionService.findOne(idNumber);
     // if (!existingProduction) {
-    //   throw new NotFoundException(`Production order with ID ${idNumber} not found`);
+    //   throw new NotFoundException(
+    //     `Production order with ID ${idNumber} not found`
+    //   );
     // }
     // const allowedFields = Object.keys(UpdateProductionSchema.shape);
     // const fieldsToUpdate = Object.keys(queryParams);
@@ -161,7 +163,12 @@ export class ProductionController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productionService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    await this.productionService.remove(idNumber);
+    return { message: `Production order with ID ${idNumber} removed` };
   }
 }

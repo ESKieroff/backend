@@ -11,7 +11,6 @@ export class ProductionService {
   constructor(private readonly productionRepository: ProductionRepository) {}
 
   async create(createProductionDto: CreateProductionDto) {
-    // cria documento de produção e pega objeto para criar os itens
     const production = await this.productionRepository.createOrder({
       number: createProductionDto.number,
       description: createProductionDto.description,
@@ -21,9 +20,6 @@ export class ProductionService {
       updated_at: new Date()
     });
 
-    // console.log('production', production);
-
-    // insere cada item associado ao docto de produção gerado acima
     let sequence = 1;
     for (const item of createProductionDto.production_items) {
       await this.productionRepository.createOrderItem({
@@ -39,7 +35,7 @@ export class ProductionService {
         created_at: new Date(),
         updated_at: new Date()
       });
-      // console.log('item', item);
+
       sequence++;
     }
     return { production, items: createProductionDto.production_items };
@@ -79,7 +75,6 @@ export class ProductionService {
   }
 
   async update(id: number, updateProductionDto: UpdateProductionDto) {
-    // Atualiza os dados da produção
     await this.productionRepository.updateOrder(id, {
       description: updateProductionDto.description ?? undefined,
       production_date: updateProductionDto.production_date
@@ -90,13 +85,11 @@ export class ProductionService {
       updated_by: updateProductionDto.updated_by ?? undefined
     });
 
-    // Busca todos os itens existentes para a produção
     const existingItems = await this.productionRepository.getOrderItems(id);
     const updatedItems = [];
-    // Pega a última sequência de item do documento para iterar
+
     let sequence = (await this.productionRepository.getLastSequence(id)) + 1;
 
-    // Atualiza ou cria novos itens
     for (const item of updateProductionDto.production_items) {
       const existingItem = existingItems.find(
         i => i.final_product_id === item.final_product_id
@@ -146,10 +139,9 @@ export class ProductionService {
       }
     }
 
-    // ordenar os itens pela sequência
     const allItems = updatedItems.concat(existingItems);
     allItems.sort((a, b) => a.sequence - b.sequence);
-    // Retorna a produção atualizada com todos os itens
+
     return {
       production: {
         id,
