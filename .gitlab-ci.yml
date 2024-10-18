@@ -14,6 +14,11 @@ stages:
   - build_and_push
   - deploy
 
+cache:
+  paths:
+    - /var/lib/docker
+    - node_modules/
+
 # Default settings for all jobs
 default:
   image: node:20-alpine
@@ -64,14 +69,15 @@ build_and_push_docker_image:
   services:
     - name: docker:20.10.16-dind
       alias: docker
-      command: ["--storage-driver=overlay2"]
+      command: ["--storage-driver=overlay2", "--dns=8.8.8.8"]
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
-    GITLAB_RUNNER_TIMEOUT: 120
+    GITLAB_RUNNER_TIMEOUT: 300
     DOCKER_DRIVER: overlay2
     DNS_SERVER: 8.8.8.8
   before_script:
+    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
@@ -89,7 +95,7 @@ trigger-infra-pipeline:
   before_script:
     - apk add --no-cache curl jq bash 
   script:
-    - echo "Triggering infrastructure pipeline..."
+    - echo "Triggering infrastructure pipeline...$CI_JOB_TOKEN"
     - curl -X POST --fail -F token=90cbad47a562a7bae7cf8de55d3e34 -F ref=main https://tools.ages.pucrs.br/api/v4/projects/683/trigger/pipeline
   only:
     - master
