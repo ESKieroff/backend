@@ -12,12 +12,7 @@ stages:
   - test
   - build_and_push
   - deploy
-
-cache:
-  paths:
-    - /var/lib/docker
-    - node_modules/
-
+  
 # Default settings for all jobs
 default:
   image: node:20-alpine
