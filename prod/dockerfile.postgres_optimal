@@ -9,7 +9,7 @@ ENV POSTGRES_PRIMARY_HOST=postgres_primary
 ENV POSTGRES_PRIMARY_PORT=5432
 
 # Install required tools
-RUN apt-get update && apt-get install -y repmgr pgbouncer
+RUN apk update && apk add --no-cache repmgr pgbouncer
 
 # Copy the custom entrypoint script and configuration files
 COPY ./docker_entrypoint.sh /usr/local/bin/
