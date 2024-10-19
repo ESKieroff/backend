@@ -3,6 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ENV DATABASE_URL=postgresql://postgres:postgres@pgbouncer:6432/postgres
+
 # Set NODE_ENV to development to install devDependencies
 RUN apk add --no-cache make gcc g++ python3
 
