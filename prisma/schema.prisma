@@ -161,6 +161,7 @@ enum Stock_Moviment {
 model stock {
   id              Int            @id @default(autoincrement())
   document_number String         @unique @db.VarChar(255)
+  document_number String         @unique @db.VarChar(255)
   document_date   DateTime       @db.Timestamp(6)
   stock_moviment  Stock_Moviment
   document_type   String?        @db.VarChar(255)
@@ -180,6 +181,7 @@ model stock_items {
   id                Int            @id @default(autoincrement())
   stock_id          Int
   sequence          Int
+  product_id        Int
   product_id        Int
   quantity          Float
   unit_price        Float  
