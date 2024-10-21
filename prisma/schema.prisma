@@ -30,7 +30,7 @@ enum Gender {
 
 // usuários do sistema
 model users {
-  id         Int          @id @default(autoincrement())
+  id                        Int                         @id @default(autoincrement())
   email                     String                      @unique @db.VarChar(255)
   password                  String                      @db.VarChar(255)
   role                      Role                        @default(DEFAULT)
@@ -45,7 +45,7 @@ model users {
   updated_by                Int?
   production_steps_progress production_steps_progress[]
   user_who_created          settings[]                  @relation("whoCreated")
-  user_who_updated          settings[]                  @relation("whoUpdated")  
+  user_who_updated          settings[]                  @relation("whoUpdated")
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +161,6 @@ enum Stock_Moviment {
 model stock {
   id              Int            @id @default(autoincrement())
   document_number String         @unique @db.VarChar(255)
-  document_number String         @unique @db.VarChar(255)
   document_date   DateTime       @db.Timestamp(6)
   stock_moviment  Stock_Moviment
   document_type   String?        @db.VarChar(255)
@@ -182,9 +181,8 @@ model stock_items {
   stock_id          Int
   sequence          Int
   product_id        Int
-  product_id        Int
   quantity          Float
-  unit_price        Float  
+  unit_price        Float
   total_price       Float
   lote              String?
   expiration        DateTime?
@@ -199,7 +197,7 @@ model stock_items {
   stock_location    stock_location @relation("stock_items_location", fields: [stock_location_id], references: [id])
   suppliers         persons?       @relation("stock_items_suppliers", fields: [supplier], references: [id])
   costumers         persons?       @relation("stock_items_costumers", fields: [costumer], references: [id])
-  batchs            batchs?        @relation("stock_items_batchs", fields: [batchsid], references: [id]) 
+  batchs            batchs?        @relation("stock_items_batchs", fields: [batchsid], references: [id])
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
