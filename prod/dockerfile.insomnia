@@ -1,0 +1,10 @@
+FROM insomnia/rest-api:latest
+
+# Copy your Insomnia configuration to the appropriate directory inside the container
+COPY Insomnia_2024-10-20.json /app/config/Insomnia.json
+
+# Optionally set any other environment variables or configurations
+ENV INSOMNIA_BACKEND_URL=http://backend:3000
+
+# Start the Insomnia REST API with the configuration file
+CMD ["insomnia", "--config", "/app/config/Insomnia.json"]
