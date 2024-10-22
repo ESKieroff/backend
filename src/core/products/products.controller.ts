@@ -8,9 +8,12 @@ import {
   Delete,
   Query,
   NotFoundException,
-  BadRequestException
+  BadRequestException,
+  UseInterceptors,
+  UploadedFile
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { Multer } from 'multer';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductSchema, UpdateProductSchema } from './dto/product.schema';
@@ -18,6 +21,7 @@ import { ZodError } from 'zod';
 import { ResponseProductsDto } from './dto/product-response.dto';
 import { Origin, Unit_Measure } from '../common/enums';
 import { ApiQuery } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('products')
 export class ProductsController {
@@ -360,5 +364,19 @@ export class ProductsController {
     await this.productsService.reactivateProduct(idNumber);
 
     return { message: `Product ID ${id} activated successfully` };
+  }
+
+  @Post('uploadimg/:id')
+  @UseInterceptors(FileInterceptor('image'))
+  async uploadImg(@UploadedFile() image: Multer.File, @Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    if (!image) {
+      throw new BadRequestException('No image provided');
+    }
+    const imageUp = await this.productsService.uploadImage(idNumber, image);
+    return { message: 'Image uploaded successfully', image: imageUp };
   }
 }

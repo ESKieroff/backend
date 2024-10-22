@@ -4,6 +4,7 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
+import { Multer } from 'multer';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
 import { products } from '@prisma/client';
@@ -100,6 +101,7 @@ export class ProductsService {
 
     return matchedProduct.map(product => this.formatProductDate(product));
   }
+
   async update(id: number, updateProductDto: UpdateProductDto) {
     const product = await this.isValid(id);
 
@@ -118,6 +120,17 @@ export class ProductsService {
     );
 
     return this.formatProductDate(updatedPorduct);
+  }
+
+  async uploadImage(id: number, image: Multer.File) {
+    await this.isValid(id);
+
+    const updatedProduct = await this.productsRepository.update(id, {
+      image,
+      updated_at: new Date()
+    });
+
+    return this.formatProductDate(updatedProduct);
   }
 
   async remove(id: number) {
