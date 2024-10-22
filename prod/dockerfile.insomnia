@@ -1,10 +1,10 @@
 FROM kong/inso:latest
 
 # Copy your Insomnia configuration to the appropriate directory inside the container
-COPY insomnia_file.json /app/config/Insomnia.json
+COPY insomnia_file.json /app/data/insomnia.json
 
 # Optionally set any other environment variables or configurations
 ENV INSOMNIA_BACKEND_URL=http://backend:3000
 
 # Start the Insomnia REST API with the configuration file
-CMD ["insomnia", "--config", "/app/config/Insomnia.json"]
+CMD ["inso", "--config", "/app/data/insomnia.json"]

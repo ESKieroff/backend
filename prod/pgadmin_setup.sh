@@ -1,20 +1,24 @@
 #!/bin/bash
 
-# Wait for pgAdmin to start
-sleep 10
+# Aguardar o PgAdmin iniciar completamente
+until curl -s http://localhost:80/api/v1/servers; do
+  echo "Aguardando PgAdmin inicializar..."
+  sleep 5
+done
 
-# Automatically create a new server connection
-PGADMIN_SETUP_SQL="
-CREATE SERVER mypgserver
-  FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (
-    host 'pgbouncer',
-    port '6432',
-    dbname 'your_db_name',
-    user 'postgres',
-    password 'your_password'
-  );
-"
+# Define a configuração do servidor
+SERVER_CONFIG='{
+  "name": "cpplanta-db",
+  "group": 1,
+  "host": "pgbouncer",
+  "port": 6432,
+  "username": "postgres",
+  "password": "postgres",
+  "maintenance_db": "postgres"
+}'
 
-# Run this configuration (you might need to adapt depending on how pgAdmin can execute it)
-psql -U postgres -d postgres -c "$PGADMIN_SETUP_SQL"
+# Enviar a configuração para a API do PgAdmin
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d "$SERVER_CONFIG" \
+  http://localhost:80/api/v1/servers
