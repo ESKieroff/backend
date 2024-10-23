@@ -1,3 +1,6 @@
+-- Configure for UUID
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('DEFAULT', 'ROOT', 'ADMIN', 'DEMO', 'API', 'SYSTEM');
 
@@ -27,7 +30,7 @@ CREATE TYPE "Batch_Status" AS ENUM ('PENDING', 'USED', 'CANCELED');
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "email" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'DEFAULT',
@@ -46,7 +49,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "persons" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "name" VARCHAR(255) NOT NULL,
     "type" "Person_Type" NOT NULL DEFAULT 'SUPPLIER',
     "active" BOOLEAN NOT NULL DEFAULT true,
@@ -60,14 +63,14 @@ CREATE TABLE "persons" (
 
 -- CreateTable
 CREATE TABLE "products" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "description" VARCHAR(255) NOT NULL,
     "code" VARCHAR(255) NOT NULL,
     "sku" VARCHAR(255) NOT NULL,
     "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'UN',
-    "category_id" INTEGER NOT NULL DEFAULT 1,
-    "group_id" INTEGER NOT NULL DEFAULT 1,
-    "supplier_id" INTEGER,
+    "category_id" UUID NOT NULL,
+    "group_id" UUID,
+    "supplier_id" UUID,
     "nutritional_info" JSONB,
     "photo" BYTEA[],
     "active" BOOLEAN NOT NULL DEFAULT true,
@@ -76,14 +79,13 @@ CREATE TABLE "products" (
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
     "updated_by" TEXT,
-    "groupsId" INTEGER,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "categories" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "description" VARCHAR(255) NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -96,8 +98,8 @@ CREATE TABLE "categories" (
 
 -- CreateTable
 CREATE TABLE "prices" (
-    "id" SERIAL NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "product_id" UUID NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "type" "Price_Type" NOT NULL DEFAULT 'COST',
     "is_current" BOOLEAN NOT NULL DEFAULT true,
@@ -111,7 +113,7 @@ CREATE TABLE "prices" (
 
 -- CreateTable
 CREATE TABLE "stock" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "document_number" VARCHAR(255) NOT NULL,
     "document_date" TIMESTAMP(6) NOT NULL,
     "stock_moviment" "Stock_Moviment" NOT NULL,
@@ -127,7 +129,7 @@ CREATE TABLE "stock" (
 
 -- CreateTable
 CREATE TABLE "stock_location" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "description" VARCHAR(255) NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -140,20 +142,19 @@ CREATE TABLE "stock_location" (
 
 -- CreateTable
 CREATE TABLE "stock_items" (
-    "id" SERIAL NOT NULL,
-    "stock_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "stock_id" UUID NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "product_id" UUID NOT NULL,
     "quantity" DOUBLE PRECISION NOT NULL,
     "unit_price" DOUBLE PRECISION NOT NULL,
     "total_price" DOUBLE PRECISION NOT NULL,
     "lote" TEXT,
     "expiration" TIMESTAMP(3),
     "photo" BYTEA[],
-    "supplier" INTEGER,
-    "costumer" INTEGER,
-    "batchsid" INTEGER,
-    "stock_location_id" INTEGER NOT NULL,
+    "supplier" UUID,
+    "costumer" UUID,
+    "stock_location_id" UUID,
     "observation" TEXT,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -165,7 +166,7 @@ CREATE TABLE "stock_items" (
 
 -- CreateTable
 CREATE TABLE "production_orders" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "number" INTEGER NOT NULL,
     "description" VARCHAR(255),
     "production_date" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -181,11 +182,11 @@ CREATE TABLE "production_orders" (
 
 -- CreateTable
 CREATE TABLE "production_orders_items" (
-    "id" SERIAL NOT NULL,
-    "production_order_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "production_order_id" UUID NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "final_product_id" INTEGER NOT NULL,
-    "prodution_quantity_estimated" DOUBLE PRECISION NOT NULL,
+    "final_product_id" UUID NOT NULL,
+    "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
     "production_quantity_real" DOUBLE PRECISION NOT NULL,
     "production_quantity_loss" DOUBLE PRECISION NOT NULL,
     "lote" VARCHAR(255),
@@ -200,7 +201,7 @@ CREATE TABLE "production_orders_items" (
 
 -- CreateTable
 CREATE TABLE "production_order_steps" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "description" VARCHAR(255) NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -213,11 +214,11 @@ CREATE TABLE "production_order_steps" (
 
 -- CreateTable
 CREATE TABLE "production_steps_progress" (
-    "id" SERIAL NOT NULL,
-    "production_id" INTEGER NOT NULL,
-    "step_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "production_id" UUID NOT NULL,
+    "step_id" UUID NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "raw_product_id" INTEGER NOT NULL,
+    "raw_product_id" UUID NOT NULL,
     "start_time" TIMESTAMP(3),
     "end_time" TIMESTAMP(3),
     "total_time" DOUBLE PRECISION,
@@ -228,7 +229,7 @@ CREATE TABLE "production_steps_progress" (
     "production_line" TEXT,
     "photo" BYTEA[],
     "observation" TEXT,
-    "operator_id" INTEGER,
+    "operator_username" TEXT,
     "ocurrences" JSON,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -240,12 +241,12 @@ CREATE TABLE "production_steps_progress" (
 
 -- CreateTable
 CREATE TABLE "ocurrences_of_production_stages" (
-    "id" SERIAL NOT NULL,
-    "ocurrence_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "ocurrence_id" UUID NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "observation" TEXT,
     "photo" BYTEA[],
-    "stage_ocurred_id" INTEGER NOT NULL,
+    "stage_ocurred_id" UUID NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -256,7 +257,7 @@ CREATE TABLE "ocurrences_of_production_stages" (
 
 -- CreateTable
 CREATE TABLE "ocurrences" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "description" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -268,7 +269,7 @@ CREATE TABLE "ocurrences" (
 
 -- CreateTable
 CREATE TABLE "settings" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "key" VARCHAR(255) NOT NULL,
     "value" TEXT NOT NULL,
     "description" TEXT,
@@ -283,7 +284,7 @@ CREATE TABLE "settings" (
 
 -- CreateTable
 CREATE TABLE "batchs" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "batch" VARCHAR(255) NOT NULL,
     "status" "Batch_Status" NOT NULL DEFAULT 'PENDING',
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -296,8 +297,8 @@ CREATE TABLE "batchs" (
 
 -- CreateTable
 CREATE TABLE "compositions" (
-    "id" SERIAL NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "product_id" UUID NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -310,10 +311,10 @@ CREATE TABLE "compositions" (
 
 -- CreateTable
 CREATE TABLE "composition_items" (
-    "id" SERIAL NOT NULL,
-    "composition_id" INTEGER NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "composition_id" UUID NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "product_id" UUID NOT NULL,
     "quantity" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -325,9 +326,9 @@ CREATE TABLE "composition_items" (
 
 -- CreateTable
 CREATE TABLE "groups" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "description" VARCHAR(255) NOT NULL,
-    "father_id" INTEGER,
+    "father_id" UUID,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -368,7 +369,7 @@ ALTER TABLE "products" ADD CONSTRAINT "products_category_id_fkey" FOREIGN KEY ("
 ALTER TABLE "products" ADD CONSTRAINT "products_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_groupsId_fkey" FOREIGN KEY ("groupsId") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "products" ADD CONSTRAINT "products_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "prices" ADD CONSTRAINT "prices_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -380,7 +381,7 @@ ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_product_id_fkey" FOREIGN K
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "stock"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_stock_location_id_fkey" FOREIGN KEY ("stock_location_id") REFERENCES "stock_location"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_stock_location_id_fkey" FOREIGN KEY ("stock_location_id") REFERENCES "stock_location"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_supplier_fkey" FOREIGN KEY ("supplier") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -395,7 +396,7 @@ ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIG
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_operator_id_fkey" FOREIGN KEY ("operator_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_operator_username_fkey" FOREIGN KEY ("operator_username") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_production_id_fkey" FOREIGN KEY ("production_id") REFERENCES "production_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
