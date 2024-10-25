@@ -105,7 +105,7 @@ model products {
   group_id                  Int                         @default(1)
   supplier_id               Int?
   nutritional_info          Json?
-  photo                     Bytes[]
+  images                    images[]
   active                    Boolean                     @default(true)
   origin                    Origin                      @default(RAW_MATERIAL)
   prices                    prices[]
@@ -210,7 +210,7 @@ model stock_items {
   total_price       Float
   lote              String?
   expiration        DateTime?
-  photo             Bytes[]
+  images            images[]
   supplier          Int?
   costumer          Int?
   batchsid          Int?
@@ -307,7 +307,7 @@ model production_steps_progress {
   quantity_loss                   Float?
   machine                         String?
   production_line                 String?
-  photo                           Bytes[]
+  images                          images[]
   observation                     String?
   operator_id                     Int?
   ocurrences                      Json?                             @db.Json
@@ -428,4 +428,28 @@ model groups {
   groups       groups?    @relation("groupsTogroups", fields: [father_id], references: [id])
   other_groups groups[]   @relation("groupsTogroups")
   products     products[]
+}
+
+model images {
+  id                        String                     @id @default(uuid())
+  hash                      String
+  image_bin                 Bytes[]
+  path                      String
+  mime_type                 String
+  file_name                 String
+  original_name             String
+  size                      Int
+  width                     Int
+  height                    Int
+  metadata                  Json?
+  steps_progress            Int?
+  stock_item                Int?
+  product                   Int?
+  created_at                DateTime                   @default(now()) @db.Timestamp(6)
+  updated_at                DateTime                   @default(now()) @db.Timestamp(6)
+  created_by                Int?
+  updated_by                Int?
+  products                  products?                  @relation(fields: [product], references: [id])
+  stock_items               stock_items?               @relation(fields: [stock_item], references: [id])
+  production_steps_progress production_steps_progress? @relation(fields: [steps_progress], references: [id])
 }

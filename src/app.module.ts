@@ -14,8 +14,10 @@ import { FeatureFlagsService } from './feature-flags/feature-flags.service';
 import { PersonsModule } from './core/persons/persons.module';
 import { CategoriesModule } from './core/categories/categories.module';
 import { GroupsModule } from './core/groups/groups.module';
-// import { CompositionsModule } from './core/compositions/compositions.module';
+import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
+import { ImagesModule } from './core/images/images.module';
+import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 
 @Module({
   imports: [
@@ -32,10 +34,12 @@ import { StockLocationsModule } from './core/stock-locations/stock_locations.mod
     PrismaModule,
     GroupsModule,
     PersonsModule,
-    CategoriesModule
-    // CompositionsModule
+    CategoriesModule,
+    ImagesModule,
+    CompositionsModule,
+    OrchestratorModule
   ],
   controllers: [ControlPanelController],
-  providers: [PrismaService, FeatureFlagsService]
+  providers: [PrismaService, FeatureFlagsService, OrchestratorModule]
 })
 export class AppModule {}
