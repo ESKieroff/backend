@@ -7,15 +7,16 @@ import {
   Param,
   Delete,
   Query,
-  NotFoundException,
-  BadRequestException
+  BadRequestException,
+  UseInterceptors,
+  UploadedFile
 } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { CreateImagesDto } from './dto/create-images.dto';
-import { UpdateImagesDto } from './dto/update-images.dto';
-import { CreateImageSchema, UpdateImageSchema } from './dto/image.schema';
-import { ZodError } from 'zod';
-import { ResponseImagesDto } from './dto/response-images.dto';
+import { CreateImagesDto } from './dto/create.images.dto';
+import { UpdateImagesDto } from './dto/update.images.dto';
+import { ResponseImagesDto } from './dto/respons.images.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Multer } from 'multer';
 
 @Controller('images')
 export class ImagesController {
@@ -25,69 +26,44 @@ export class ImagesController {
   async create(
     @Body() createImagesDto: CreateImagesDto
   ): Promise<ResponseImagesDto> {
-    const errors = [];
-
-    const descriptionValidation = CreateImageSchema.shape.description.safeParse(
-      createImagesDto.description
-    );
-    if (!descriptionValidation.success) {
-      errors.push({
-        field: 'description',
-        message: descriptionValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
-    const matchedImages = await this.imagesService.matchImageByData(
-      createImagesDto.description
-    );
-
-    if ((await matchedImages).length > 0) {
-      const existingImage = matchedImages[0];
-
-      if (!existingImage.active) {
-        throw new BadRequestException(
-          `Image already exists but is not active. Activate and update it: ${JSON.stringify(
-            existingImage
-          )}`
-        );
-      }
-
-      throw new BadRequestException(
-        'Image already exists. Try update it instead'
-      );
-    }
-
     const createdImage = await this.imagesService.create(createImagesDto);
     return {
       id: createdImage.id,
-      description: createdImage.description,
-      active: createdImage.active,
+      hash: createdImage.hash,
+      path: createdImage.path,
+      mime_type: createdImage.mime_type,
+      size: createdImage.size,
       created_at: createdImage.created_at,
-      updated_at: createdImage.updated_at
+      updated_at: createdImage.updated_at,
+      file_name: createdImage.file_name
     };
   }
 
   @Get()
   async findAll(
-    @Query('orderBy') orderBy: string = 'id'
+    @Query('orderBy') orderBy: string = 'id',
+    @Query('storage') storage: string
   ): Promise<ResponseImagesDto[]> {
     const validOrderFields = ['id', 'description'];
+    const validStorage = ['products', 'steps', 'stock'];
 
     if (!validOrderFields.includes(orderBy)) {
       throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
+    if (!validStorage.includes(storage)) {
+      throw new BadRequestException(`Invalid storage field: ${storage}`);
+    }
 
-    const images = await this.imagesService.findAll(orderBy);
+    const images = await this.imagesService.findAll(orderBy, storage);
     return images.map(image => ({
       id: image.id,
-      description: image.description,
-      active: image.active,
+      hash: image.hash,
+      path: image.path,
+      mime_type: image.mime_type,
+      size: image.size,
       created_at: image.created_at,
-      updated_at: image.updated_at
+      updated_at: image.updated_at,
+      file_name: image.file_name
     }));
   }
 
@@ -99,124 +75,76 @@ export class ImagesController {
     }
 
     const image = await this.imagesService.findById(idNumber);
-
-    const response: ResponseImagesDto = {
+    return {
       id: image.id,
-      description: image.description,
-      active: image.active,
+      hash: image.hash,
+      path: image.path,
+      mime_type: image.mime_type,
+      size: image.size,
       created_at: image.created_at,
-      updated_at: image.updated_at
+      updated_at: image.updated_at,
+      file_name: image.file_name
     };
-
-    return response;
   }
 
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateImagesDto: UpdateImagesDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateImagesDto: UpdateImagesDto
   ): Promise<ResponseImagesDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const existingImage = await this.imagesService.findById(idNumber);
-    if (!existingImage) {
-      throw new NotFoundException(`Image with ID ${id} not found`);
-    }
-
-    if (!existingImage.active) {
-      throw new BadRequestException(`Image ID ${id} is not active`);
-    }
-
-    const allowedFields = Object.keys(UpdateImageSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateImagesDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['image_id', 'group_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdateImageSchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updatedImage = await this.imagesService.update(
       idNumber,
-      updateData as UpdateImagesDto
+      updateImagesDto
     );
-
     return {
       id: updatedImage.id,
-      description: updatedImage.description,
-      active: updatedImage.active,
+      hash: updatedImage.hash,
+      path: updatedImage.path,
+      mime_type: updatedImage.mime_type,
+      size: updatedImage.size,
       created_at: updatedImage.created_at,
-      updated_at: updatedImage.updated_at
+      updated_at: updatedImage.updated_at,
+      file_name: updatedImage.file_name
     };
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const idNumber = +id;
-
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const existingImage = await this.imagesService.findById(idNumber);
-    if (!existingImage) {
-      throw new NotFoundException(`Image with ID ${idNumber} not found`);
-    }
-
-    try {
-      await this.imagesService.remove(idNumber);
-
-      return { message: `Image with ID ${idNumber} deleted successfully` };
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    await this.imagesService.remove(idNumber);
+    return { message: `Image with ID ${idNumber} deleted successfully` };
   }
 
-  @Post('activate/:id')
-  async activate(@Param('id') id: string) {
+  @Post('upload/:id')
+  @UseInterceptors(FileInterceptor('image'))
+  async uploadImg(
+    @UploadedFile() image: Multer.File,
+    @Param('id') id: string,
+    @Query('storage') storage: string
+  ) {
     const idNumber = +id;
+    const validStorage = ['products', 'steps', 'stock'];
+
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
+    if (!image) {
+      throw new BadRequestException('No image provided');
+    }
+    if (!validStorage.includes(storage)) {
+      throw new BadRequestException(`Invalid storage: ${storage}`);
+    }
 
-    await this.imagesService.reactivateImage(idNumber);
-
-    return { message: `Image ID ${id} activated successfully` };
+    const uploadedImage = await this.imagesService.uploadImage(idNumber);
+    return { message: 'Image uploaded successfully', image: uploadedImage };
   }
 }

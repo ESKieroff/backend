@@ -83,7 +83,20 @@ VALUES
     ('Seleção de Sabor'),
     ('Seleção de Aroma');
     
-    
+-- Insert into groups
+INSERT INTO "groups" ("description", "father_id" )
+VALUES 
+  ('Batata', Null),
+	('Tomate', Null),
+	('Cebola', Null),
+	('Couve', Null),
+  ('Melancia', Null),
+	('Batata Branca',1),
+	('Tomate Cereja',2),
+	('Cebola Roxa',3),
+	('Couve Mirim',4),
+  ('Melancia Gigante',5);
+	
 -- Insert into products
 INSERT INTO "products" ("description", "code", "sku", "origin", "unit_measure","category_id", "group_id", "supplier_id", "nutritional_info")
 VALUES 
@@ -376,20 +389,6 @@ VALUES
     (4, 'Novo Equipamento Instalado', 'Novo equipamento foi instalado na linha de produção.', 4),
     (5, 'Incidente de Segurança', 'Ocorreu um incidente de segurança no armazém.', 5);
 
--- Insert into groups
-INSERT INTO "groups" ("description", "father_id" )
-VALUES 
-  ('Batata', Null),
-	('Tomate', Null),
-	('Cebola', Null),
-	('Couve', Null),
-  ('Melancia', Null),
-	('Batata Branca',1),
-	('Tomate Cereja',2),
-	('Cebola Roxa',3),
-	('Couve Mirim',4),
-  ('Melancia Gigante',5);
-	
 -- Insert into compositions
 INSERT INTO "compositions" ("product_id", "description")
 VALUES 

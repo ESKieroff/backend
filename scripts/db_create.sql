@@ -22,9 +22,6 @@ CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 
 -- CreateEnum
 CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
 
--- CreateEnum
-CREATE TYPE "Batch_Status" AS ENUM ('PENDING', 'USED', 'CANCELED');
-
 -- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
@@ -75,7 +72,6 @@ CREATE TABLE "products" (
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
     "updated_by" TEXT,
-    "groupsId" INTEGER,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
@@ -279,19 +275,6 @@ CREATE TABLE "settings" (
 );
 
 -- CreateTable
-CREATE TABLE "batchs" (
-    "id" SERIAL NOT NULL,
-    "batch" VARCHAR(255) NOT NULL,
-    "status" "Batch_Status" NOT NULL DEFAULT 'PENDING',
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" TEXT,
-    "updated_by" TEXT,
-
-    CONSTRAINT "batchs_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "compositions" (
     "id" SERIAL NOT NULL,
     "product_id" INTEGER NOT NULL,
@@ -336,7 +319,7 @@ CREATE TABLE "groups" (
 
 -- CreateTable
 CREATE TABLE "images" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "hash" TEXT NOT NULL,
     "image_bin" BYTEA[],
     "path" TEXT NOT NULL,
@@ -352,8 +335,8 @@ CREATE TABLE "images" (
     "product" INTEGER,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" INTEGER,
-    "updated_by" INTEGER,
+    "created_by" TEXT,
+    "updated_by" TEXT,
 
     CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );
@@ -383,13 +366,19 @@ CREATE UNIQUE INDEX "production_orders_number_key" ON "production_orders"("numbe
 CREATE UNIQUE INDEX "settings_key_key" ON "settings"("key");
 
 -- AddForeignKey
+ALTER TABLE "products" ADD CONSTRAINT "products_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "products" ADD CONSTRAINT "products_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_groupsId_fkey" FOREIGN KEY ("groupsId") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "products" ADD CONSTRAINT "products_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "prices" ADD CONSTRAINT "prices_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -459,3 +448,9 @@ ALTER TABLE "images" ADD CONSTRAINT "images_stock_item_fkey" FOREIGN KEY ("stock
 
 -- AddForeignKey
 ALTER TABLE "images" ADD CONSTRAINT "images_steps_progress_fkey" FOREIGN KEY ("steps_progress") REFERENCES "production_steps_progress"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;

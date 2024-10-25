@@ -7,29 +7,34 @@ export class ImagesRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.imagesCreateInput): Promise<images> {
-    const image = await this.prisma.images.create({
+    return await this.prisma.images.create({
       data
     });
-
-    const imageResponse = {
-      ...image
-    };
-    return imageResponse;
   }
 
-  async findAll(orderBy: string): Promise<images[]> {
+  async findAll(orderBy: string, imageType: string): Promise<images[]> {
     const validOrderFields = ['id', 'description'];
 
     if (!validOrderFields.includes(orderBy)) {
       throw new Error('Invalid order field');
     }
 
-    const result = await this.prisma.images.findMany({
-      where: { active: true },
+    let whereCondition = {};
+
+    if (imageType === 'products') {
+      whereCondition = { product: { not: null } };
+    } else if (imageType === 'steps') {
+      whereCondition = { steps_progress: { not: null } };
+    } else if (imageType === 'stock') {
+      whereCondition = { stock_item: { not: null } };
+    } else {
+      throw new Error('Invalid image type');
+    }
+
+    return this.prisma.images.findMany({
+      where: whereCondition,
       orderBy: { [orderBy]: 'asc' }
     });
-
-    return result;
   }
 
   async findById(id: number): Promise<images | null> {
@@ -46,18 +51,16 @@ export class ImagesRepository {
     return imageWithoutSensitiveFields;
   }
 
+  async findByHash(hash: string): Promise<images | null> {
+    return this.prisma.images.findFirst({
+      where: { hash }
+    });
+  }
+
   async findManyByIds(ids: number[]): Promise<images[]> {
     return this.prisma.images.findMany({
       where: {
         id: { in: ids }
-      }
-    });
-  }
-
-  async matchImageByData(description: string): Promise<images[]> {
-    return this.prisma.images.findMany({
-      where: {
-        OR: [{ description: { equals: description } }]
       }
     });
   }
@@ -86,30 +89,8 @@ export class ImagesRepository {
       throw new Error('Image not found');
     }
 
-    await this.prisma.images.update({
-      where: { id },
-      data: {
-        active: false,
-        updated_at: new Date()
-      }
-    });
-  }
-
-  async reactivate(id: number): Promise<void> {
-    if (!id) {
-      throw new Error('ID not found');
-    }
-    const existingImage = await this.findById(id);
-    if (!existingImage) {
-      throw new Error('Image not found');
-    }
-
-    await this.prisma.images.update({
-      where: { id },
-      data: {
-        active: true,
-        updated_at: new Date()
-      }
+    await this.prisma.images.delete({
+      where: { id }
     });
   }
 }
