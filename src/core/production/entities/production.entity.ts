@@ -1,12 +1,15 @@
+import { ProductionItem } from './production-item.entity';
 import { Production_Status } from '../../common/enums';
 
 export class Production {
   id: number;
+  number: number;
   description: string;
-  prodution_quantity_estimated: number;
-  production_quantity_real: number;
-  lote: string;
-  expiration: Date;
+  production_date: Date;
+  created_at: Date;
+  updated_at: Date;
+  created_by: number;
+  updated_by: number;
   Production_Status: Production_Status;
-  final_product: number;
+  production_items: ProductionItem[];
 }

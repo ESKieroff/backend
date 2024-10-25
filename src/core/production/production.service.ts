@@ -1,194 +1,198 @@
-// import { Injectable } from '@nestjs/common';
-// import { CreateProductionDto } from './dto/create-production.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateProductionDto } from './dto/create-production.dto';
+//import { CreateProductionItemsDto } from './dto/create-production.dto';
+import { UpdateProductionDto } from './dto/update-production.dto';
+import { ProductionRepository } from './production.repository';
+import { production_orders } from '@prisma/client';
+import { format } from 'date-fns';
 
-// @Injectable()
-// export class ProductionService {
-//   //constructor(private readonly productionRepository: ProductionRepository) {}
+@Injectable()
+export class ProductionService {
+  constructor(private readonly productionRepository: ProductionRepository) {}
 
-//   async create(createProductionDto: CreateProductionDto) {
-//     createProductionDto.name,
-//       createProductionDto.price,
-//       createProductionDto.stock;
-//   }
+  async create(createProductionDto: CreateProductionDto) {
+    const production = await this.productionRepository.createOrder({
+      number: createProductionDto.number,
+      description: createProductionDto.description,
+      production_date: new Date(createProductionDto.production_date),
+      Production_Status: createProductionDto.Production_Status,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
 
-//   async matchProductionByData() {}
+    let sequence = 1;
+    for (const item of createProductionDto.production_items) {
+      await this.productionRepository.createOrderItem({
+        production_order_id: production.id,
+        sequence: sequence,
+        final_product_id: item.final_product_id,
+        production_quantity_estimated: item.production_quantity_estimated,
+        production_quantity_real: item.production_quantity_real,
+        production_quantity_loss:
+          item.production_quantity_estimated - item.production_quantity_real,
+        lote: item.lote,
+        lote_expiration: item.lote_expiration,
+        created_at: new Date(),
+        updated_at: new Date()
+      });
 
-//   // findAll() {
-//   //   return 'This action returns all production';
-//   // }
+      sequence++;
+    }
+    return { production, items: createProductionDto.production_items };
+  }
 
-//   // findOne(id: number) {
-//   //   return `This action returns a #${id} production`;
-//   // }
+  async findAll(orderBy: string): Promise<
+    (Omit<
+      production_orders,
+      'created_at' | 'updated_at' | 'production_date'
+    > & {
+      created_at: string;
+      updated_at: string;
+      production_date: string;
+    })[]
+  > {
+    const findedProduction =
+      await this.productionRepository.findAllProductionItems(orderBy);
+    return findedProduction.map(production =>
+      this.formatProductionDate(production)
+    );
+  }
 
-//   // update(id: number, _updateProductionDto: UpdateProductionDto) {
-//   //   return `This action updates a #${id} production`;
-//   // }
+  async findOne(id: number): Promise<
+    Omit<production_orders, 'created_at' | 'updated_at' | 'production_date'> & {
+      created_at: string;
+      updated_at: string;
+      production_date: string;
+    }
+  > {
+    const order = await this.productionRepository.findById(id);
 
-//   // remove(id: number) {
-//   //   return `This action removes a #${id} production`;
-//   // }
+    if (!order) {
+      throw new NotFoundException(`Production with ID ${id} not found`);
+    }
 
-//   //   return matchedProduct.map(product => this.formatProductDate(product));
-//   // }
-// }
-// /*
-// import {
-//   BadRequestException,
-//   Injectable,
-//   NotFoundException
-// } from '@nestjs/common';
-// import { CreateProductDto } from './dto/create-product.dto';
-// import { UpdateProductDto } from './dto/update-product.dto';
-// import { ProductsRepository } from './products.repository';
-// import { products } from '@prisma/client';
-// import { format } from 'date-fns';
+    return this.formatProductionDate(order);
+  }
 
-// @Injectable()
-// export class ProductsService {
-//   constructor(private readonly productsRepository: ProductsRepository) {}
+  async update(id: number, updateProductionDto: UpdateProductionDto) {
+    await this.productionRepository.updateOrder(id, {
+      description: updateProductionDto.description ?? undefined,
+      production_date: updateProductionDto.production_date
+        ? new Date(updateProductionDto.production_date)
+        : undefined,
+      Production_Status: updateProductionDto.Production_Status ?? undefined,
+      updated_at: new Date(),
+      updated_by: updateProductionDto.updated_by ?? undefined
+    });
 
-//   async create(createProductDto: CreateProductDto) {
-//     const existingProduct = await this.matchProductByData(
-//       createProductDto.code,
-//       createProductDto.description,
-//       createProductDto.sku
-//     );
+    const existingItems = await this.productionRepository.getOrderItems(id);
+    const updatedItems = [];
 
-//     if (existingProduct.length > 0) {
-//       throw new Error(
-//         `Product already exists: ${JSON.stringify(existingProduct[0])}`
-//       );
-//     }
+    let sequence = (await this.productionRepository.getLastSequence(id)) + 1;
 
-//     const createdProduct =
-//       await this.productsRepository.create(createProductDto);
+    for (const item of updateProductionDto.production_items) {
+      const existingItem = existingItems.find(
+        i => i.final_product_id === item.final_product_id
+      );
 
-//     return this.formatProductDate(createdProduct);
-//   }
+      if (existingItem) {
+        await this.productionRepository.updateOrderItem(
+          item.production_order_id,
+          {
+            final_product_id: item.final_product_id,
+            production_quantity_estimated:
+              item.production_quantity_estimated ?? undefined,
+            production_quantity_real:
+              item.production_quantity_real ?? undefined,
+            production_quantity_loss:
+              item.production_quantity_estimated &&
+              item.production_quantity_real
+                ? item.production_quantity_estimated -
+                  item.production_quantity_real
+                : undefined,
+            updated_at: new Date(),
+            updated_by: updateProductionDto.updated_by ?? undefined
+          }
+        );
+        updatedItems.push({ ...existingItem, ...item });
+      } else {
+        // Cria um novo item
+        const newItem = await this.productionRepository.createOrderItem({
+          production_order_id: id,
+          sequence: sequence,
+          final_product_id: item.final_product_id!,
+          production_quantity_estimated: item.production_quantity_estimated!,
+          production_quantity_real: item.production_quantity_real!,
+          production_quantity_loss:
+            item.production_quantity_estimated && item.production_quantity_real
+              ? item.production_quantity_estimated -
+                item.production_quantity_real
+              : 0,
+          lote: item.lote!,
+          lote_expiration: item.lote_expiration!,
+          created_at: new Date(),
+          updated_at: new Date(),
+          created_by: updateProductionDto.updated_by!,
+          updated_by: updateProductionDto.updated_by!
+        });
+        updatedItems.push(newItem);
+        sequence++;
+      }
+    }
 
-//   async findAll(orderBy: string): Promise<
-//     (Omit<products, 'created_at' | 'updated_at'> & {
-//       created_at: string;
-//       updated_at: string;
-//     })[]
-//   > {
-//     const findedProducts = await this.productsRepository.findAll(orderBy);
-//     return findedProducts.map(product => this.formatProductDate(product));
-//   }
+    const allItems = updatedItems.concat(existingItems);
+    allItems.sort((a, b) => a.sequence - b.sequence);
 
-//   async findById(id: number) {
-//     const product = await this.isValid(id);
-//     return this.formatProductDate(product);
-//   }
+    return {
+      production: {
+        id,
+        description: updateProductionDto.description,
+        updated_at: new Date(),
+        updated_by: updateProductionDto.updated_by,
+        items: updatedItems.concat(
+          existingItems.filter(i => !updatedItems.includes(i))
+        )
+      }
+    };
+  }
 
-//   private formatProductDate(product: products): Omit<
-//     products,
-//     'created_at' | 'updated_at'
-//   > & {
-//     created_at: string;
-//     updated_at: string;
-//   } {
-//     return {
-//       ...product,
-//       created_at: format(new Date(product.created_at), 'dd/MM/yyyy HH:mm:ss'),
-//       updated_at: format(new Date(product.updated_at), 'dd/MM/yyyy HH:mm:ss')
-//     };
-//   }
+  async remove(id: number) {
+    await this.isValid(id);
+    await this.productionRepository.delete(id);
+  }
 
-//   async isValid(id: number) {
-//     const product = await this.productsRepository.findById(id);
+  private formatProductionDate(production: production_orders): Omit<
+    production_orders,
+    'created_at' | 'updated_at' | 'production_date'
+  > & {
+    created_at: string;
+    updated_at: string;
+    production_date: string;
+  } {
+    return {
+      ...production,
+      created_at: format(
+        new Date(production.created_at),
+        'dd/MM/yyyy HH:mm:ss'
+      ),
+      updated_at: format(
+        new Date(production.updated_at),
+        'dd/MM/yyyy HH:mm:ss'
+      ),
+      production_date: format(
+        new Date(production.production_date),
+        'dd/MM/yyyy HH:mm:ss'
+      )
+    };
+  }
 
-//     if (!product) {
-//       throw new NotFoundException(`Product with ID ${id} not found`);
-//     } else if (!product.active) {
-//       throw new BadRequestException(`Product with ID ${id} is not active`);
-//     }
-//     return product;
-//   }
+  async isValid(id: number) {
+    const order = await this.productionRepository.findById(id);
 
-//   async reactivateProduct(id: number) {
-//     const product = await this.productsRepository.findById(id);
+    if (!order) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
 
-//     if (!product) {
-//       throw new NotFoundException(`Product with ID ${id} not found`);
-//     }
-
-//     if (product.active) {
-//       throw new BadRequestException(`Product with ID ${id} is already active`);
-//     }
-
-//     const reactivatedProduct = await this.productsRepository.update(id, {
-//       active: true,
-//       updated_at: new Date()
-//     });
-
-//     return this.formatProductDate(reactivatedProduct);
-//   }
-
-//   async matchProductByData(code: string, description: string, sku: string) {
-//     const matchedProduct = await this.productsRepository.matchProductByData(
-//       code,
-//       description,
-//       sku
-//     );
-
-//     return matchedProduct.map(product => this.formatProductDate(product));
-//   }
-//   async update(id: number, updateProductDto: UpdateProductDto) {
-//     const product = await this.isValid(id);
-
-//     if (!product) {
-//       throw new NotFoundException(`Product with ID ${id} not found`);
-//     }
-//     const updatedProductDto = {
-//       ...updateProductDto,
-//       updated_at: new Date(),
-//       active: product.active
-//     };
-
-//     const updatedPorduct = await this.productsRepository.update(
-//       id,
-//       updatedProductDto
-//     );
-
-//     return this.formatProductDate(updatedPorduct);
-//   }
-
-//   remove(id: number) {
-//     return this.productsRepository.delete(id);
-//   }
-
-//   async bulkRemove(ids: number[]) {
-//     const existingProducts = await this.productsRepository.findManyByIds(ids);
-
-//     const errors = [];
-//     const validIds = [];
-
-//     for (const id of ids) {
-//       const product = existingProducts.find(p => p.id === id);
-
-//       if (!product) {
-//         errors.push(`Product with ID ${id} not found`);
-//         continue;
-//       }
-
-//       if (!product.active) {
-//         errors.push(`Product with ID ${id} is not active`);
-//         continue;
-//       }
-
-//       validIds.push(id);
-//     }
-
-//     if (validIds.length > 0) {
-//       await this.productsRepository.bulkUpdateStatus(validIds, {
-//         active: false
-//       });
-//     }
-
-//     return { removedIds: validIds, errors };
-//   }
-// }
-
-// */
+    return order;
+  }
+}

@@ -1,32 +1,30 @@
 variables:
   # Docker image details
-  DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
-  DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
-  DOCKER_IMAGE_TAG: "latest"
-  DOCKER_DRIVER: "overlay2"
-  PUPPETEER_SKIP_DOWNLOAD: "true"
+  DOCKER_IMAGE_NAME1: 'norohim/cp-planta-backend'
+  DOCKER_IMAGE_NAME2: 'norohim/postgres-optimal'
+  DOCKER_IMAGE_NAME3: 'norohim/pgbouncer'
+  DOCKER_IMAGE_TAG: 'latest'
+  DOCKER_DRIVER: 'overlay2'
+  DOCKER_TLS_CERTDIR: ''
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
 
 stages:
   - commit-msg-check
   - lint
   - test
-  - build
-  - push
+  - build_and_push
   - deploy
-
-cache:
-  paths:
-    - node_modules/
 
 # Default settings for all jobs
 default:
-  image: node:20
+  image: node:20-alpine
   before_script:
     - cp .env.example .env
-    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=production/g" .env
     - npm cache clean --force
     - rm -rf node_modules/ package-lock.json # Remove node_modules directory
     - npm install --force --ignore-scripts # Install dependencies cleanly
+    - df -h
 
 # Commit message check using commitlint
 commit-msg-check:
@@ -39,9 +37,8 @@ commit-msg-check:
 
 # Linting and formatting job
 lint:
+  image: node:20-alpine
   stage: lint
-  before_script:
-    - npm install -g eslint@8.x.x prettier@3.x.x
   script:
     - npm run lint
     - npm run prettier
@@ -51,81 +48,48 @@ lint:
 
 # Testing job
 test:
+  image: node:20-alpine
   stage: test
-  before_script:
-    - npm install -g jest@29.x.x
   script:
     - npm run test:ci
   only:
     - merge_requests
     - branches
-
-# Build Docker image job
-build_docker_image:
-  stage: build
-  image: docker:20.10.16
-  services:
-    - name: docker:20.10.16-dind
-      alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_TLS_CERTDIR: ""
-  before_script:
-    - docker info
-    - cp .env.example .env
-    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
+  after_script:
     - npm cache clean --force
-    - rm -rf node_modules/ package-lock.json # Remove node_modules directory
-  script:
-    - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
-    - docker save "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" -o image1.tar
-    - cd prod
-    - docker build -f ./dockerfile.postgres_prod -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
-    - docker save "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" -o image2.tar
-    - cd ..
-  artifacts:
-    paths:
-      - image1.tar
-      - image2.tar
-    expire_in: 1 hour
-  only:
-    - master
 
-# Push Docker image job
-push_docker_image:
-  stage: push
+# Build and Push Docker image job
+build_and_push_docker_image:
+  stage: build_and_push
   image: docker:20.10.16
   services:
     - name: docker:20.10.16-dind
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_TLS_CERTDIR: ""
   before_script:
+    - sleep 10
     - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker load -i image1.tar
+    - docker build -f ./prod/dockerfile.node_backend -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG"
-    - docker load -i image2.tar
+    - cd prod
+    - docker build -f ./dockerfile.postgres_optimal -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG"
-  dependencies:
-    - build_docker_image
+    - docker build -f ./dockerfile.pgbouncer -t "$DOCKER_IMAGE_NAME3:$DOCKER_IMAGE_TAG" .
+    - docker push "$DOCKER_IMAGE_NAME3:$DOCKER_IMAGE_TAG"
+    - cd ..
   only:
     - master
 
 # trigger deploy when build an push succeed
 trigger-infra-pipeline:
   stage: deploy
+  before_script:
+    - apk add --no-cache curl jq bash
   script:
     - echo "Triggering infrastructure pipeline..."
-    - curl -X POST \
-        --fail \
-        -F token=90cbad47a562a7bae7cf8de55d3e34 \
-        -F ref=main \
-        https://tools.ages.pucrs.br/api/v4/projects/683/trigger/pipeline
+    - curl -X POST --fail -F token=90cbad47a562a7bae7cf8de55d3e34 -F ref=main https://tools.ages.pucrs.br/api/v4/projects/683/trigger/pipeline
   only:
-    - main
+    - master
   dependencies:
-    - build_docker_image
-    - push_docker_image
+    - build_and_push_docker_image

@@ -1,100 +1,198 @@
-// import { Injectable } from '@nestjs/common';
-// import { PrismaService } from 'src/database/prisma/prisma.service';
-// import { Prisma, Production } from '@prisma/client';
-// @Injectable()
-// export class ProductionRepository {
-//   constructor(private prisma: PrismaService) {}
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import {
+  production_orders,
+  Prisma,
+  production_orders_items
+} from '@prisma/client';
 
-//   async create(data: Prisma.productionCreateInput): Promise<Production> {
-//     return this.prisma.Production.create({ data });
-//   }
+@Injectable()
+export class ProductionRepository {
+  constructor(private prisma: PrismaService) {}
 
-//   async findAll(orderBy: string): Promise<Production[]> {
-//     const validOrderFields = [
-//       'id',
-//       'description',
-//       'prodution_quantity_estimated',
-//       'production_quantity_real',
-//       'lote',
-//       'expiration',
-//       'Production_Status'
-//     ];
+  async createOrder(data: Prisma.production_ordersCreateInput) {
+    return await this.prisma.production_orders.create({
+      data
+    });
+  }
 
-//     if (!validOrderFields.includes(orderBy)) {
-//       throw new Error('Invalid order field');
-//     }
+  async createOrderItem(
+    data: Prisma.production_orders_itemsUncheckedCreateInput
+  ) {
+    return await this.prisma.production_orders_items.create({
+      data
+    });
+  }
 
-//     return this.prisma.Production.findMany({
-//       orderBy: { [orderBy]: 'asc' }
-//     });
-//   }
+  async getLastSequence(productionOrderId: number): Promise<number> {
+    const lastItem = await this.prisma.production_orders_items.findFirst({
+      where: { production_order_id: productionOrderId },
+      orderBy: { sequence: 'desc' }
+    });
+    return lastItem ? lastItem.sequence : 0;
+  }
 
-//   async findById(id: number): Promise<Production | null> {
-//     return this.prisma.Production.findUnique({
-//       where: { id }
-//     });
-//   }
+  async getOrderItems(
+    productionOrderId: number
+  ): Promise<production_orders_items[]> {
+    return await this.prisma.production_orders_items.findMany({
+      where: { production_order_id: productionOrderId },
+      orderBy: { sequence: 'asc' }
+    });
+  }
+  //Precisa da order no bd
+  async findAll(orderBy: string): Promise<production_orders[]> {
+    const order = [
+      'id',
+      'number',
+      'description',
+      'production_date',
+      'production_line',
+      'Production_Status',
+      'created_by',
+      'updated_by'
+    ];
+    if (!order.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
 
-//   async update(
-//     id: number,
-//     data: Prisma.productionUpdateInput
-//   ): Promise<Production> {
-//     return this.prisma.Production.update({
-//       where: { id },
-//       data
-//     });
-//   }
+    const result = await this.prisma.production_orders.findMany({
+      orderBy: { [orderBy]: 'asc' }
+    });
+    return result;
+  }
 
-//   async updateStatus(
-//     id: number,
-//     newStatus: Production_Status
-//   ): Promise<Production> {
-//     const currentProduction = await this.findById(id);
+  async findAllProductionItems(orderBy: string): Promise<production_orders[]> {
+    const order = [
+      'id',
+      'number',
+      'description',
+      'production_date',
+      'Production_Status',
+      'created_by',
+      'updated_by'
+    ];
+    if (!order.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
 
-//     if (!currentProduction) {
-//       throw new Error('Production order not found');
-//     }
+    const result = await this.prisma.production_orders.findMany({
+      orderBy: { [orderBy]: 'asc' },
+      include: {
+        production_item: {
+          select: {
+            id: true,
+            production_order_id: true,
+            sequence: true,
+            final_product_id: true,
+            production_quantity_estimated: true,
+            production_quantity_real: true,
+            production_quantity_loss: true,
+            lote: true,
+            lote_expiration: true,
+            created_at: true,
+            updated_at: true,
+            created_by: true,
+            updated_by: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
+      }
+    });
 
-//     if (!this.canChangeStatus(currentProduction.Production_Status, newStatus)) {
-//       throw new Error('Invalid status transition');
-//     }
+    return result;
+  }
 
-//     return this.prisma.Production.update({
-//       where: { id },
-//       data: { Production_Status: newStatus, updated_at: new Date() }
-//     });
-//   }
+  async findById(id: number): Promise<production_orders | null> {
+    const order = this.prisma.production_orders.findUnique({
+      where: { id },
+      include: {
+        production_item: {
+          select: {
+            id: true,
+            production_order_id: true,
+            sequence: true,
+            final_product_id: true,
+            final_product_made: {
+              select: {
+                description: true
+              }
+            },
+            production_quantity_estimated: true,
+            production_quantity_real: true,
+            production_quantity_loss: true,
+            lote: true,
+            lote_expiration: true,
+            created_at: true,
+            updated_at: true,
+            created_by: true,
+            updated_by: true
+          }
+        }
+      }
+    });
 
-//   private canChangeStatus(
-//     currentStatus: Production_Status,
-//     newStatus: Production_Status
-//   ): boolean {
-//     const validTransitions = {
-//       [Production_Status.CREATED]: [Production_Status.SCHEDULED],
-//       [Production_Status.SCHEDULED]: [
-//         Production_Status.OPEN,
-//         Production_Status.CANCELED
-//       ],
-//       [Production_Status.OPEN]: [
-//         Production_Status.IN_PROGRESS,
-//         Production_Status.STOPPED
-//       ],
-//       [Production_Status.IN_PROGRESS]: [
-//         Production_Status.FINISHED,
-//         Production_Status.STOPPED
-//       ],
-//       [Production_Status.STOPPED]: [
-//         Production_Status.IN_PROGRESS,
-//         Production_Status.CANCELED
-//       ],
-//       [Production_Status.FINISHED]: [],
-//       [Production_Status.CANCELED]: []
-//     };
+    if (!order) {
+      return null;
+    }
 
-//     return validTransitions[currentStatus].includes(newStatus);
-//   }
+    return order;
+  }
 
-//   async delete(id: number): Promise<void> {
-//     await this.updateStatus(id, Production_Status.CANCELED);
-//   }
-// }
+  async updateOrder(
+    id: number,
+    data: Prisma.production_ordersUpdateInput
+  ): Promise<production_orders> {
+    const product = this.prisma.production_orders.update({
+      where: { id },
+      data
+    });
+
+    const productionResponse = {
+      ...product
+    };
+    return productionResponse;
+  }
+
+  async updateOrderItem(
+    id: number,
+    data: Prisma.production_orders_itemsUncheckedUpdateInput
+  ): Promise<production_orders_items> {
+    const product = this.prisma.production_orders_items.update({
+      where: { id },
+      data
+    });
+
+    const productionResponse = {
+      ...product
+    };
+    return productionResponse;
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.prisma.production_orders_items.deleteMany({
+      where: { production_order_id: id }
+    });
+
+    const progressIds = await this.prisma.production_steps_progress
+      .findMany({
+        where: { production_id: id },
+        select: { id: true }
+      })
+      .then(results => results.map(result => result.id));
+
+    if (progressIds.length > 0) {
+      await this.prisma.ocurrences_of_production_stages.deleteMany({
+        where: { stage_ocurred_id: { in: progressIds } }
+      });
+    }
+
+    await this.prisma.production_steps_progress.deleteMany({
+      where: { production_id: id }
+    });
+
+    await this.prisma.production_orders.delete({
+      where: { id }
+    });
+  }
+}
