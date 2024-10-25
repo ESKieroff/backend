@@ -2,13 +2,13 @@
 -- o password dos usuários é "cpplanta"
 INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
 VALUES 
-	  ('root', 'cp.planta@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'CP', 'Planta', 'ROOT', 'MALE'),
-	  ('Cassio', 'cassio@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Cassio', 'Santos', 'ROOT', 'MALE'),
+  ('root', 'cp.planta@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'CP', 'Planta', 'ROOT', 'MALE'),	
+    ('Cassio', 'cassio@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Cassio', 'Santos', 'ROOT', 'MALE'),
     ('Roberto', 'fulano@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Roberto', 'Da Silva', 'DEMO', 'MALE'),
     ('Ana', 'ana@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
     ('Maria', 'maria@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Maria', 'Silva', 'DEMO', 'FEMALE');
 	
--- Insert into settings
+-- Insert into settings 
 INSERT INTO "settings" ("key", "value", "description", "created_by", "updated_by") 
 VALUES
 ('enableNegativeStock', 'true', 'Serve para habilitar ou desabilitar o controle de estoque negativo','root','root'),
@@ -29,6 +29,21 @@ VALUES
     ('Sebastião Costa'),	
     ('Produtor Rural'),
     ('Ecologia na Veia');	
+        
+    
+-- Insert into groups
+INSERT INTO "groups" ("description", "father_id" )
+VALUES 
+    ('Batata', Null),
+	('Tomate', Null),
+	('Cebola', Null),
+	('Couve', Null),
+    ('Melancia', Null),
+	('Batata Branca',1),
+	('Tomate Cereja',2),
+	('Cebola Roxa',3),
+	('Couve Mirim',4),
+    ('Melancia Gigante',5);
 	
 -- Insert into categories
 INSERT INTO "categories" ("description")
