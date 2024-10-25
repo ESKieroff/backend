@@ -69,7 +69,6 @@ CREATE TABLE "products" (
     "group_id" INTEGER NOT NULL DEFAULT 1,
     "supplier_id" INTEGER,
     "nutritional_info" JSONB,
-    "photo" BYTEA[],
     "active" BOOLEAN NOT NULL DEFAULT true,
     "origin" "Origin" NOT NULL DEFAULT 'RAW_MATERIAL',
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -149,7 +148,6 @@ CREATE TABLE "stock_items" (
     "total_price" DOUBLE PRECISION NOT NULL,
     "lote" TEXT,
     "expiration" TIMESTAMP(3),
-    "photo" BYTEA[],
     "supplier" INTEGER,
     "costumer" INTEGER,
     "batchsid" INTEGER,
@@ -226,7 +224,6 @@ CREATE TABLE "production_steps_progress" (
     "quantity_loss" DOUBLE PRECISION,
     "machine" TEXT,
     "production_line" TEXT,
-    "photo" BYTEA[],
     "observation" TEXT,
     "operator_id" INTEGER,
     "ocurrences" JSON,
@@ -337,6 +334,30 @@ CREATE TABLE "groups" (
     CONSTRAINT "groups_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "images" (
+    "id" TEXT NOT NULL,
+    "hash" TEXT NOT NULL,
+    "image_bin" BYTEA[],
+    "path" TEXT NOT NULL,
+    "mime_type" TEXT NOT NULL,
+    "file_name" TEXT NOT NULL,
+    "original_name" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "width" INTEGER NOT NULL,
+    "height" INTEGER NOT NULL,
+    "metadata" JSONB,
+    "steps_progress" INTEGER,
+    "stock_item" INTEGER,
+    "product" INTEGER,
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_by" INTEGER,
+    "updated_by" INTEGER,
+
+    CONSTRAINT "images_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -429,3 +450,12 @@ ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_product_id_fke
 
 -- AddForeignKey
 ALTER TABLE "groups" ADD CONSTRAINT "groups_father_id_fkey" FOREIGN KEY ("father_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_product_fkey" FOREIGN KEY ("product") REFERENCES "products"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_stock_item_fkey" FOREIGN KEY ("stock_item") REFERENCES "stock_items"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_steps_progress_fkey" FOREIGN KEY ("steps_progress") REFERENCES "production_steps_progress"("id") ON DELETE SET NULL ON UPDATE CASCADE;
