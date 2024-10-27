@@ -1,5 +1,5 @@
 export class CreateCompositionsDto {
-  product_id: number;
+  final_product: number;
   description: string;
   created_at: Date;
   updated_at: Date;
@@ -12,7 +12,7 @@ export class CreateCompositionsDto {
 export class CreateCompositionsItemsDto {
   readonly composition_id: number;
   readonly sequence: number;
-  readonly product_id: number;
+  readonly raw_product: number;
   readonly quantity: number;
   readonly created_at: Date;
   readonly updated_at: Date;

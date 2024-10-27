@@ -1,274 +1,205 @@
-// import {
-//   BadRequestException,
-//   Injectable,
-//   NotFoundException
-// } from '@nestjs/common';
-// import { CreateCompositionsDto, CreateCompositionsItemsDto } from './dto/create.compositions.dto';
-// import { UpdateCompositionsDto } from './dto/update.compositions.dto';
-// import { CompositionsRepository } from './compositions.repository';
-// import { SettingsService } from 'src/settings/settings.service';
-// import { LoteService } from '../common/lote.utils';
-// import { format } from 'date-fns';
-// import { compositions } from '@prisma/client';
-// import { Compositions_Moviment } from '../common/enums';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
+import { CreateCompositionsDto } from './dto/create.compositions.dto';
+import { UpdateCompositionsDto } from './dto/update.compositions.dto';
+import { CompositionsRepository } from './compositions.repository';
+import { format } from 'date-fns';
+import { compositions } from '@prisma/client';
 
-// @Injectable()
-// export class CompositionsService {
-//   constructor(
-//     private readonly compositionsRepository: CompositionsRepository,
-//     private readonly settingsService: SettingsService,
-//     private readonly loteService: LoteService
-//   ) {}
+@Injectable()
+export class CompositionsService {
+  constructor(
+    private readonly compositionsRepository: CompositionsRepository
+  ) {}
 
-//   compositionsMovimentsToCheck = new Set([
-//     Compositions_Moviment.OUTPUT,
-//     Compositions_Moviment.RESERVED,
-//     Compositions_Moviment.ADJUST
-//   ]);
+  private getCurrentUser(): string {
+    //TODO: Implementar busca do usuário logado
+    return 'root';
+  }
 
-//   async create(createCompositionsDto: CreateCompositionsDto) {
-//     const errorMessages = [];
-//     if (!Array.isArray(createCompositionsDto.compositions_items)) {
-//       throw new BadRequestException('Items must be an array');
-//     }
+  async create(createCompositionsDto: CreateCompositionsDto) {
+    const errorMessages = [];
+    if (!Array.isArray(createCompositionsDto.compositions_items)) {
+      throw new BadRequestException('Items must be an array');
+    }
 
-//     const existingCompositions = await this.compositionsRepository.findByDocumentNumber(
-//       createCompositionsDto.document_number
-//     );
-//     if (existingCompositions) {
-//       throw new BadRequestException(
-//         `Document number ${createCompositionsDto.document_number} already exists`
-//       );
-//     }
+    const existingCompositions =
+      await this.compositionsRepository.findByProductMade(
+        createCompositionsDto.final_product
+      );
+    if (existingCompositions) {
+      throw new BadRequestException(
+        `Composition to product ${createCompositionsDto.final_product} already exists`
+      );
+    }
 
-//     if (this.compositionsMovimentsToCheck.has(createCompositionsDto.compositions_moviment)) {
-//       const enableNegativeCompositions = await this.settingsService.get(
-//         'enableNegativeCompositions'
-//       );
+    if (errorMessages.length > 0) {
+      return {
+        success: false,
+        errors: errorMessages,
+        message: 'Não foi possível processar todos os itens do documento.'
+      };
+    }
 
-//       if (enableNegativeCompositions == 'false') {
-//         await this.validateCompositions(createCompositionsDto.compositions_items, errorMessages);
-//       }
-//     }
+    let compositionsDocument;
+    const createdItems = [];
+    try {
+      compositionsDocument =
+        await this.compositionsRepository.createCompositions({
+          product_made: {
+            connect: { id: createCompositionsDto.final_product }
+          },
+          description: createCompositionsDto.description,
+          production_steps: createCompositionsDto.production_steps,
+          users_created: {
+            connect: { username: this.getCurrentUser() }
+          },
+          users_updated: {
+            connect: { username: this.getCurrentUser() }
+          }
+        });
 
-//     if (errorMessages.length > 0) {
-//       return {
-//         success: false,
-//         errors: errorMessages,
-//         message:
-//           'Não foi possível processar todos os itens devido a saldos insuficientes.'
-//       };
-//     }
+      let sequencia = 1;
 
-//     let compositionsDocument;
-//     const createdItems = [];
-//     try {
-//       compositionsDocument = await this.compositionsRepository.createCompositions({
-//         document_number: createCompositionsDto.document_number,
-//         document_date: new Date(createCompositionsDto.document_date),
-//         compositions_moviment: createCompositionsDto.compositions_moviment,
-//         created_at: new Date(),
-//         updated_at: new Date()
-//       });
+      for (const item of createCompositionsDto.compositions_items) {
+        const createdItem =
+          await this.compositionsRepository.createCompositionsItems({
+            composition_id: compositionsDocument.id,
+            sequence: sequencia,
+            raw_product: item.raw_product,
+            quantity: item.quantity,
+            created_at: new Date(),
+            updated_at: new Date(),
+            created_by: this.getCurrentUser(),
+            updated_by: this.getCurrentUser()
+          });
+        sequencia++;
+        createdItems.push(createdItem);
+      }
 
-//       let sequencia = 1;
+      return {
+        compositionsDocument: {
+          id: compositionsDocument.id,
+          product_id: compositionsDocument.product_id,
+          description: compositionsDocument.description,
+          created_at: compositionsDocument.created_at,
+          updated_at: compositionsDocument.updated_at,
+          production_steps: compositionsDocument.production_steps,
+          items: createdItems
+        }
+      };
+    } catch (error) {
+      console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
 
-//       const compositions_location_default_str = await this.settingsService.get(
-//         'defaultCompositionsLocation'
-//       );
-//       const compositions_location_default = parseInt(compositions_location_default_str, 10);
+      if (compositionsDocument?.id) {
+        try {
+          await this.compositionsRepository.deleteCompositions(
+            compositionsDocument.id
+          );
+        } catch (deleteError) {
+          console.error(
+            'Error removing compositions document:',
+            (deleteError as Error).message
+          );
+        }
+      }
 
-//       for (const item of createCompositionsDto.compositions_items) {
-//         let lote;
-//         let expiration;
-//         if (!item.lote) {
-//           [lote, expiration] = await this.getLote(compositionsDocument.compositions_moviment);
-//         } else {
-//           lote = item.lote;
-//           expiration = new Date(item.expiration);
-//         }
+      return {
+        success: false,
+        message:
+          'Erro ao criar itens do documento de estoque. Documento foi removido.'
+      };
+    }
+  }
 
-//         const createdItem = await this.compositionsRepository.createCompositionsItems({
-//           compositions_id: compositionsDocument.id,
-//           product_id: item.product_id,
-//           sequence: sequencia,
-//           quantity: item.quantity,
-//           unit_price: item.unit_price,
-//           total_price: item.unit_price * item.quantity,
-//           lote: lote,
-//           expiration: expiration.toISOString(),
-//           observation: item.observation!,
-//           supplier: item.supplier!,
-//           costumer: item.costumer!,
-//           compositions_location_id: item.compositions_location_id || compositions_location_default,
-//           created_at: new Date(),
-//           updated_at: new Date()
-//         });
-//         sequencia++;
-//         createdItems.push(createdItem);
-//       }
+  async findAll(orderBy: string): Promise<
+    (Omit<compositions, 'created_at' | 'updated_at'> & {
+      created_at: string;
+      updated_at: string;
+    })[]
+  > {
+    const findedCompositions =
+      await this.compositionsRepository.findAllCompositionsItems(orderBy);
+    return findedCompositions.map(compositions =>
+      this.formatDate(compositions)
+    );
+  }
 
-//       return {
-//         compositionsDocument: {
-//           id: compositionsDocument.id,
-//           document_number: compositionsDocument.document_number,
-//           document_date: compositionsDocument.document_date,
-//           compositions_moviment: compositionsDocument.compositions_moviment,
-//           created_at: compositionsDocument.created_at,
-//           updated_at: compositionsDocument.updated_at,
-//           items: createdItems
-//         }
-//       };
-//     } catch (error) {
-//       console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
+  async findOne(id: number): Promise<
+    Omit<compositions, 'created_at' | 'updated_at'> & {
+      created_at: string;
+      updated_at: string;
+    }
+  > {
+    const order = await this.compositionsRepository.findById(id);
 
-//       if (compositionsDocument?.id) {
-//         try {
-//           await this.compositionsRepository.deleteCompositions(compositionsDocument.id);
-//         } catch (deleteError) {
-//           console.error(
-//             'Error removing compositions document:',
-//             (deleteError as Error).message
-//           );
-//         }
-//       }
+    if (!order) {
+      throw new NotFoundException(`Compositions with ID ${id} not found`);
+    }
 
-//       return {
-//         success: false,
-//         message:
-//           'Erro ao criar itens do documento de estoque. Documento foi removido.'
-//       };
-//     }
-//   }
+    return this.formatDate(order);
+  }
 
-//   async getLote(compositionsMoviment: Compositions_Moviment): Promise<[string, Date]> {
-//     const loteGenerated = await this.loteService.generateLote(
-//       compositionsMoviment === Compositions_Moviment.INPUT ? 'INPUT' : 'OUTPUT'
-//     );
-//     const [lote, expiration] = loteGenerated.split('-');
-//     return [lote, new Date(expiration)];
-//   }
+  async update(id: number, updateCompositionsDto: UpdateCompositionsDto) {
+    await this.compositionsRepository.updateCompositions(id, {
+      updated_at: new Date()
+    });
 
-//   private async validateCompositions(
-//     items: CreateCompositionsItemsDto[],
-//     errorMessages: string[]
-//   ) {
-//     for (const item of items) {
-//       const saldoAtual = await this.checkCompositions(item.product_id, item.lote);
-//       if (item.quantity > saldoAtual) {
-//         errorMessages.push(
-//           `Saldo insuficiente para o produto ${item.product_id} no lote ${item.lote}. \nQuantidade atual: ${saldoAtual}.`
-//         );
-//       }
-//     }
-//   }
+    const existingItems =
+      await this.compositionsRepository.getCompositionsItems(id);
 
-//   async checkCompositions(product_id: number, lote: string): Promise<number> {
-//     const estoque = await this.compositionsRepository.checkCompositions(product_id, lote);
+    const updatedItems = [];
 
-//     return estoque || 0;
-//   }
+    for (const item of updateCompositionsDto.compositions_items) {
+      const existingItem = existingItems.find(i => i.id === item.id);
 
-//   async findAll(orderBy: string): Promise<
-//     (Omit<compositions, 'created_at' | 'updated_at'> & {
-//       created_at: string;
-//       updated_at: string;
-//     })[]
-//   > {
-//     const findedCompositions = await this.compositionsRepository.findAllCompositionsItems(orderBy);
-//     return findedCompositions.map(compositions => this.formatDate(compositions));
-//   }
+      if (existingItem) {
+        const fieldsToUpdate: Partial<typeof item> = {};
 
-//   async findOne(id: number): Promise<
-//     Omit<compositions, 'created_at' | 'updated_at'> & {
-//       created_at: string;
-//       updated_at: string;
-//     }
-//   > {
-//     const order = await this.compositionsRepository.findById(id);
+        if (existingItem.quantity === null)
+          fieldsToUpdate['quantity'] = item.quantity;
+        if (existingItem.updated_at !== undefined)
+          fieldsToUpdate['updated_at'] = new Date();
+        if (existingItem.updated_by !== undefined)
+          fieldsToUpdate['updated_by'] = this.getCurrentUser();
 
-//     if (!order) {
-//       throw new NotFoundException(`Compositions with ID ${id} not found`);
-//     }
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          await this.compositionsRepository.updateCompositionsItems(item.id, {
+            ...fieldsToUpdate,
+            quantity: item.quantity,
+            updated_at: new Date(),
+            updated_by: updateCompositionsDto.updated_by ?? undefined
+          });
+          updatedItems.push({ ...existingItem, ...fieldsToUpdate });
+        }
+      }
+    }
 
-//     return this.formatDate(order);
-//   }
+    return {
+      success: true,
+      message: 'Compositions updated successfully',
+      updatedItems
+    };
+  }
 
-//   async getAllProductLots(orderBy, origin) {
-//     return this.compositionsRepository.getAllProductLots(orderBy, origin);
-//   }
+  async delete(id: number) {
+    return this.compositionsRepository.deleteCompositions(id);
+  }
 
-//   async update(id: number, updateCompositionsDto: UpdateCompositionsDto) {
-//     await this.compositionsRepository.updateCompositions(id, {
-//       updated_at: new Date(),
-//       updated_by: updateCompositionsDto.updated_by ?? undefined
-//     });
-
-//     const existingItems = await this.compositionsRepository.getCompositionsItems(id);
-
-//     const updatedItems = [];
-
-//     for (const item of updateCompositionsDto.compositions_items) {
-//       const existingItem = existingItems.find(i => i.id === item.id);
-
-//       if (existingItem) {
-//         const fieldsToUpdate: Partial<typeof item> = {};
-
-//         if (existingItem.unit_price !== undefined)
-//           fieldsToUpdate['unit_price'] = item.unit_price;
-//         if (existingItem.quantity === null)
-//           fieldsToUpdate['quantity'] = item.quantity;
-//         if (existingItem.supplier !== undefined)
-//           fieldsToUpdate['supplier'] = item.supplier;
-//         if (existingItem.costumer !== undefined)
-//           fieldsToUpdate['costumer'] = item.costumer;
-//         if (existingItem.compositions_location_id !== undefined)
-//           fieldsToUpdate['compositions_location_id'] = item.compositions_location_id;
-//         if (existingItem.observation !== undefined)
-//           fieldsToUpdate['observation'] = item.observation;
-//         if (existingItem.total_price !== undefined)
-//           fieldsToUpdate['total_price'] =
-//             item.unit_price * existingItem.quantity;
-//         if (existingItem.updated_at !== undefined)
-//           fieldsToUpdate['updated_at'] = new Date();
-
-//         if (Object.keys(fieldsToUpdate).length > 0) {
-//           await this.compositionsRepository.updateCompositionsItems(item.id, {
-//             ...fieldsToUpdate,
-//             quantity: item.quantity,
-//             unit_price: item.unit_price,
-//             total_price: item.total_price,
-//             observation: item.observation,
-//             updated_at: new Date(),
-//             updated_by: updateCompositionsDto.updated_by ?? undefined,
-//             supplier: item.supplier,
-//             costumer: item.costumer,
-//             compositions_location_id: item.compositions_location_id
-//           });
-//           updatedItems.push({ ...existingItem, ...fieldsToUpdate });
-//         }
-//       }
-//     }
-
-//     return {
-//       success: true,
-//       message: 'Compositions updated successfully',
-//       updatedItems
-//     };
-//   }
-
-//   async remove(id: number) {
-//     return this.compositionsRepository.deleteCompositions(id);
-//   }
-
-//   private formatDate(compositions: compositions): Omit<compositions, 'created_at' | 'updated_at'> & {
-//     created_at: string;
-//     updated_at: string;
-//   } {
-//     return {
-//       ...compositions,
-//       created_at: format(compositions.created_at, 'dd/MM/yyyy'),
-//       updated_at: format(compositions.updated_at, 'dd/MM/yyyy')
-//     };
-//   }
-// }
+  private formatDate(compositions: compositions): Omit<
+    compositions,
+    'created_at' | 'updated_at'
+  > & {
+    created_at: string;
+    updated_at: string;
+  } {
+    return {
+      ...compositions,
+      created_at: format(compositions.created_at, 'dd/MM/yyyy'),
+      updated_at: format(compositions.updated_at, 'dd/MM/yyyy')
+    };
+  }
+}

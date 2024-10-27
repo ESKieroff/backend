@@ -81,8 +81,7 @@ export class ProductionService {
         ? new Date(updateProductionDto.production_date)
         : undefined,
       Production_Status: updateProductionDto.Production_Status ?? undefined,
-      updated_at: new Date(),
-      updated_by: updateProductionDto.updated_by ?? undefined
+      updated_at: new Date()
     });
 
     const existingItems = await this.productionRepository.getOrderItems(id);

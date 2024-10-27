@@ -1,12 +1,13 @@
-// import { Compositions_Moviment } from '../../common/enums';
-// import { CompositionsItem } from './compositions.item.entity';
+import { CompositionsItem } from './composition-item.entity';
 
-// export class Compositions {
-//   id: number;
-//   document_number: string;
-//   document_date: Date;
-//   compositions_moviment: Compositions_Moviment;
-//   created_at: Date;
-//   updated_at: Date;
-//   compositions_items: CompositionsItem[];
-// }
+export class Compositions {
+  id: number;
+  final_product: number;
+  description: string;
+  production_steps: number[];
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+  updated_by: string;
+  compositions_items: CompositionsItem[];
+}

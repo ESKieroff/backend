@@ -1,427 +1,264 @@
-// import { Injectable } from '@nestjs/common';
-// import { Prisma, compositions, compositions_items, Compositions_Moviment } from '@prisma/client';
-// import { PrismaService } from 'src/database/prisma/prisma.service';
-// import { ProductLot } from './dto/response.compositions.dto';
-// @Injectable()
-// export class CompositionsRepository {
-//   constructor(private prisma: PrismaService) {}
+import { Injectable } from '@nestjs/common';
+import { Prisma, compositions, composition_items } from '@prisma/client';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+@Injectable()
+export class CompositionsRepository {
+  constructor(private prisma: PrismaService) {}
 
-//   async createCompositions(data: Prisma.compositionsCreateInput) {
-//     return await this.prisma.compositions.create({ data });
-//   }
+  async createCompositions(data: Prisma.compositionsCreateInput) {
+    return await this.prisma.compositions.create({
+      data: {
+        description: data.description,
+        production_steps: data.production_steps,
+        created_at: new Date(),
+        updated_at: new Date(),
+        product_made: {
+          connect: { id: Number(data.product_made) }
+        },
+        ...(data.users_created
+          ? { users_created: { connect: { id: Number(data.users_created) } } }
+          : {}),
+        ...(data.users_updated
+          ? { users_updated: { connect: { id: Number(data.users_updated) } } }
+          : {})
+      }
+    });
+  }
 
-//   async createCompositionsItems(
-//     data: Partial<Prisma.compositions_itemsUncheckedCreateInput>
-//   ) {
-//     return await this.prisma.compositions_items.create({
-//       data: {
-//         sequence: data.sequence,
-//         quantity: data.quantity,
-//         unit_price: data.unit_price,
-//         total_price: data.total_price,
-//         lote: data.lote,
-//         expiration: data.expiration,
-//         products: { connect: { id: data.product_id } },
-//         compositions: { connect: { id: data.compositions_id } },
-//         compositions_location: data.compositions_location_id
-//           ? { connect: { id: data.compositions_location_id } }
-//           : undefined,
-//         ...((data.supplier && {
-//           suppliers: { connect: { id: data.supplier } }
-//         }) ||
-//           {}),
-//         ...((data.costumer && {
-//           costumers: { connect: { id: data.costumer } }
-//         }) ||
-//           {})
-//       }
-//     });
-//   }
+  async createCompositionsItems(
+    data: Partial<Prisma.composition_itemsUncheckedCreateInput>
+  ) {
+    return await this.prisma.composition_items.create({
+      data: {
+        sequence: data.sequence,
+        quantity: data.quantity,
+        created_at: new Date(),
+        updated_at: new Date(),
+        compositions: {
+          connect: { id: data.composition_id }
+        },
+        product_raw: {
+          connect: { id: data.raw_product }
+        },
+        ...(data.created_by
+          ? { users: { connect: { id: data.created_by } } }
+          : {}),
+        ...(data.updated_by
+          ? { users: { connect: { id: data.updated_by } } }
+          : {})
+      }
+    });
+  }
 
-//   async updateCompositions(id: number, data: Prisma.compositionsUpdateInput): Promise<compositions> {
-//     const compositions = await this.prisma.compositions.update({
-//       where: { id },
-//       data
-//     });
+  async updateCompositions(
+    id: number,
+    data: Prisma.compositionsUpdateInput
+  ): Promise<compositions> {
+    const compositions = await this.prisma.compositions.update({
+      where: { id },
+      data
+    });
 
-//     return compositions;
-//   }
+    return compositions;
+  }
 
-//   async updateCompositionsItems(
-//     id: number,
-//     data: Partial<Prisma.compositions_itemsUncheckedCreateInput>
-//   ) {
-//     const compositions_items = await this.prisma.compositions_items.update({
-//       where: { id },
-//       data: {
-//         sequence: data.sequence,
-//         quantity: data.quantity,
-//         unit_price: data.unit_price,
-//         total_price: data.total_price,
-//         lote: data.lote,
-//         expiration: data.expiration,
-//         ...(data.compositions_location_id
-//           ? { compositions_location: { connect: { id: data.compositions_location_id } } }
-//           : {}),
-//         ...(data.supplier
-//           ? { suppliers: { connect: { id: data.supplier } } }
-//           : {}),
-//         ...(data.costumer
-//           ? { costumers: { connect: { id: data.costumer } } }
-//           : {})
-//       }
-//     });
+  async updateCompositionsItems(
+    id: number,
+    data: Partial<Prisma.composition_itemsUncheckedCreateInput>
+  ) {
+    const composition_items = await this.prisma.composition_items.update({
+      where: { id },
+      data: {
+        sequence: data.sequence,
+        quantity: data.quantity,
+        created_at: new Date(),
+        updated_at: new Date(),
+        ...(data.raw_product
+          ? {
+              products: {
+                connect: { id: data.raw_product }
+              }
+            }
+          : {}),
+        ...(data.created_by
+          ? { users: { connect: { username: data.created_by } } }
+          : {}),
+        ...(data.updated_by
+          ? { users: { connect: { username: data.updated_by } } }
+          : {})
+      }
+    });
 
-//     return compositions_items;
-//   }
+    return composition_items;
+  }
 
-//   async getLastSequence(compositionsId: number): Promise<number> {
-//     const lastItem = await this.prisma.compositions_items.findFirst({
-//       where: { compositions_id: compositionsId },
-//       orderBy: { sequence: 'desc' }
-//     });
-//     return lastItem ? lastItem.sequence : 0;
-//   }
+  async getLastSequence(compositionsId: number): Promise<number> {
+    const lastItem = await this.prisma.composition_items.findFirst({
+      where: { composition_id: compositionsId },
+      orderBy: { sequence: 'desc' }
+    });
+    return lastItem ? lastItem.sequence : 0;
+  }
 
-//   async findByDocumentNumber(document_number: string): Promise<compositions | null> {
-//     return this.prisma.compositions.findUnique({
-//       where: { document_number }
-//     });
-//   }
+  async findByProductMade(product_id: number): Promise<compositions | null> {
+    return this.prisma.compositions.findUnique({
+      where: { id: product_id }
+    });
+  }
 
-//   async getCompositionsItems(compositionsId: number): Promise<compositions_items[]> {
-//     return await this.prisma.compositions_items.findMany({
-//       where: { compositions_id: compositionsId },
-//       orderBy: { sequence: 'asc' }
-//     });
-//   }
+  async getCompositionsItems(
+    compositionsId: number
+  ): Promise<composition_items[]> {
+    return await this.prisma.composition_items.findMany({
+      where: { composition_id: compositionsId },
+      orderBy: { sequence: 'asc' }
+    });
+  }
 
-//   async checkCompositions(product_id: number, lote: string): Promise<number> {
-//     const inputs = await this.prisma.compositions_items.aggregate({
-//       where: {
-//         product_id: product_id,
-//         lote: lote,
-//         compositions: {
-//           compositions_moviment: Compositions_Moviment.INPUT
-//         }
-//       },
-//       _sum: {
-//         quantity: true
-//       }
-//     });
+  async findAllCompositionsItems(orderBy: string): Promise<compositions[]> {
+    const validOrderFields = [
+      'id',
+      'product_id',
+      'lote',
+      'quantity',
+      'compositions_id',
+      'sequence',
+      'created_at',
+      'updated_at'
+    ];
 
-//     const totalInput = inputs._sum.quantity || 0;
+    if (!validOrderFields.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
 
-//     const outputs = await this.prisma.compositions_items.aggregate({
-//       where: {
-//         product_id: product_id,
-//         lote: lote,
-//         compositions: {
-//           compositions_moviment: Compositions_Moviment.OUTPUT
-//         }
-//       },
-//       _sum: {
-//         quantity: true
-//       }
-//     });
+    const result = await this.prisma.compositions.findMany({
+      orderBy: { [orderBy]: 'asc' },
+      include: {
+        composition_items: {
+          select: {
+            id: true,
+            raw_product: true,
+            quantity: true,
+            sequence: true,
+            created_at: true,
+            updated_at: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
+      }
+    });
+    return result;
+  }
 
-//     const totalOutput = outputs._sum.quantity || 0;
+  async findItemsByCompositionsId(
+    composition_id: number
+  ): Promise<composition_items[]> {
+    return await this.prisma.composition_items.findMany({
+      where: { composition_id },
+      orderBy: { sequence: 'asc' }
+    });
+  }
 
-//     const reserved = await this.prisma.compositions_items.aggregate({
-//       where: {
-//         product_id: product_id,
-//         lote: lote,
-//         compositions: {
-//           compositions_moviment: Compositions_Moviment.RESERVED
-//         }
-//       },
-//       _sum: {
-//         quantity: true
-//       }
-//     });
+  async update(data: Prisma.compositionsCreateInput): Promise<compositions> {
+    const compositions = await this.prisma.compositions.create({
+      data
+    });
 
-//     const totalReserved = reserved._sum.quantity || 0;
+    const compositionsResponse = {
+      ...compositions
+    };
+    return compositionsResponse;
+  }
 
-//     const transit = await this.prisma.compositions_items.aggregate({
-//       where: {
-//         product_id: product_id,
-//         lote: lote,
-//         compositions: {
-//           compositions_moviment: Compositions_Moviment.TRANSIT
-//         }
-//       },
-//       _sum: {
-//         quantity: true
-//       }
-//     });
+  async findAll(orderBy: string): Promise<compositions[]> {
+    const validOrderFields = [
+      'id',
+      'product_id',
+      'created_at',
+      'updated_at'
+      //ver production steps
+    ];
 
-//     const totalTransit = transit._sum.quantity || 0;
-//     // total
-//     const totalUndisponible = totalOutput + totalReserved + totalTransit;
+    if (!validOrderFields.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
 
-//     const totalQuantity =
-//       totalInput - totalUndisponible > 0 ? totalInput - totalUndisponible : 0;
+    const result = await this.prisma.compositions.findMany({
+      where: {},
+      orderBy: { [orderBy]: 'asc' }
+    });
 
-//     return totalQuantity;
-//   }
+    return result;
+  }
 
-//   async findAllCompositionsItems(orderBy: string): Promise<compositions[]> {
-//     const validOrderFields = [
-//       'id',
-//       'product_id',
-//       'lote',
-//       'quantity',
-//       'compositions_id',
-//       'sequence',
-//       'created_at',
-//       'updated_at'
-//     ];
+  async findById(id: number): Promise<compositions | null> {
+    const compositions = this.prisma.compositions.findUnique({
+      where: { id },
+      include: {
+        composition_items: {
+          select: {
+            id: true,
+            sequence: true,
+            product_raw: {
+              select: {
+                id: true,
+                description: true,
+                code: true,
+                sku: true
+              }
+            },
+            quantity: true,
+            created_at: true,
+            updated_at: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
+      }
+    });
 
-//     if (!validOrderFields.includes(orderBy)) {
-//       throw new Error('Invalid order field');
-//     }
+    if (!compositions) {
+      throw new Error('Compositions not found');
+    }
 
-//     const result = await this.prisma.compositions.findMany({
-//       orderBy: { [orderBy]: 'asc' },
-//       include: {
-//         compositions_items: {
-//           select: {
-//             id: true,
-//             product_id: true,
-//             lote: true,
-//             quantity: true,
-//             compositions_id: true,
-//             sequence: true,
-//             created_at: true,
-//             updated_at: true
-//           },
-//           orderBy: { sequence: 'asc' }
-//         }
-//       }
-//     });
-//     return result;
-//   }
+    return compositions;
+  }
 
-//   async findItemsByCompositionsId(compositions_id: number): Promise<compositions_items[]> {
-//     return await this.prisma.compositions_items.findMany({
-//       where: { compositions_id },
-//       orderBy: { sequence: 'asc' }
-//     });
-//   }
+  async findManyByIds(ids: number[]): Promise<compositions[]> {
+    return this.prisma.compositions.findMany({
+      where: {
+        id: { in: ids }
+      }
+    });
+  }
 
-//   async update(data: Prisma.compositionsCreateInput): Promise<compositions> {
-//     const compositions = await this.prisma.compositions.create({
-//       data
-//     });
+  async findAllWithLots(orderBy: string): Promise<composition_items[]> {
+    const validOrderFields = ['product_id'];
 
-//     const compositionsResponse = {
-//       ...compositions
-//     };
-//     return compositionsResponse;
-//   }
+    if (!validOrderFields.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
 
-//   async findAll(orderBy: string): Promise<compositions[]> {
-//     const validOrderFields = [
-//       'id',
-//       'document_number',
-//       'document_date',
-//       'compositions_moviment',
-//       'created_at',
-//       'updated_at'
-//     ];
+    const result = await this.prisma.composition_items.findMany({
+      include: {
+        compositions: true
+      },
+      orderBy: { [orderBy]: 'asc' }
+    });
 
-//     if (!validOrderFields.includes(orderBy)) {
-//       throw new Error('Invalid order field');
-//     }
+    return result;
+  }
 
-//     const result = await this.prisma.compositions.findMany({
-//       where: {},
-//       orderBy: { [orderBy]: 'asc' }
-//     });
+  async deleteCompositions(id: number): Promise<void> {
+    await this.prisma.composition_items.deleteMany({
+      where: {
+        composition_id: id
+      }
+    });
 
-//     return result;
-//   }
-
-//   async findById(id: number): Promise<compositions | null> {
-//     const compositions = this.prisma.compositions.findUnique({
-//       where: { id },
-//       include: {
-//         compositions_items: {
-//           select: {
-//             id: true,
-//             sequence: true,
-//             products: {
-//               select: {
-//                 id: true,
-//                 description: true,
-//                 code: true,
-//                 sku: true
-//               }
-//             },
-//             lote: true,
-//             expiration: true,
-//             quantity: true,
-//             unit_price: true,
-//             total_price: true,
-//             suppliers: {
-//               select: {
-//                 id: true,
-//                 name: true
-//               }
-//             },
-//             compositions_location: {
-//               select: {
-//                 id: true,
-//                 description: true
-//               }
-//             },
-//             created_at: true,
-//             updated_at: true
-//           },
-//           orderBy: { sequence: 'asc' }
-//         }
-//       }
-//     });
-
-//     if (!compositions) {
-//       throw new Error('Compositions not found');
-//     }
-
-//     return compositions;
-//   }
-
-//   async findManyByIds(ids: number[]): Promise<compositions[]> {
-//     return this.prisma.compositions.findMany({
-//       where: {
-//         id: { in: ids }
-//       }
-//     });
-//   }
-
-//   async findAllWithLots(orderBy: string): Promise<compositions_items[]> {
-//     const validOrderFields = ['product_id'];
-
-//     if (!validOrderFields.includes(orderBy)) {
-//       throw new Error('Invalid order field');
-//     }
-
-//     const result = await this.prisma.compositions_items.findMany({
-//       include: {
-//         compositions: true
-//       },
-//       orderBy: { [orderBy]: 'asc' }
-//     });
-
-//     return result;
-//   }
-
-//   async deleteCompositions(id: number): Promise<void> {
-//     await this.prisma.compositions_items.deleteMany({
-//       where: {
-//         compositions_id: id
-//       }
-//     });
-
-//     await this.prisma.compositions.delete({
-//       where: {
-//         id
-//       }
-//     });
-//   }
-
-//   async teste(orderBy: 'asc' | 'desc'): Promise<ProductLot[]> {
-//     const lots = await this.prisma.compositions_items.findMany({
-//       select: {
-//         product_id: true,
-//         lote: true,
-//         expiration: true,
-//         quantity: true
-//       },
-//       orderBy: {
-//         product_id: orderBy
-//       }
-//     });
-
-//     const productLotSummary: Record<number, ProductLot> = {};
-
-//     for (const lot of lots) {
-//       const productId = lot.product_id;
-//       const lote = lot.lote || 'sem lote';
-//       const expiration = lot.expiration || new Date('1900-01-01');
-
-//       if (!productLotSummary[productId]) {
-//         const description = await this.prisma.products.findUnique({
-//           where: { id: productId },
-//           select: { description: true }
-//         });
-
-//         productLotSummary[productId] = {
-//           productId,
-//           description: description?.description || '',
-//           lots: []
-//         };
-//       }
-
-//       productLotSummary[productId].lots.push({
-//         lote: lote,
-//         totalQuantity: 0,
-//         expiration: expiration
-//       });
-//     }
-
-//     return Object.values(productLotSummary);
-//   }
-
-//   async getAllProductLots(
-//     orderBy: 'asc' | 'desc' = 'asc',
-//     origin?: 'RAW_MATERIAL' | 'MADE'
-//   ): Promise<ProductLot[]> {
-//     const productFilter = origin ? { origin } : {};
-
-//     const lots = await this.prisma.compositions_items.findMany({
-//       distinct: ['product_id', 'lote'],
-//       where: {
-//         products: productFilter
-//       },
-//       select: {
-//         product_id: true,
-//         lote: true,
-//         expiration: true,
-//         quantity: true
-//       },
-//       orderBy: { product_id: orderBy }
-//     });
-
-//     const productLotSummary: Record<number, ProductLot> = {};
-
-//     for (const lot of lots) {
-//       const productId = lot.product_id;
-//       const lote = lot.lote;
-
-//       if (typeof productId !== 'number') {
-//         console.error(`Product ID ${productId} tem um formato inválido!`);
-//       }
-//       if (!productLotSummary[productId]) {
-//         const description = await this.prisma.products.findUnique({
-//           where: { id: productId },
-//           select: { description: true }
-//         });
-
-//         productLotSummary[productId] = {
-//           productId,
-//           description: description?.description || '',
-//           lots: []
-//         };
-//       }
-//       const availableCompositions = await this.checkCompositions(productId, lote);
-
-//       productLotSummary[productId].lots.push({
-//         lote: lote,
-//         totalQuantity: availableCompositions,
-//         expiration: lot.expiration
-//       });
-//     }
-
-//     return Object.values(productLotSummary);
-//   }
-// }
+    await this.prisma.compositions.delete({
+      where: {
+        id
+      }
+    });
+  }
+}

@@ -200,8 +200,7 @@ export class StockService {
 
   async update(id: number, updateStockDto: UpdateStockDto) {
     await this.stockRepository.updateStock(id, {
-      updated_at: new Date(),
-      updated_by: updateStockDto.updated_by ?? undefined
+      updated_at: new Date()
     });
 
     const existingItems = await this.stockRepository.getStockItems(id);
