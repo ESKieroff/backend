@@ -6,7 +6,7 @@ export class CreateCompositionsDto {
   created_by: string;
   updated_by: string;
   production_steps: object;
-  readonly compositions_items: CreateCompositionsItemsDto[];
+  readonly composition_items: CreateCompositionsItemsDto[];
 }
 
 export class CreateCompositionsItemsDto {

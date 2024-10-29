@@ -6,7 +6,8 @@ export class CompositionsRepository {
   constructor(private prisma: PrismaService) {}
 
   async createCompositions(data: Prisma.compositionsCreateInput) {
-    return await this.prisma.compositions.create({
+    console.log('rep composição ', data);
+    const createdComposition = await this.prisma.compositions.create({
       data: {
         description: data.description,
         production_steps: data.production_steps,
@@ -15,19 +16,22 @@ export class CompositionsRepository {
         product_made: {
           connect: { id: Number(data.product_made) }
         },
-        ...(data.users_created
-          ? { users_created: { connect: { id: Number(data.users_created) } } }
-          : {}),
-        ...(data.users_updated
-          ? { users_updated: { connect: { id: Number(data.users_updated) } } }
-          : {})
+        users_created: {
+          connect: { username: String(data.users_created) }
+        },
+        users_updated: {
+          connect: { username: String(data.users_updated) }
+        }
       }
     });
+
+    return createdComposition;
   }
 
   async createCompositionsItems(
-    data: Partial<Prisma.composition_itemsUncheckedCreateInput>
+    data: Partial<Prisma.composition_itemsCreateInput>
   ) {
+    console.log('itens ', data);
     return await this.prisma.composition_items.create({
       data: {
         sequence: data.sequence,
@@ -35,17 +39,17 @@ export class CompositionsRepository {
         created_at: new Date(),
         updated_at: new Date(),
         compositions: {
-          connect: { id: data.composition_id }
+          connect: { id: Number(data.compositions) }
         },
         product_raw: {
-          connect: { id: data.raw_product }
+          connect: { id: Number(data.product_raw) }
         },
-        ...(data.created_by
-          ? { users: { connect: { id: data.created_by } } }
-          : {}),
-        ...(data.updated_by
-          ? { users: { connect: { id: data.updated_by } } }
-          : {})
+        users_created: {
+          connect: { username: String(data.users_created) }
+        },
+        users_updated: {
+          connect: { username: String(data.users_updated) }
+        }
       }
     });
   }

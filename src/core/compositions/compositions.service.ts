@@ -22,7 +22,17 @@ export class CompositionsService {
 
   async create(createCompositionsDto: CreateCompositionsDto) {
     const errorMessages = [];
-    if (!Array.isArray(createCompositionsDto.compositions_items)) {
+    console.log('req ', createCompositionsDto);
+
+    console.log(
+      'Tipo de composition_items:',
+      typeof createCompositionsDto.composition_items
+    );
+    console.log(
+      'Conteúdo de composition_items:',
+      createCompositionsDto.composition_items
+    );
+    if (!Array.isArray(createCompositionsDto.composition_items)) {
       throw new BadRequestException('Items must be an array');
     }
 
@@ -43,14 +53,14 @@ export class CompositionsService {
         message: 'Não foi possível processar todos os itens do documento.'
       };
     }
-
+    console.log('user ', this.getCurrentUser());
     let compositionsDocument;
     const createdItems = [];
     try {
       compositionsDocument =
         await this.compositionsRepository.createCompositions({
           product_made: {
-            connect: { id: createCompositionsDto.final_product }
+            connect: { id: Number(createCompositionsDto.final_product) }
           },
           description: createCompositionsDto.description,
           production_steps: createCompositionsDto.production_steps,
@@ -61,22 +71,27 @@ export class CompositionsService {
             connect: { username: this.getCurrentUser() }
           }
         });
-
+      console.log('documento ', compositionsDocument);
       let sequencia = 1;
 
-      for (const item of createCompositionsDto.compositions_items) {
+      for (const item of createCompositionsDto.composition_items) {
         const createdItem =
           await this.compositionsRepository.createCompositionsItems({
-            composition_id: compositionsDocument.id,
+            compositions: { connect: { id: compositionsDocument.id } },
             sequence: sequencia,
-            raw_product: item.raw_product,
+            product_raw: { connect: { id: item.raw_product } },
             quantity: item.quantity,
             created_at: new Date(),
             updated_at: new Date(),
-            created_by: this.getCurrentUser(),
-            updated_by: this.getCurrentUser()
+            users_created: {
+              connect: { username: this.getCurrentUser() }
+            },
+            users_updated: {
+              connect: { username: this.getCurrentUser() }
+            }
           });
         sequencia++;
+        console.log('item criado ', createdItem);
         createdItems.push(createdItem);
       }
 
@@ -92,6 +107,8 @@ export class CompositionsService {
         }
       };
     } catch (error) {
+      console.log('compositions ', compositionsDocument);
+      console.log('items ', createdItems);
       console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
 
       if (compositionsDocument?.id) {
