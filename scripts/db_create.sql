@@ -22,13 +22,16 @@ CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 
 -- CreateEnum
 CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
 
+-- CreateEnum
+CREATE TYPE "Batch_Status" AS ENUM ('PENDING', 'USED', 'CANCELED');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "email" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'DEFAULT',
-    "username" VARCHAR(255),
+    "username" VARCHAR(255) NOT NULL,
     "first_name" VARCHAR(255),
     "last_name" VARCHAR(255),
     "gender" "Gender" DEFAULT 'OTHER',
@@ -238,7 +241,7 @@ CREATE TABLE "production_steps_progress" (
 -- CreateTable
 CREATE TABLE "occurrences_of_production_stages" (
     "id" SERIAL NOT NULL,
-    "ocurrence_id" INTEGER NOT NULL,
+    "occurrence_id" INTEGER NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "observation" TEXT,
     "photo" BYTEA[],
@@ -278,15 +281,16 @@ CREATE TABLE "settings" (
     CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
 );
 
+
 -- CreateTable
 CREATE TABLE "compositions" (
     "id" SERIAL NOT NULL,
-    "final_product" INTEGER NOT NULL,
+    "product_id" INTEGER NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" TEXT,
-    "updated_by" TEXT,
+    "created_by" INTEGER,
+    "updated_by" INTEGER,
     "production_steps" JSON,
 
     CONSTRAINT "compositions_pkey" PRIMARY KEY ("id")
@@ -297,7 +301,7 @@ CREATE TABLE "composition_items" (
     "id" SERIAL NOT NULL,
     "composition_id" INTEGER NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "raw_product" INTEGER NOT NULL,
+    "product_id" INTEGER NOT NULL,
     "quantity" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -315,8 +319,8 @@ CREATE TABLE "groups" (
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" TEXT,
-    "updated_by" TEXT,
+    "created_by" INTEGER,
+    "updated_by" INTEGER,
 
     CONSTRAINT "groups_pkey" PRIMARY KEY ("id")
 );
@@ -355,37 +359,7 @@ ALTER TABLE "products" ADD CONSTRAINT "products_supplier_id_fkey" FOREIGN KEY ("
 ALTER TABLE "products" ADD CONSTRAINT "products_groupsId_fkey" FOREIGN KEY ("groupsId") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "categories" ADD CONSTRAINT "categories_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "categories" ADD CONSTRAINT "categories_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "prices" ADD CONSTRAINT "prices_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "prices" ADD CONSTRAINT "prices_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "prices" ADD CONSTRAINT "prices_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "stock" ADD CONSTRAINT "stock_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "stock" ADD CONSTRAINT "stock_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "stock_location" ADD CONSTRAINT "stock_location_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "stock_location" ADD CONSTRAINT "stock_location_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -403,34 +377,10 @@ ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_supplier_fkey" FOREIGN KEY
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_costumer_fkey" FOREIGN KEY ("costumer") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_orders" ADD CONSTRAINT "production_orders_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_orders" ADD CONSTRAINT "production_orders_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("final_product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_order_steps" ADD CONSTRAINT "production_order_steps_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_order_steps" ADD CONSTRAINT "production_order_steps_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_operator_id_fkey" FOREIGN KEY ("operator_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -445,28 +395,10 @@ ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progres
 ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_step_id_fkey" FOREIGN KEY ("step_id") REFERENCES "production_order_steps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_ocurrence_id_fkey" FOREIGN KEY ("ocurrence_id") REFERENCES "occurrences"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_occurrence_id_fkey" FOREIGN KEY ("occurrence_id") REFERENCES "occurrences"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_stage_ocurred_id_fkey" FOREIGN KEY ("stage_ocurred_id") REFERENCES "production_steps_progress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "occurrences" ADD CONSTRAINT "occurrences_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "occurrences" ADD CONSTRAINT "occurrences_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "settings" ADD CONSTRAINT "settings_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -475,31 +407,13 @@ ALTER TABLE "settings" ADD CONSTRAINT "settings_created_by_fkey" FOREIGN KEY ("c
 ALTER TABLE "settings" ADD CONSTRAINT "settings_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compositions" ADD CONSTRAINT "compositions_final_product_fkey" FOREIGN KEY ("final_product") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "compositions" ADD CONSTRAINT "compositions_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "compositions" ADD CONSTRAINT "compositions_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "compositions" ADD CONSTRAINT "compositions_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_composition_id_fkey" FOREIGN KEY ("composition_id") REFERENCES "compositions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_raw_product_fkey" FOREIGN KEY ("raw_product") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "groups" ADD CONSTRAINT "groups_father_id_fkey" FOREIGN KEY ("father_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "groups" ADD CONSTRAINT "groups_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "groups" ADD CONSTRAINT "groups_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE SET NULL ON UPDATE CASCADE;

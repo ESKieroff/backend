@@ -34,7 +34,7 @@ model users {
   email                      String                             @unique @db.VarChar(255)
   password                   String                             @db.VarChar(255)
   role                       Role                               @default(DEFAULT)
-  username                   String?                            @unique @db.VarChar(255)
+  username                   String                             @unique @db.VarChar(255)
   first_name                 String?                            @db.VarChar(255)
   last_name                  String?                            @db.VarChar(255)
   gender                     Gender?                            @default(OTHER)
@@ -76,6 +76,8 @@ model users {
   categories_updated         categories[]                       @relation("updated_at")
   products_created           products[]                         @relation("created_at")
   products_updated           products[]                         @relation("updated_at")
+  images_created             images[]                           @relation("created_by")
+  images_updated             images[]                           @relation("updated_by")
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +137,7 @@ model products {
   group_id                  Int                         @default(1)
   supplier_id               Int?
   nutritional_info          Json?
-  photo                     Bytes[]
+  images                    images[]                    @relation("images_of_products")
   active                    Boolean                     @default(true)
   origin                    Origin                      @default(RAW_MATERIAL)
   prices                    prices[]
@@ -250,7 +252,7 @@ model stock_items {
   total_price       Float
   lote              String?
   expiration        DateTime?
-  photo             Bytes[]
+  images            images[]       @relation("images_of_stock_items")
   supplier          Int?
   costumer          Int?
   batchsid          Int?
@@ -355,7 +357,7 @@ model production_steps_progress {
   quantity_loss                    Float?
   machine                          String?
   production_line                  String?
-  photo                            Bytes[]
+  images                           images[]                           @relation("images_of_production_steps_progress")
   observation                      String?
   operator_id                      Int?
   occurrences                      Json?                              @db.Json
@@ -379,16 +381,16 @@ model production_steps_progress {
 // detalhamento de ocorrencias da etapa da ordem de produção
 model occurrences_of_production_stages {
   id               Int                       @id @default(autoincrement())
-  ocurrence_id     Int
+  occurrence_id    Int
   description      String                    @db.VarChar(255)
   observation      String?
-  photo            Bytes[]
+  images           images[]                  @relation("images_of_occurrences")
   stage_ocurred_id Int
   created_at       DateTime                  @default(now()) @db.Timestamp(6)
   updated_at       DateTime                  @default(now()) @db.Timestamp(6)
   created_by       String?
   updated_by       String?
-  occurrences      occurrences               @relation(fields: [ocurrence_id], references: [id])
+  occurrences      occurrences               @relation(fields: [occurrence_id], references: [id])
   stage            production_steps_progress @relation(fields: [stage_ocurred_id], references: [id])
   users_created    users?                    @relation("created_at", fields: [created_by], references: [username])
   users_updated    users?                    @relation("updated_at", fields: [updated_by], references: [username])
@@ -419,10 +421,10 @@ model settings {
   active      Boolean  @default(true)
   created_at  DateTime @default(now()) @db.Timestamp(6)
   updated_at  DateTime @default(now()) @db.Timestamp(6)
-  created_by  String
-  updated_by  String
-  who_created users    @relation("created_at", fields: [created_by], references: [username])
-  who_updated users    @relation("updated_at", fields: [updated_by], references: [username])
+  created_by  String?
+  updated_by  String?
+  who_created users?   @relation("created_at", fields: [created_by], references: [username])
+  who_updated users?   @relation("updated_at", fields: [updated_by], references: [username])
 }
 
 model compositions {
@@ -471,4 +473,32 @@ model groups {
   products      products[]
   users_created users?     @relation("created_at", fields: [created_by], references: [username])
   users_updated users?     @relation("updated_at", fields: [updated_by], references: [username])
+}
+
+model images {
+  id                        Int                               @id @default(autoincrement())
+  hash                      String
+  image_bin                 Bytes[]
+  path                      String
+  mime_type                 String
+  file_name                 String
+  original_name             String
+  size                      Int
+  width                     Int
+  height                    Int
+  metadata                  Json?
+  owner_steps_progress      Int?
+  owner_stock_item          Int?
+  owner_product             Int?
+  owner_step_occurrences    Int?
+  created_at                DateTime                          @default(now()) @db.Timestamp(6)
+  updated_at                DateTime                          @default(now()) @db.Timestamp(6)
+  created_by                String?
+  updated_by                String?
+  products                  products?                         @relation("images_of_products", fields: [owner_product], references: [id])
+  stock_items               stock_items?                      @relation("images_of_stock_items", fields: [owner_stock_item], references: [id])
+  production_steps_progress production_steps_progress?        @relation("images_of_production_steps_progress", fields: [owner_steps_progress], references: [id])
+  occurrences               occurrences_of_production_stages? @relation("images_of_occurrences", fields: [owner_step_occurrences], references: [id])
+  created_by_users          users?                            @relation("created_by", fields: [created_by], references: [username])
+  updated_by_users          users?                            @relation("updated_by", fields: [updated_by], references: [username])
 }
