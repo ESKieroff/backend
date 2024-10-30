@@ -4,10 +4,10 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { CreateCompositionsDto } from './dto/create.compositions.dto';
+import { ResponseCompositionsDto } from './dto/response.compositions.dto';
 import { UpdateCompositionsDto } from './dto/update.compositions.dto';
 import { CompositionsRepository } from './compositions.repository';
-import { format } from 'date-fns';
-import { compositions } from '@prisma/client';
+import { format, isValid } from 'date-fns';
 
 @Injectable()
 export class CompositionsService {
@@ -117,33 +117,114 @@ export class CompositionsService {
     }
   }
 
-  async findAll(orderBy: string): Promise<
-    (Omit<compositions, 'created_at' | 'updated_at'> & {
-      created_at: string;
-      updated_at: string;
-    })[]
-  > {
-    const findedCompositions =
+  // async findAll(orderBy: string): Promise<
+  //   (Omit<compositions, 'created_at' | 'updated_at'> & {
+  //     created_at: string;
+  //     updated_at: string;
+  //   })[]
+  // > {
+  //   const findedCompositions =
+  //     await this.compositionsRepository.findAllCompositionsItems(orderBy);
+  //   return findedCompositions.map(compositions =>
+  //     this.formatDate(compositions)
+  //   );
+  // }
+  async findAll(orderBy: string): Promise<ResponseCompositionsDto[]> {
+    const compositions =
       await this.compositionsRepository.findAllCompositionsItems(orderBy);
-    return findedCompositions.map(compositions =>
-      this.formatDate(compositions)
-    );
+
+    return compositions.map(composition => ({
+      id: composition.id,
+      final_product: composition.final_product,
+      description: composition.description,
+      production_steps: Array.isArray(composition.production_steps)
+        ? composition.production_steps.map(step => String(step))
+        : [],
+      created_at: this.formatDate(composition.created_at),
+      updated_at: this.formatDate(composition.updated_at),
+      created_by: composition.created_by,
+      updated_by: composition.updated_by,
+      composition_items: (composition['composition_items'] || []).map(item => ({
+        id: item.id,
+        compositions_id: item.compositions_id,
+        sequence: item.sequence,
+        raw_product: item.raw_product,
+        quantity: item.quantity,
+        created_at: this.formatDate(item.created_at),
+        updated_at: this.formatDate(item.updated_at),
+        created_by: item.created_by,
+        updated_by: item.updated_by
+      }))
+    }));
   }
 
-  async findOne(id: number): Promise<
-    Omit<compositions, 'created_at' | 'updated_at'> & {
-      created_at: string;
-      updated_at: string;
-    }
-  > {
-    const order = await this.compositionsRepository.findById(id);
+  async findOne(id: number): Promise<ResponseCompositionsDto> {
+    const composition = await this.compositionsRepository.findById(id);
 
-    if (!order) {
-      throw new NotFoundException(`Compositions with ID ${id} not found`);
+    if (!composition) {
+      throw new NotFoundException(`Composition with ID ${id} not found`);
     }
 
-    return this.formatDate(order);
+    return {
+      id: composition.id,
+      final_product: composition.final_product,
+      description: composition.description,
+      production_steps: Array.isArray(composition.production_steps)
+        ? composition.production_steps.map(step => String(step))
+        : [],
+      created_at: this.formatDate(composition.created_at),
+      updated_at: this.formatDate(composition.updated_at),
+      created_by: composition.created_by,
+      updated_by: composition.updated_by,
+      composition_items: (composition['composition_items'] || []).map(item => ({
+        id: item.id,
+        compositions_id: item.compositions_id,
+        sequence: item.sequence,
+        raw_product: item.raw_product,
+        quantity: item.quantity,
+        created_at: this.formatDate(item.created_at),
+        updated_at: this.formatDate(item.updated_at),
+        created_by: item.created_by,
+        updated_by: item.updated_by
+      }))
+    };
   }
+
+  // async findOne(id: number) {
+  //   const composition = await this.compositionsRepository.findById(id);
+
+  //   if (!composition) {
+  //     throw new NotFoundException(`Composition with ID ${id} not found`);
+  //   }
+
+  //   return composition;
+
+  //   // return {
+  //   //   id: composition.id,
+  //   //   final_product: composition.final_product,
+  //   //   description: composition.description,
+  //   //   production_steps: Array.isArray(composition.production_steps)
+  //   //     ? composition.production_steps.map(step => String(step))
+  //   //     : [],
+  //   //   created_at: format(composition.created_at, 'dd/MM/yyyy'),
+  //   //   updated_at: format(composition.updated_at, 'dd/MM/yyyy'),
+  //   //   created_by: composition.created_by,
+  //   //   updated_by: composition.updated_by,
+  //   //   composition_items: (composition['items'] || []).map(item => ({
+  //   //     id: item.id,
+  //   //     sequence: item.sequence,
+  //   //     raw_product: item.raw_product,
+  //   //     quantity: item.quantity,
+  //   //     created_at: format(item.created_at, 'dd/MM/yyyy'),
+  //   //     updated_at: item.updated_at
+  //   //       ? format(item.updated_at, 'dd/MM/yyyy')
+  //   //       : null,
+  //   //     compositions_id: item.compositions_id,
+  //   //     created_by: item.created_by,
+  //   //     updated_by: item.updated_by
+  //   //   }))
+  //   // };
+  // }
 
   async update(id: number, updateCompositionsDto: UpdateCompositionsDto) {
     const currentUser = this.getCurrentUser();
@@ -200,7 +281,7 @@ export class CompositionsService {
         id: updatedComposition.id,
         product_id: updatedComposition.final_product,
         description: updatedComposition.description,
-        updated_at: updatedComposition.updated_at,
+        updated_at: format(updatedComposition.updated_at, 'dd/MM/yyyy'),
         production_steps: updatedComposition.production_steps,
         items: updatedItems
       }
@@ -211,17 +292,25 @@ export class CompositionsService {
     return this.compositionsRepository.delete(id);
   }
 
-  private formatDate(compositions: compositions): Omit<
-    compositions,
-    'created_at' | 'updated_at'
-  > & {
-    created_at: string;
-    updated_at: string;
-  } {
-    return {
-      ...compositions,
-      created_at: format(compositions.created_at, 'dd/MM/yyyy'),
-      updated_at: format(compositions.updated_at, 'dd/MM/yyyy')
-    };
+  private formatDate(date: Date | null | undefined): string | null {
+    if (date && isValid(date)) {
+      return format(date, 'dd/MM/yyyy');
+    }
+    return null; // Retorna null ou uma string padrão, como 'Data Inválida'
   }
 }
+
+//   private formatDate(compositions: compositions): Omit<
+//     compositions,
+//     'created_at' | 'updated_at'
+//   > & {
+//     created_at: string;
+//     updated_at: string;
+//   } {
+//     return {
+//       ...compositions,
+//       created_at: format(compositions.created_at, 'dd/MM/yyyy'),
+//       updated_at: format(compositions.updated_at, 'dd/MM/yyyy')
+//     };
+//   }
+// }

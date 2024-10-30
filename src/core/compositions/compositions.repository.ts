@@ -112,40 +112,40 @@ export class CompositionsRepository {
     });
   }
 
-  async findAllCompositionsItems(orderBy: string): Promise<compositions[]> {
-    const validOrderFields = [
-      'id',
-      'product_id',
-      'lote',
-      'quantity',
-      'compositions_id',
-      'sequence',
-      'created_at',
-      'updated_at'
-    ];
+  // async findAllCompositionsItems(orderBy: string): Promise<compositions[]> {
+  //   const validOrderFields = [
+  //     'id',
+  //     'product_id',
+  //     'lote',
+  //     'quantity',
+  //     'compositions_id',
+  //     'sequence',
+  //     'created_at',
+  //     'updated_at'
+  //   ];
 
-    if (!validOrderFields.includes(orderBy)) {
-      throw new Error('Invalid order field');
-    }
+  //   if (!validOrderFields.includes(orderBy)) {
+  //     throw new Error('Invalid order field');
+  //   }
 
-    const result = await this.prisma.compositions.findMany({
-      orderBy: { [orderBy]: 'asc' },
-      include: {
-        composition_items: {
-          select: {
-            id: true,
-            raw_product: true,
-            quantity: true,
-            sequence: true,
-            created_at: true,
-            updated_at: true
-          },
-          orderBy: { sequence: 'asc' }
-        }
-      }
-    });
-    return result;
-  }
+  //   const result = await this.prisma.compositions.findMany({
+  //     orderBy: { [orderBy]: 'asc' },
+  //     include: {
+  //       composition_items: {
+  //         select: {
+  //           id: true,
+  //           raw_product: true,
+  //           quantity: true,
+  //           sequence: true,
+  //           created_at: true,
+  //           updated_at: true
+  //         },
+  //         orderBy: { sequence: 'asc' }
+  //       }
+  //     }
+  //   });
+  //   return result;
+  // }
 
   async findItemsByCompositionsId(
     composition_id: number
@@ -156,57 +156,113 @@ export class CompositionsRepository {
     });
   }
 
-  async findAll(orderBy: string): Promise<compositions[]> {
-    const validOrderFields = [
-      'id',
-      'product_id',
-      'created_at',
-      'updated_at'
-      //ver production steps
-    ];
+  // async findAll(orderBy: string): Promise<compositions[]> {
+  //   const validOrderFields = [
+  //     'id',
+  //     'product_id',
+  //     'created_at',
+  //     'updated_at'
+  //     //ver production steps
+  //   ];
+
+  //   if (!validOrderFields.includes(orderBy)) {
+  //     throw new Error('Invalid order field');
+  //   }
+
+  //   const result = await this.prisma.compositions.findMany({
+  //     where: {},
+  //     orderBy: { [orderBy]: 'asc' }
+  //   });
+
+  //   return result;
+  // }
+
+  // async findById(id: number): Promise<compositions | null> {
+  //   const composition = this.prisma.compositions.findUnique({
+  //     where: { id },
+  //     include: {
+  //       composition_items: {
+  //         select: {
+  //           id: true,
+  //           sequence: true,
+  //           product_raw: {
+  //             select: {
+  //               id: true,
+  //               description: true
+  //             }
+  //           },
+  //           quantity: true,
+  //           created_at: true,
+  //           updated_at: true
+  //         },
+  //         orderBy: { sequence: 'asc' }
+  //       }
+  //     }
+  //   });
+
+  //   if (!composition) {
+  //     throw new Error('Compositions not found');
+  //   }
+
+  //   return composition;
+  // }
+
+  async findAllCompositionsItems(orderBy: string): Promise<compositions[]> {
+    const validOrderFields = ['id', 'product_id', 'created_at', 'updated_at'];
 
     if (!validOrderFields.includes(orderBy)) {
       throw new Error('Invalid order field');
     }
 
-    const result = await this.prisma.compositions.findMany({
-      where: {},
-      orderBy: { [orderBy]: 'asc' }
-    });
-
-    return result;
-  }
-
-  async findById(id: number): Promise<compositions | null> {
-    const compositions = this.prisma.compositions.findUnique({
-      where: { id },
+    const compositions = await this.prisma.compositions.findMany({
+      orderBy: { [orderBy]: 'asc' },
       include: {
         composition_items: {
           select: {
             id: true,
+            composition_id: true,
             sequence: true,
-            product_raw: {
-              select: {
-                id: true,
-                description: true,
-                code: true,
-                sku: true
-              }
-            },
+            raw_product: true,
             quantity: true,
             created_at: true,
-            updated_at: true
+            updated_at: true,
+            created_by: true,
+            updated_by: true
           },
           orderBy: { sequence: 'asc' }
         }
       }
     });
 
-    if (!compositions) {
-      throw new Error('Compositions not found');
+    return compositions;
+  }
+
+  async findById(id: number): Promise<compositions | null> {
+    const composition = await this.prisma.compositions.findUnique({
+      where: { id },
+      include: {
+        composition_items: {
+          select: {
+            id: true,
+            composition_id: true,
+            sequence: true,
+            raw_product: true,
+            quantity: true,
+            created_at: true,
+            updated_at: true,
+            created_by: true,
+            updated_by: true
+          },
+          orderBy: { sequence: 'asc' }
+        }
+      }
+    });
+
+    if (!composition) {
+      throw new Error('Composition not found');
     }
 
-    return compositions;
+    return composition;
   }
 
   async findManyByIds(ids: number[]): Promise<compositions[]> {

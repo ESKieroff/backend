@@ -3,11 +3,11 @@ export class ResponseCompositionsDto {
   final_product: number;
   description: string;
   production_steps: string[];
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  updated_by: string;
-  compositions_items: ResponseCompositionsItem[];
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
+  composition_items: ResponseCompositionsItem[];
 }
 
 export class ResponseCompositionsItem {
@@ -17,7 +17,7 @@ export class ResponseCompositionsItem {
   raw_product: number;
   quantity: number;
   created_at: string;
-  updated_at: string;
-  created_by: string;
-  updated_by: string;
+  updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
 }
