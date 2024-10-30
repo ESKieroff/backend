@@ -24,6 +24,10 @@ export class CompositionsController {
 
   @Post()
   create(@Body() createCompositionsDto: CreateCompositionsDto) {
+    if (!Array.isArray(createCompositionsDto.composition_items)) {
+      throw new BadRequestException('Items must be an array');
+    }
+
     const validationResult = CreateCompositionsSchema.safeParse(
       createCompositionsDto
     );
@@ -39,7 +43,6 @@ export class CompositionsController {
         errors
       });
     }
-
     return this.compositionsService.create(createCompositionsDto);
   }
 
@@ -72,7 +75,7 @@ export class CompositionsController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateCompositionsDto: UpdateCompositionsDto
   ) {
@@ -80,9 +83,14 @@ export class CompositionsController {
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
+    console.log('Received request:', updateCompositionsDto);
+
+    if (!Array.isArray(updateCompositionsDto.composition_items)) {
+      throw new BadRequestException('Items must be an array');
+    }
 
     const validationResult = UpdateCompositionsSchema.safeParse(
-      UpdateCompositionsDto
+      updateCompositionsDto
     );
 
     if (!validationResult.success) {
@@ -90,9 +98,14 @@ export class CompositionsController {
         field: err.path.join('.'),
         message: err.message
       }));
+      console.error('Validation errors:', errors);
 
-      throw new BadRequestException(errors);
+      throw new BadRequestException({
+        message: 'Validation errors',
+        errors
+      });
     }
+
     return this.compositionsService.update(idNumber, updateCompositionsDto);
   }
 

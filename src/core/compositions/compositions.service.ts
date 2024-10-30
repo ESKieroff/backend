@@ -22,16 +22,7 @@ export class CompositionsService {
 
   async create(createCompositionsDto: CreateCompositionsDto) {
     const errorMessages = [];
-    console.log('req ', createCompositionsDto);
 
-    console.log(
-      'Tipo de composition_items:',
-      typeof createCompositionsDto.composition_items
-    );
-    console.log(
-      'Conteúdo de composition_items:',
-      createCompositionsDto.composition_items
-    );
     if (!Array.isArray(createCompositionsDto.composition_items)) {
       throw new BadRequestException('Items must be an array');
     }
@@ -53,7 +44,7 @@ export class CompositionsService {
         message: 'Não foi possível processar todos os itens do documento.'
       };
     }
-    console.log('user ', this.getCurrentUser());
+    const currentUser = this.getCurrentUser();
     let compositionsDocument;
     const createdItems = [];
     try {
@@ -65,13 +56,13 @@ export class CompositionsService {
           description: createCompositionsDto.description,
           production_steps: createCompositionsDto.production_steps,
           users_created: {
-            connect: { username: this.getCurrentUser() }
+            connect: { username: currentUser }
           },
           users_updated: {
-            connect: { username: this.getCurrentUser() }
+            connect: { username: currentUser }
           }
         });
-      console.log('documento ', compositionsDocument);
+
       let sequencia = 1;
 
       for (const item of createCompositionsDto.composition_items) {
@@ -84,14 +75,13 @@ export class CompositionsService {
             created_at: new Date(),
             updated_at: new Date(),
             users_created: {
-              connect: { username: this.getCurrentUser() }
+              connect: { username: currentUser }
             },
             users_updated: {
-              connect: { username: this.getCurrentUser() }
+              connect: { username: currentUser }
             }
           });
         sequencia++;
-        console.log('item criado ', createdItem);
         createdItems.push(createdItem);
       }
 
@@ -101,21 +91,16 @@ export class CompositionsService {
           product_id: compositionsDocument.product_id,
           description: compositionsDocument.description,
           created_at: compositionsDocument.created_at,
-          updated_at: compositionsDocument.updated_at,
           production_steps: compositionsDocument.production_steps,
           items: createdItems
         }
       };
     } catch (error) {
-      console.log('compositions ', compositionsDocument);
-      console.log('items ', createdItems);
-      console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
+      console.error('Error during item insertion:', (error as Error).message);
 
       if (compositionsDocument?.id) {
         try {
-          await this.compositionsRepository.deleteCompositions(
-            compositionsDocument.id
-          );
+          await this.compositionsRepository.delete(compositionsDocument.id);
         } catch (deleteError) {
           console.error(
             'Error removing compositions document:',
@@ -161,16 +146,29 @@ export class CompositionsService {
   }
 
   async update(id: number, updateCompositionsDto: UpdateCompositionsDto) {
-    await this.compositionsRepository.updateCompositions(id, {
-      updated_at: new Date()
-    });
+    const currentUser = this.getCurrentUser();
+
+    const existingComposition = await this.compositionsRepository.findById(id);
+    if (!existingComposition) {
+      throw new Error(`Composition with ID ${id} not found`);
+    }
+
+    const updatedComposition =
+      await this.compositionsRepository.updateCompositions(id, {
+        description: updateCompositionsDto.description,
+        production_steps: updateCompositionsDto.production_steps,
+        updated_at: new Date(),
+        users_updated: {
+          connect: { username: currentUser }
+        }
+      });
 
     const existingItems =
       await this.compositionsRepository.getCompositionsItems(id);
 
     const updatedItems = [];
 
-    for (const item of updateCompositionsDto.compositions_items) {
+    for (const item of updateCompositionsDto.composition_items) {
       const existingItem = existingItems.find(i => i.id === item.id);
 
       if (existingItem) {
@@ -181,14 +179,16 @@ export class CompositionsService {
         if (existingItem.updated_at !== undefined)
           fieldsToUpdate['updated_at'] = new Date();
         if (existingItem.updated_by !== undefined)
-          fieldsToUpdate['updated_by'] = this.getCurrentUser();
+          fieldsToUpdate['updated_by'] = currentUser;
 
         if (Object.keys(fieldsToUpdate).length > 0) {
           await this.compositionsRepository.updateCompositionsItems(item.id, {
             ...fieldsToUpdate,
             quantity: item.quantity,
             updated_at: new Date(),
-            updated_by: updateCompositionsDto.updated_by ?? undefined
+            users_updated: {
+              connect: { username: currentUser }
+            }
           });
           updatedItems.push({ ...existingItem, ...fieldsToUpdate });
         }
@@ -196,14 +196,19 @@ export class CompositionsService {
     }
 
     return {
-      success: true,
-      message: 'Compositions updated successfully',
-      updatedItems
+      compositionsDocument: {
+        id: updatedComposition.id,
+        product_id: updatedComposition.final_product,
+        description: updatedComposition.description,
+        updated_at: updatedComposition.updated_at,
+        production_steps: updatedComposition.production_steps,
+        items: updatedItems
+      }
     };
   }
 
   async delete(id: number) {
-    return this.compositionsRepository.deleteCompositions(id);
+    return this.compositionsRepository.delete(id);
   }
 
   private formatDate(compositions: compositions): Omit<

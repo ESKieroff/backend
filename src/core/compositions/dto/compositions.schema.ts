@@ -31,13 +31,14 @@ export const CreateCompositionsSchema = z.object({
 });
 
 export const UpdateCompositionsSchema = z.object({
-  description: z.string().min(3, 'Description is required').optional(),
+  description: z.string().min(3, 'Description is required'),
   updated_at: z.date().optional(),
   updated_by: z.string().min(3, 'Updated by is required').optional(),
-  production_steps: z.object({}).optional(),
-  Composition_items: z.array(
+  production_steps: z.object({}),
+  composition_items: z.array(
     z.object({
-      quantity: z.number().int().positive('Quantity is required').optional(),
+      id: z.number().int().positive('Quantity is required').optional(),
+      quantity: z.number().int().positive('Quantity is required'),
       updated_at: z.date().optional(),
       updated_by: z.string().min(3, 'Updated by is required').optional()
     })

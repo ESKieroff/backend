@@ -3,8 +3,8 @@ export class ResponseCompositionsDto {
   final_product: number;
   description: string;
   production_steps: string[];
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   created_by: string;
   updated_by: string;
   compositions_items: ResponseCompositionsItem[];
@@ -16,8 +16,8 @@ export class ResponseCompositionsItem {
   sequence: number;
   raw_product: number;
   quantity: number;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   created_by: string;
   updated_by: string;
 }

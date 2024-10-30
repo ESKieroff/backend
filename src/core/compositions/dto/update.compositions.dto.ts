@@ -3,7 +3,7 @@ export class UpdateCompositionsDto {
   updated_at: Date;
   updated_by: string;
   production_steps?: object;
-  readonly compositions_items: UpdateCompositionsItemsDto[];
+  readonly composition_items: UpdateCompositionsItemsDto[];
 }
 
 export class UpdateCompositionsItemsDto {

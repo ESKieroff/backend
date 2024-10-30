@@ -6,7 +6,6 @@ export class CompositionsRepository {
   constructor(private prisma: PrismaService) {}
 
   async createCompositions(data: Prisma.compositionsCreateInput) {
-    console.log('rep composição ', data);
     const createdComposition = await this.prisma.compositions.create({
       data: {
         description: data.description,
@@ -14,13 +13,13 @@ export class CompositionsRepository {
         created_at: new Date(),
         updated_at: new Date(),
         product_made: {
-          connect: { id: Number(data.product_made) }
+          connect: { id: Number(data.product_made?.connect?.id) }
         },
         users_created: {
-          connect: { username: String(data.users_created) }
+          connect: { username: String(data.users_created?.connect?.username) }
         },
         users_updated: {
-          connect: { username: String(data.users_updated) }
+          connect: { username: String(data.users_updated?.connect?.username) }
         }
       }
     });
@@ -31,7 +30,6 @@ export class CompositionsRepository {
   async createCompositionsItems(
     data: Partial<Prisma.composition_itemsCreateInput>
   ) {
-    console.log('itens ', data);
     return await this.prisma.composition_items.create({
       data: {
         sequence: data.sequence,
@@ -39,16 +37,16 @@ export class CompositionsRepository {
         created_at: new Date(),
         updated_at: new Date(),
         compositions: {
-          connect: { id: Number(data.compositions) }
+          connect: { id: Number(data.compositions?.connect?.id) }
         },
         product_raw: {
-          connect: { id: Number(data.product_raw) }
+          connect: { id: Number(data.product_raw?.connect?.id) }
         },
         users_created: {
-          connect: { username: String(data.users_created) }
+          connect: { username: String(data.users_created?.connect?.username) }
         },
         users_updated: {
-          connect: { username: String(data.users_updated) }
+          connect: { username: String(data.users_updated?.connect?.username) }
         }
       }
     });
@@ -60,7 +58,14 @@ export class CompositionsRepository {
   ): Promise<compositions> {
     const compositions = await this.prisma.compositions.update({
       where: { id },
-      data
+      data: {
+        description: data.description,
+        production_steps: data.production_steps,
+        updated_at: new Date(),
+        users_updated: {
+          connect: { username: String(data.users_updated?.connect?.username) }
+        }
+      }
     });
 
     return compositions;
@@ -68,28 +73,16 @@ export class CompositionsRepository {
 
   async updateCompositionsItems(
     id: number,
-    data: Partial<Prisma.composition_itemsUncheckedCreateInput>
+    data: Partial<Prisma.composition_itemsUpdateInput>
   ) {
     const composition_items = await this.prisma.composition_items.update({
       where: { id },
       data: {
-        sequence: data.sequence,
         quantity: data.quantity,
-        created_at: new Date(),
         updated_at: new Date(),
-        ...(data.raw_product
-          ? {
-              products: {
-                connect: { id: data.raw_product }
-              }
-            }
-          : {}),
-        ...(data.created_by
-          ? { users: { connect: { username: data.created_by } } }
-          : {}),
-        ...(data.updated_by
-          ? { users: { connect: { username: data.updated_by } } }
-          : {})
+        users_updated: {
+          connect: { username: String(data.users_updated?.connect?.username) }
+        }
       }
     });
 
@@ -104,9 +97,9 @@ export class CompositionsRepository {
     return lastItem ? lastItem.sequence : 0;
   }
 
-  async findByProductMade(product_id: number): Promise<compositions | null> {
-    return this.prisma.compositions.findUnique({
-      where: { id: product_id }
+  async findByProductMade(final_product: number): Promise<compositions | null> {
+    return this.prisma.compositions.findFirst({
+      where: { final_product: final_product }
     });
   }
 
@@ -161,17 +154,6 @@ export class CompositionsRepository {
       where: { composition_id },
       orderBy: { sequence: 'asc' }
     });
-  }
-
-  async update(data: Prisma.compositionsCreateInput): Promise<compositions> {
-    const compositions = await this.prisma.compositions.create({
-      data
-    });
-
-    const compositionsResponse = {
-      ...compositions
-    };
-    return compositionsResponse;
   }
 
   async findAll(orderBy: string): Promise<compositions[]> {
@@ -235,24 +217,7 @@ export class CompositionsRepository {
     });
   }
 
-  async findAllWithLots(orderBy: string): Promise<composition_items[]> {
-    const validOrderFields = ['product_id'];
-
-    if (!validOrderFields.includes(orderBy)) {
-      throw new Error('Invalid order field');
-    }
-
-    const result = await this.prisma.composition_items.findMany({
-      include: {
-        compositions: true
-      },
-      orderBy: { [orderBy]: 'asc' }
-    });
-
-    return result;
-  }
-
-  async deleteCompositions(id: number): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.prisma.composition_items.deleteMany({
       where: {
         composition_id: id
