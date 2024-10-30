@@ -79,10 +79,14 @@ export class StockService {
       const stock_location_default = parseInt(stock_location_default_str, 10);
 
       for (const item of createStockDto.stock_items) {
-        const loteGenetated = await this.loteService.generateLote(
-          stockDocument.stock_moviment
-        );
-        const [lote, expiration] = loteGenetated.split('-');
+        let lote;
+        let expiration;
+        if (!item.lote) {
+          [lote, expiration] = await this.getLote(stockDocument.stock_moviment);
+        } else {
+          lote = item.lote;
+          expiration = new Date(item.expiration);
+        }
 
         const createdItem = await this.stockRepository.createStockItems({
           stock_id: stockDocument.id,
@@ -92,13 +96,11 @@ export class StockService {
           unit_price: item.unit_price,
           total_price: item.unit_price * item.quantity,
           lote: lote,
-          expiration: new Date(expiration).toISOString(),
+          expiration: expiration.toISOString(),
           observation: item.observation!,
           supplier: item.supplier!,
           costumer: item.costumer!,
           stock_location_id: item.stock_location_id || stock_location_default,
-          image_link: item.image_link!,
-
           created_at: new Date(),
           updated_at: new Date()
         });
@@ -137,6 +139,14 @@ export class StockService {
           'Erro ao criar itens do documento de estoque. Documento foi removido.'
       };
     }
+  }
+
+  async getLote(stockMoviment: Stock_Moviment): Promise<[string, Date]> {
+    const loteGenerated = await this.loteService.generateLote(
+      stockMoviment === Stock_Moviment.INPUT ? 'INPUT' : 'OUTPUT'
+    );
+    const [lote, expiration] = loteGenerated.split('-');
+    return [lote, new Date(expiration)];
   }
 
   private async validateStock(
@@ -219,8 +229,6 @@ export class StockService {
         if (existingItem.total_price !== undefined)
           fieldsToUpdate['total_price'] =
             item.unit_price * existingItem.quantity;
-        if (existingItem.image_link !== undefined)
-          fieldsToUpdate['image_link'] = item.image_link;
         if (existingItem.updated_at !== undefined)
           fieldsToUpdate['updated_at'] = new Date();
 
@@ -231,7 +239,6 @@ export class StockService {
             unit_price: item.unit_price,
             total_price: item.total_price,
             observation: item.observation,
-            image_link: item.image_link,
             updated_at: new Date(),
             updated_by: updateStockDto.updated_by ?? undefined,
             supplier: item.supplier,
