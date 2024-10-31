@@ -294,6 +294,7 @@ CREATE TABLE "batchs" (
     CONSTRAINT "batchs_pkey" PRIMARY KEY ("id")
 );
 
+
 -- CreateTable
 CREATE TABLE "compositions" (
     "id" SERIAL NOT NULL,

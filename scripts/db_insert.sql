@@ -389,7 +389,7 @@ VALUES
 	('Cebola Roxa',3),
 	('Couve Mirim',4),
   ('Melancia Gigante',5);
-	
+	  
 -- Insert into compositions
 INSERT INTO "compositions" ("product_id", "description")
 VALUES 
