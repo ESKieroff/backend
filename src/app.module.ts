@@ -19,6 +19,8 @@ import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
 import { BatchsModule } from './core/batchs/batchs.module';
 import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
+import { ImagesModule } from './core/images/images.module';
+import { OccurrenceModule } from './core/occurrences/occurrence.module';
 
 @Module({
   imports: [
@@ -30,21 +32,22 @@ import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
         port: parseInt(process.env.REDIS_PORT, 10)
       }
     }),
+    PrismaModule,
+    AuthModule,
     BatchsModule,
-    UsersModule,
+    CategoriesModule,
+    CompositionsModule,
+    ControlPanelModule,
+    GroupsModule,
+    ImagesModule,
+    OccurrenceModule,
+    PersonsModule,
     ProductsModule,
     ProductionModule,
-    StockModule,
-    AuthModule,
-    ControlPanelModule,
     SettingsModule,
-    PrismaModule,
+    StockModule,
     StockLocationsModule,
-    PrismaModule,
-    GroupsModule,
-    PersonsModule,
-    CategoriesModule,
-    CompositionsModule
+    UsersModule
   ],
   controllers: [ControlPanelController],
   providers: [PrismaService, FeatureFlagsService]
