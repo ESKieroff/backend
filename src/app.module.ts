@@ -15,13 +15,15 @@ import { FeatureFlagsService } from './feature-flags/feature-flags.service';
 import { PersonsModule } from './core/persons/persons.module';
 import { CategoriesModule } from './core/categories/categories.module';
 import { GroupsModule } from './core/groups/groups.module';
-//import { CompositionsModule } from './core/compositions/compositions.module';
+import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
 import { BatchsModule } from './core/batchs/batchs.module';
+import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    OrchestratorModule.forRoot(),
     RedisModule.forRoot({
       config: {
         host: process.env.REDIS_HOST,
@@ -41,8 +43,8 @@ import { BatchsModule } from './core/batchs/batchs.module';
     PrismaModule,
     GroupsModule,
     PersonsModule,
-    CategoriesModule
-    //CompositionsModule
+    CategoriesModule,
+    CompositionsModule
   ],
   controllers: [ControlPanelController],
   providers: [PrismaService, FeatureFlagsService]
