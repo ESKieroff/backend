@@ -63,3 +63,11 @@ export enum Batch_Status {
   USED = 'USED',
   CANCELED = 'CANCELED'
 }
+
+export enum Owner {
+  PRODUCT = 'PRODUCT',
+  USER = 'USER',
+  PRODUCTION_STEP = 'PRODUCTION_STEP',
+  STOCK_ITEM = 'STOCK_ITEM',
+  OCURRENCE = 'OCURRENCE'
+}
