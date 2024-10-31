@@ -21,7 +21,7 @@ export class CreateStepProgressDto {
   final_quantity: number;
   quantity_loss: number;
   machine: string;
-  line_id: number;
+  production_line: string;
   image_link: string;
   photo: string;
   observation: string;

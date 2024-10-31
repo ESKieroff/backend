@@ -10,14 +10,19 @@ import { format } from 'date-fns';
 export class StepsService {
   constructor(private readonly stepsRepository: StepsRepository) {}
 
+  private getCurrentUser() {
+    // vou implementar depois
+    return 'root';
+  }
   async create(createStepDto: CreateStepDto) {
+    const currentUser = this.getCurrentUser();
     const production = await this.stepsRepository.createStep({
       description: createStepDto.description,
       active: createStepDto.active,
       created_at: new Date(),
       updated_at: new Date(),
-      created_by: createStepDto.created_by,
-      updated_by: createStepDto.updated_by
+      created_by: currentUser,
+      updated_by: currentUser
     });
 
     let sequence = 1;
@@ -35,9 +40,7 @@ export class StepsService {
         final_quantity: item.final_quantity,
         quantity_loss: item.quantity_loss,
         machine: item.machine,
-        line_id: item.line_id,
-        image_link: item.image_link,
-        //photo: item.photo,
+        production_line: item.production_line,
         observation: item.observation,
         operator_id: item.operator_id,
         ocurrences: item.ocurrences,
