@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { RedisModule } from '@liaoliaots/nestjs-redis';
+//import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { UsersModule } from './core/users/users.module';
 import { ProductsModule } from './core/products/products.module';
 import { ProductionModule } from './core/production/production.module';
@@ -25,12 +25,12 @@ import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
   imports: [
     ConfigModule.forRoot(),
     OrchestratorModule.forRoot(),
-    RedisModule.forRoot({
-      config: {
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT, 10)
-      }
-    }),
+    // RedisModule.forRoot({
+    //   config: {
+    //     host: process.env.REDIS_HOST,
+    //     port: parseInt(process.env.REDIS_PORT, 10)
+    //   }
+    // }),
     PrismaModule,
     AuthModule,
     BatchsModule,

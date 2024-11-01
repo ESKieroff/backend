@@ -139,6 +139,15 @@ export class ProductionRepository {
     return order;
   }
 
+  async findProductDescriptionById(id: number): Promise<string> {
+    const product = await this.prisma.products.findUnique({
+      where: { id },
+      select: { description: true }
+    });
+
+    return product.description;
+  }
+
   async updateOrder(
     id: number,
     data: Prisma.production_ordersUpdateInput
