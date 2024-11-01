@@ -20,7 +20,7 @@ import {
 import { ZodError } from 'zod';
 import { ResponseProductionStepsDto } from './dto/response.production-steps.dto';
 
-@Controller('steps')
+@Controller('production-steps')
 export class ProductionStepsController {
   constructor(private readonly categoriesService: ProductionStepsService) {}
 
