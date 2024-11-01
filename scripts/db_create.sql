@@ -23,7 +23,7 @@ CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 
 CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
 
 -- CreateEnum
-CREATE TYPE "Owner" AS ENUM ('PRODUCT', 'STOCK_ITEM', 'PRODUCTION_STEP', 'OCCURRENTE');
+CREATE TYPE "Owner" AS ENUM ('PRODUCT', 'PRODUCTION_STEP', 'STOCK_ITEM', 'OCURRENCE');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -282,12 +282,12 @@ CREATE TABLE "settings" (
 -- CreateTable
 CREATE TABLE "compositions" (
     "id" SERIAL NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "final_product" INTEGER NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" INTEGER,
-    "updated_by" INTEGER,
+    "created_by" TEXT,
+    "updated_by" TEXT,
     "production_steps" JSON,
 
     CONSTRAINT "compositions_pkey" PRIMARY KEY ("id")
@@ -298,7 +298,7 @@ CREATE TABLE "composition_items" (
     "id" SERIAL NOT NULL,
     "composition_id" INTEGER NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "raw_product" INTEGER NOT NULL,
     "quantity" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -418,13 +418,13 @@ ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_pr
 ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_stage_occurred_id_fkey" FOREIGN KEY ("stage_occurred_id") REFERENCES "production_steps_progress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compositions" ADD CONSTRAINT "compositions_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "compositions" ADD CONSTRAINT "compositions_final_product_fkey" FOREIGN KEY ("final_product") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_composition_id_fkey" FOREIGN KEY ("composition_id") REFERENCES "compositions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_raw_product_fkey" FOREIGN KEY ("raw_product") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "groups" ADD CONSTRAINT "groups_father_id_fkey" FOREIGN KEY ("father_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -182,8 +182,8 @@ export class ProductionRepository {
       .then(results => results.map(result => result.id));
 
     if (progressIds.length > 0) {
-      await this.prisma.ocurrences_of_production_stages.deleteMany({
-        where: { stage_ocurred_id: { in: progressIds } }
+      await this.prisma.occurrences_of_production_stages.deleteMany({
+        where: { stage_occurred_id: { in: progressIds } }
       });
     }
 

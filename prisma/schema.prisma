@@ -115,8 +115,8 @@ model products {
   categories                categories                  @relation("categories", fields: [category_id], references: [id])
   supplier                  persons?                    @relation("suppliers", fields: [supplier_id], references: [id])
   stock_items               stock_items[]               @relation("stock_items")
-  composition_items         composition_items[]         @relation("composition_items")
-  compositions              compositions[]              @relation("compositions")
+  composition_items         composition_items[]         @relation("raw_products")
+  compositions              compositions[]              @relation("made_products")
   groups                    groups?                     @relation("groups", fields: [group_id], references: [id])
 }
 
@@ -365,29 +365,30 @@ model settings {
 
 model compositions {
   id                Int                 @id @default(autoincrement())
-  product_id        Int
+  final_product     Int
   description       String              @db.VarChar(255)
   created_at        DateTime            @default(now()) @db.Timestamp(6)
   updated_at        DateTime            @default(now()) @db.Timestamp(6)
-  created_by        Int?
-  updated_by        Int?
+  created_by        String?
+  updated_by        String?
   production_steps  Json?               @db.Json
   composition_items composition_items[] @relation("compositions")
-  products          products            @relation("compositions", fields: [product_id], references: [id])
+  product_made      products            @relation("made_products", fields: [final_product], references: [id])
 }
+
 
 model composition_items {
   id             Int          @id @default(autoincrement())
   composition_id Int
   sequence       Int
-  product_id     Int
+  raw_product    Int
   quantity       Float
   created_at     DateTime     @default(now()) @db.Timestamp(6)
   updated_at     DateTime     @default(now()) @db.Timestamp(6)
   created_by     String?
   updated_by     String?
   compositions   compositions @relation("compositions", fields: [composition_id], references: [id])
-  products       products     @relation("composition_items", fields: [product_id], references: [id])
+  product_raw    products     @relation("raw_products", fields: [raw_product], references: [id])
 }
 
 // permanece para facilitar a geração de relatórios, como Curva ABC e DRE (demostração de resultado do exercício)
@@ -427,7 +428,7 @@ model images {
 
 enum Owner {
   PRODUCT
-  STOCK_ITEM
   PRODUCTION_STEP
-  OCCURRENTE
+  STOCK_ITEM
+  OCURRENCE
 }
