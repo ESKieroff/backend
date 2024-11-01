@@ -6,7 +6,7 @@ export const CreateCompositionsSchema = z.object({
     .int()
     .positive('Final Product is required')
     .describe('Produto final incluido na composição.'),
-  description: z.string().min(3, 'Description is required'),
+  description: z.string().min(3, 'Description is required').optional(),
   created_at: z.date().optional().describe('Date of Creation'),
   updated_at: z.date().optional(),
   created_by: z.string().min(3, 'Created by is required').optional(),
