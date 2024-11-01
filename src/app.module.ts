@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { ConfigModule } from '@nestjs/config';
+import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { UsersModule } from './core/users/users.module';
 import { ProductsModule } from './core/products/products.module';
 import { ProductionModule } from './core/production/production.module';
@@ -17,11 +17,10 @@ import { CategoriesModule } from './core/categories/categories.module';
 import { GroupsModule } from './core/groups/groups.module';
 import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
-import { BatchsModule } from './core/batchs/batchs.module';
-import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 import { ImagesModule } from './core/images/images.module';
 import { OccurrenceModule } from './core/occurrences/occurrence.module';
-
+import { BatchsModule } from './core/batchs/batchs.module';
+import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),

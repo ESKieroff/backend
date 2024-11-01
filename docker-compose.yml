@@ -66,7 +66,7 @@ services:
       - myapp-network
 
   redis:
-    image: redis:alpine # Usa a imagem oficial do Redis (versão leve: alpine)
+    image: redis:alpine
     restart: always
     ports:
       - '6379:6379'
