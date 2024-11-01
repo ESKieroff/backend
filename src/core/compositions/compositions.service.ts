@@ -129,24 +129,9 @@ export class CompositionsService {
         }
       };
     } catch (error) {
-      console.error('Error during item insertion:', (error as Error).message);
-
-      if (compositionsDocument && compositionsDocument.id) {
-        try {
-          await this.compositionsRepository.delete(compositionsDocument.id);
-        } catch (deleteError) {
-          console.error(
-            'Error removing compositions document:',
-            (deleteError as Error).message
-          );
-        }
-      }
-
-      return {
-        success: false,
-        message:
-          'Erro ao criar itens do documento de estoque. Documento foi removido.'
-      };
+      throw new Error(
+        `Error during item insertion: ${(error as Error).message}`
+      );
     }
   }
 

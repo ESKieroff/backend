@@ -154,7 +154,6 @@ export class CompositionsController {
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
-    console.log('Received request:', updateCompositionsDto);
 
     if (!Array.isArray(updateCompositionsDto.composition_items)) {
       throw new BadRequestException('Items must be an array');
@@ -169,7 +168,6 @@ export class CompositionsController {
         field: err.path.join('.'),
         message: err.message
       }));
-      console.error('Validation errors:', errors);
 
       throw new BadRequestException({
         message: 'Validation errors',
