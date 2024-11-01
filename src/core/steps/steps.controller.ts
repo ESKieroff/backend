@@ -14,7 +14,7 @@ import { CreateStepDto } from './dto/create-step.dto';
 //import { UpdateStepDto } from './dto/update-step.dto';
 import { ApiQuery } from '@nestjs/swagger';
 
-@Controller('step')
+@Controller('steps')
 export class StepsController {
   constructor(private readonly stepsService: StepsService) {}
 
