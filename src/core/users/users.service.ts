@@ -8,15 +8,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { users } from '@prisma/client';
 import { format } from 'date-fns';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
-
-  private getCurrentUser(): string {
-    // TODO: falta implementar
-    return 'root';
-  }
+  constructor(
+    private readonly sessionService: SessionService,
+    private readonly usersRepository: UsersRepository
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     let { username } = createUserDto;
@@ -85,7 +84,7 @@ export class UsersService {
   }
 
   async reactivateUser(id: number) {
-    const currentUser = this.getCurrentUser();
+    const currentUser = this.sessionService.getCurrentUser();
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
@@ -115,7 +114,7 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const currentUser = this.getCurrentUser();
+    const currentUser = this.sessionService.getCurrentUser();
     const user = await this.isValid(id);
 
     if (!user) {
@@ -137,7 +136,7 @@ export class UsersService {
   }
 
   async delete(id: number, softDelete: boolean) {
-    const currentUser = this.getCurrentUser();
+    const currentUser = this.sessionService.getCurrentUser();
     await this.isValid(id);
     await this.usersRepository.delete(id, softDelete, currentUser);
   }

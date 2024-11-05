@@ -11,10 +11,12 @@ import { LoteService } from '../common/lote.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class StockService {
   constructor(
+    private readonly sessionService: SessionService,
     private readonly stockRepository: StockRepository,
     private readonly settingsService: SettingsService,
     private readonly loteService: LoteService
@@ -27,6 +29,7 @@ export class StockService {
   ]);
 
   async create(createStockDto: CreateStockDto) {
+    const currentUser = this.sessionService.getCurrentUser();
     const errorMessages = [];
     if (!Array.isArray(createStockDto.stock_items)) {
       throw new BadRequestException('Items must be an array');
@@ -68,7 +71,9 @@ export class StockService {
         document_date: new Date(createStockDto.document_date),
         stock_moviment: createStockDto.stock_moviment,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
+        created_by: currentUser,
+        updated_by: currentUser
       });
 
       let sequencia = 1;
@@ -199,9 +204,11 @@ export class StockService {
   }
 
   async update(id: number, updateStockDto: UpdateStockDto) {
+    const currentUser = this.sessionService.getCurrentUser();
+
     await this.stockRepository.updateStock(id, {
       updated_at: new Date(),
-      updated_by: updateStockDto.updated_by ?? undefined
+      updated_by: currentUser
     });
 
     const existingItems = await this.stockRepository.getStockItems(id);
@@ -240,7 +247,7 @@ export class StockService {
             total_price: item.total_price,
             observation: item.observation,
             updated_at: new Date(),
-            updated_by: updateStockDto.updated_by ?? undefined,
+            updated_by: currentUser,
             supplier: item.supplier,
             costumer: item.costumer,
             stock_location_id: item.stock_location_id

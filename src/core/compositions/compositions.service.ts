@@ -9,17 +9,14 @@ import { UpdateCompositionsDto } from './dto/update.compositions.dto';
 import { CompositionsRepository } from './compositions.repository';
 import { format, isValid } from 'date-fns';
 import { Origin } from '../common/enums';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class CompositionsService {
   constructor(
+    private readonly sessionService: SessionService,
     private readonly compositionsRepository: CompositionsRepository
   ) {}
-
-  private getCurrentUser(): string {
-    //TODO: Implementar busca do usuário logado
-    return 'root';
-  }
 
   async create(createCompositionsDto: CreateCompositionsDto) {
     const errorMessages = [];
@@ -78,8 +75,8 @@ export class CompositionsService {
       throw new Error('Produto não encontrado');
     }
 
-    const currentUser = this.getCurrentUser();
     const description = `Composição ${descriptionProduct}`;
+    const currentUser = this.sessionService.getCurrentUser();
 
     let compositionsDocument;
     const createdItems = [];
@@ -197,7 +194,7 @@ export class CompositionsService {
   }
 
   async update(id: number, updateCompositionsDto: UpdateCompositionsDto) {
-    const currentUser = this.getCurrentUser();
+    const currentUser = this.sessionService.getCurrentUser();
 
     const existingComposition = await this.compositionsRepository.findById(id);
     if (!existingComposition) {

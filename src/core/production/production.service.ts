@@ -6,18 +6,15 @@ import { ProductionRepository } from './production.repository';
 import { production_orders } from '@prisma/client';
 import { format } from 'date-fns';
 import { SettingsService } from 'src/settings/settings.service';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class ProductionService {
   constructor(
+    private readonly sessionService: SessionService,
     private readonly productionRepository: ProductionRepository,
     private readonly settingsService: SettingsService
   ) {}
-
-  private getCurrentUser(): string {
-    // TODO: falta implementar a lógica de pegar o usuário logado
-    return 'root';
-  }
 
   async create(createProductionDto: CreateProductionDto) {
     const firstProductId =
@@ -29,7 +26,7 @@ export class ProductionService {
         )
       : 'Produto não encontrado';
 
-    const currentUser = this.getCurrentUser();
+    const currentUser = this.sessionService.getCurrentUser();
     const numberString = await this.settingsService.get('lastOrderNumber');
     const number = Number(numberString);
     const description = `Ordem ${descriptionProduct} - ${number}`;
@@ -101,7 +98,7 @@ export class ProductionService {
   }
 
   async update(id: number, updateProductionDto: UpdateProductionDto) {
-    const currentUser = this.getCurrentUser();
+    const currentUser = this.sessionService.getCurrentUser();
     await this.productionRepository.updateOrder(id, {
       description: updateProductionDto.description ?? undefined,
       production_date: updateProductionDto.production_date
