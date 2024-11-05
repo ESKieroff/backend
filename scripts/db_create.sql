@@ -316,8 +316,8 @@ CREATE TABLE "groups" (
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" INTEGER,
-    "updated_by" INTEGER,
+    "created_by" TEXT,
+    "updated_by" TEXT,
 
     CONSTRAINT "groups_pkey" PRIMARY KEY ("id")
 );

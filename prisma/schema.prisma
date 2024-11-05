@@ -399,8 +399,8 @@ model groups {
   active       Boolean    @default(true)
   created_at   DateTime   @default(now()) @db.Timestamp(6)
   updated_at   DateTime   @default(now()) @db.Timestamp(6)
-  created_by   Int?
-  updated_by   Int?
+  created_by   String?
+  updated_by   String?
   groups       groups?    @relation("groupsTogroups", fields: [father_id], references: [id])
   other_groups groups[]   @relation("groupsTogroups")
   products     products[] @relation("groups")
