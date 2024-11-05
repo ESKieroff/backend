@@ -21,6 +21,8 @@ import { ImagesModule } from './core/images/images.module';
 import { OccurrenceModule } from './core/occurrences/occurrence.module';
 import { BatchsModule } from './core/batchs/batchs.module';
 import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
+import { ZodValidationPipe } from './config/zod.validation.pipe';
+import { SessionService } from './core/common/sessionService';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -49,6 +51,14 @@ import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
     UsersModule
   ],
   controllers: [ControlPanelController],
-  providers: [PrismaService, FeatureFlagsService]
+  providers: [
+    PrismaService,
+    SessionService,
+    FeatureFlagsService,
+    {
+      provide: 'APP_PIPE',
+      useClass: ZodValidationPipe
+    }
+  ]
 })
 export class AppModule {}
