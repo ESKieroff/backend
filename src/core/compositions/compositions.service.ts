@@ -193,6 +193,16 @@ export class CompositionsService {
     };
   }
 
+  async getByProduct(product_id: number) {
+    const composition =
+      await this.compositionsRepository.findByProductMade(product_id);
+    if (!composition) {
+      throw new Error('Composição não encontrada');
+    }
+
+    return { production_steps: composition.production_steps };
+  }
+
   async update(id: number, updateCompositionsDto: UpdateCompositionsDto) {
     const currentUser = this.sessionService.getCurrentUser();
 

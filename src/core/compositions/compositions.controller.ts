@@ -175,4 +175,13 @@ export class CompositionsController {
       message: `Compositions ID ${idNumber} permanently removed successfully`
     };
   }
+
+  @Get('steps-by-product/:id')
+  async getByProduct(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return await this.compositionsService.getByProduct(idNumber);
+  }
 }
