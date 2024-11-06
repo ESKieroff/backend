@@ -23,6 +23,7 @@ import { BatchsModule } from './core/batchs/batchs.module';
 import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 import { ZodValidationPipe } from './config/zod.validation.pipe';
 import { SessionService } from './core/common/sessionService';
+import { RequestMethodPathInterceptor } from './config/interceptor.request';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -58,6 +59,10 @@ import { SessionService } from './core/common/sessionService';
     {
       provide: 'APP_PIPE',
       useClass: ZodValidationPipe
+    },
+    {
+      provide: 'APP_INTERCEPTOR',
+      useClass: RequestMethodPathInterceptor
     }
   ]
 })

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Controller,
   Get,
@@ -11,9 +12,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
+import { ResponseCategoriesDto } from './dto/response.categories.dto';
 import { CreateCategoriesDto } from './dto/create.categories.dto';
 import { UpdateCategoriesDto } from './dto/update.categories.dto';
-import { ResponseCategoriesDto } from './dto/response.categories.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -42,7 +43,6 @@ export class CategoriesController {
         'Category already exists. Try update it instead'
       );
     }
-
     const createdCategory =
       await this.categoriesService.create(createCategoriesDto);
     return {

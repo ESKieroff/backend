@@ -54,42 +54,42 @@ type SchemaMap = {
 };
 export const ZodSchemasMap: SchemaMap = {
   //categories
-  'POST:/categories': CreateCategorySchema,
-  'PATCH:/categories/:id': UpdateCategorySchema,
+  'POST:/categories/': CreateCategorySchema,
+  'PATCH:/categories/': UpdateCategorySchema,
   //compositions
-  'POST:/compositions': CreateCompositionsSchema,
-  'PATCH:/compositions/:id': UpdateCompositionsSchema,
+  'POST:/compositions/': CreateCompositionsSchema,
+  'PATCH:/compositions/': UpdateCompositionsSchema,
   //groups
-  'POST:/groups': CreateGroupSchema,
-  'PATCH:/groups/:id': UpdateGroupSchema,
+  'POST:/groups/': CreateGroupSchema,
+  'PATCH:/groups/': UpdateGroupSchema,
   //images
-  'POST:/images': CreateImageSchema,
-  'PATCH:/images/:id': UpdateImageSchema,
+  'POST:/images/': CreateImageSchema,
+  'PATCH:/images/': UpdateImageSchema,
   //occurrences
-  'POST:/occurrences': CreateOccurrenceSchema,
-  'PATCH:/occurrences/:id': UpdateOccurrenceSchema,
+  'POST:/occurrences/': CreateOccurrenceSchema,
+  'PATCH:/occurrences/': UpdateOccurrenceSchema,
   //persons
-  'POST:/persons': CreatePersonsSchema,
-  'PATCH:/persons/:id': UpdatePersonsSchema,
+  'POST:/persons/': CreatePersonsSchema,
+  'PATCH:/persons/': UpdatePersonsSchema,
   //production
-  'POST:/production': CreateProductionSchema,
-  'PATCH:/production/:id': UpdateProductionSchema,
+  'POST:/production/': CreateProductionSchema,
+  'PATCH:/production/': UpdateProductionSchema,
   //production-progress
-  'POST:/production-progress': CreateProductionProgressSchema,
-  'PATCH:/production-progress/:id': UpdateProductionProgressSchema,
+  'POST:/production-progress/': CreateProductionProgressSchema,
+  'PATCH:/production-progress/': UpdateProductionProgressSchema,
   //production-steps
-  'POST:/steps': CreateProductionStepSchema,
-  'PATCH:/steps/:id': UpdateProductionStepSchema,
+  'POST:/steps/': CreateProductionStepSchema,
+  'PATCH:/steps/': UpdateProductionStepSchema,
   //products
-  'POST:/products': CreateProductSchema,
-  'PATCH:/products/:id': UpdateProductSchema,
+  'POST:/products/': CreateProductSchema,
+  'PATCH:/products/': UpdateProductSchema,
   //stock
-  'POST:/stock': CreateStockSchema,
-  'PATCH:/stock/:id': UpdateStockSchema,
+  'POST:/stock/': CreateStockSchema,
+  'PATCH:/stock/': UpdateStockSchema,
   //stock-locations
-  'POST:/stock-locations': CreateStockLocationSchema,
-  'PATCH:/stock-locations/:id': UpdateStockLocationSchema,
+  'POST:/stock-locations/': CreateStockLocationSchema,
+  'PATCH:/stock-locations/': UpdateStockLocationSchema,
   //users
-  'POST:/users': CreateUserSchema,
-  'PATCH:/users/:id': UpdateUserSchema
+  'POST:/users/': CreateUserSchema,
+  'PATCH:/users/': UpdateUserSchema
 };
