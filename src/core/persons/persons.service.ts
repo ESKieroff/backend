@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreatePersonsDto } from './dto/create-persons.dto';
-import { UpdatePersonsDto } from './dto/update-persons.dto';
+import { CreatePersonsDto } from './dto/create.persons.dto';
+import { UpdatePersonsDto } from './dto/update.persons.dto';
 import { PersonsRepository } from './persons.repository';
 import { persons } from '@prisma/client';
 import { format } from 'date-fns';

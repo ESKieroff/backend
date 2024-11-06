@@ -11,9 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { PersonsService } from './persons.service';
-import { CreatePersonsDto } from './dto/create-persons.dto';
-import { UpdatePersonsDto } from './dto/update-persons.dto';
-import { ResponsePersonsDto } from './dto/response-persons.dto';
+import { CreatePersonsDto } from './dto/create.persons.dto';
+import { UpdatePersonsDto } from './dto/update.persons.dto';
+import { ResponsePersonsDto } from './dto/response.persons.dto';
 
 @Controller('persons')
 export class PersonsController {

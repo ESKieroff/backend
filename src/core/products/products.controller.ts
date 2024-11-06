@@ -11,9 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { ResponseProductsDto } from './dto/product-response.dto';
+import { CreateProductDto } from './dto/create.products.dto';
+import { UpdateProductDto } from './dto/update.products.dto';
+import { ResponseProductsDto } from './dto/response.products.dto';
 import { Origin, Unit_Measure } from '../common/enums';
 import { ApiQuery } from '@nestjs/swagger';
 

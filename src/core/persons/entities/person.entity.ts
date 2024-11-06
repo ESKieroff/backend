@@ -1,6 +1,7 @@
-export class Occurrence {
+export class Person {
   id: number;
-  description: string;
+  name: string;
+  active: boolean;
   created_at: Date;
   updated_at: Date;
   created_by: string;

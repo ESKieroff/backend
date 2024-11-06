@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreateCategoriesDto } from './dto/create-categories.dto';
-import { UpdateCategoriesDto } from './dto/update-categories.dto';
+import { CreateCategoriesDto } from './dto/create.categories.dto';
+import { UpdateCategoriesDto } from './dto/update.categories.dto';
 import { CategoriesRepository } from './categories.repository';
 import { categories } from '@prisma/client';
 import { format } from 'date-fns';

@@ -11,8 +11,8 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { ProductionService } from './production.service';
-import { CreateProductionDto } from './dto/create-production.dto';
-import { UpdateProductionDto } from './dto/update-production.dto';
+import { CreateProductionDto } from './dto/create.production.dto';
+import { UpdateProductionDto } from './dto/update.production.dto';
 import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('orders')

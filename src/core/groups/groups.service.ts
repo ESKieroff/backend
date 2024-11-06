@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreateGroupsDto } from './dto/create-groups.dto';
-import { UpdateGroupsDto } from './dto/update-groups.dto';
+import { CreateGroupsDto } from './dto/create.groups.dto';
+import { UpdateGroupsDto } from './dto/update.groups.dto';
 import { GroupsRepository } from './groups.repository';
 import { groups } from '@prisma/client';
 import { format } from 'date-fns';

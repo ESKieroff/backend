@@ -11,9 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
-import { CreateCategoriesDto } from './dto/create-categories.dto';
-import { UpdateCategoriesDto } from './dto/update-categories.dto';
-import { ResponseCategoriesDto } from './dto/response-categories.dto';
+import { CreateCategoriesDto } from './dto/create.categories.dto';
+import { UpdateCategoriesDto } from './dto/update.categories.dto';
+import { ResponseCategoriesDto } from './dto/response.categories.dto';
 
 @Controller('categories')
 export class CategoriesController {

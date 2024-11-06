@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { OccurrenceService } from './occurrence.service';
-import { OccurrenceController } from './occurrence.controller';
-import { OccurrenceRepository } from './occurrence.repository';
+import { OccurrenceService } from './occurrences.service';
+import { OccurrenceController } from './occurrences.controller';
+import { OccurrenceRepository } from './occurrences.repository';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { SessionService } from '../common/sessionService';
 

@@ -2,8 +2,7 @@ import { ZodSchema } from 'zod';
 import {
   CreateCategorySchema,
   UpdateCategorySchema
-} from '../categories/dto/category.schema';
-// compositions
+} from '../categories/dto/categories.schema';
 import {
   CreateCompositionsSchema,
   UpdateCompositionsSchema
@@ -11,7 +10,7 @@ import {
 import {
   CreateGroupSchema,
   UpdateGroupSchema
-} from '../groups/dto/group.schema';
+} from '../groups/dto/groups.schema';
 import {
   CreateImageSchema,
   UpdateImageSchema
@@ -19,7 +18,7 @@ import {
 import {
   CreateOccurrenceSchema,
   UpdateOccurrenceSchema
-} from '../occurrences/dto/occurrence.schema';
+} from '../occurrences/dto/occurrences.schema';
 import {
   CreatePersonsSchema,
   UpdatePersonsSchema
@@ -39,7 +38,7 @@ import {
 import {
   CreateProductSchema,
   UpdateProductSchema
-} from '../products/dto/product.schema';
+} from '../products/dto/products.schema';
 import {
   CreateStockSchema,
   UpdateStockSchema
@@ -48,7 +47,7 @@ import {
   CreateStockLocationSchema,
   UpdateStockLocationSchema
 } from '../stock-locations/dto/stock-location.schema';
-import { CreateUserSchema, UpdateUserSchema } from '../users/dto/user.schema';
+import { CreateUserSchema, UpdateUserSchema } from '../users/dto/users.schema';
 
 type SchemaMap = {
   [key: string]: ZodSchema;

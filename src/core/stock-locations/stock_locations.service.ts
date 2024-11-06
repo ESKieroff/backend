@@ -4,10 +4,10 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { StockLocationsRepository } from './stock-locations.repository';
-import { CreateStockLocationDto } from './dto/create-stock-locations.dto';
+import { CreateStockLocationDto } from './dto/create.stock-locations.dto';
 import { stock_location } from '@prisma/client';
 import { format } from 'date-fns';
-import { UpdateStockLocationDto } from './dto/update-stock-locations.dto';
+import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
 import { SessionService } from '../common/sessionService';
 
 @Injectable()

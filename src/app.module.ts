@@ -18,7 +18,7 @@ import { GroupsModule } from './core/groups/groups.module';
 import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
 import { ImagesModule } from './core/images/images.module';
-import { OccurrenceModule } from './core/occurrences/occurrence.module';
+import { OccurrenceModule } from './core/occurrences/occurrences.module';
 import { BatchsModule } from './core/batchs/batchs.module';
 import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 import { ZodValidationPipe } from './config/zod.validation.pipe';

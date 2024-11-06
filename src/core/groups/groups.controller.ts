@@ -11,9 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
-import { CreateGroupsDto } from './dto/create-groups.dto';
-import { UpdateGroupsDto } from './dto/update-groups.dto';
-import { ResponseGroupsDto } from './dto/groups-response.dto';
+import { CreateGroupsDto } from './dto/create.groups.dto';
+import { UpdateGroupsDto } from './dto/update.groups.dto';
+import { ResponseGroupsDto } from './dto/response.groups.dto';
 
 @Controller('groups')
 export class GroupsController {

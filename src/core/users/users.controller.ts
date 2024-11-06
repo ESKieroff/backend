@@ -11,9 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ResponseUsersDto } from './dto/user-response..dto';
+import { CreateUserDto } from './dto/create.users.dto';
+import { UpdateUserDto } from './dto/update.users.dto';
+import { ResponseUsersDto } from './dto/response.users.dto';
 import { Role, Gender } from '../common/enums';
 import * as bcrypt from 'bcrypt';
 import { ApiQuery } from '@nestjs/swagger';

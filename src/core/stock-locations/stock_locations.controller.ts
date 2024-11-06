@@ -10,10 +10,10 @@ import {
   Post,
   Query
 } from '@nestjs/common';
-import { CreateStockLocationDto } from './dto/create-stock-locations.dto';
+import { CreateStockLocationDto } from './dto/create.stock-locations.dto';
 import { StockLocationsService } from './stock_locations.service';
-import { UpdateStockLocationDto } from './dto/update-stock-locations.dto';
-import { ResponseStockLocationDto } from './dto/response-stock-locations';
+import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
+import { ResponseStockLocationDto } from './dto/response.stock-locations';
 
 @Controller('stock-locations')
 export class StockLocationsController {

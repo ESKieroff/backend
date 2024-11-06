@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dto/create.products.dto';
+import { UpdateProductDto } from './dto/update.products.dto';
 import { ProductsRepository } from './products.repository';
 import { products } from '@prisma/client';
 import { format } from 'date-fns';

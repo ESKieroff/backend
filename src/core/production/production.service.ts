@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateProductionDto } from './dto/create-production.dto';
-//import { CreateProductionItemsDto } from './dto/create-production.dto';
-import { UpdateProductionDto } from './dto/update-production.dto';
+import { CreateProductionDto } from './dto/create.production.dto';
+import { UpdateProductionDto } from './dto/update.production.dto';
 import { ProductionRepository } from './production.repository';
 import { production_orders } from '@prisma/client';
 import { format } from 'date-fns';
