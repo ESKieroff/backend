@@ -97,7 +97,7 @@ model products {
   description               String                      @db.VarChar(255)
   code                      String                      @unique @db.VarChar(255)
   sku                       String                      @unique @db.VarChar(255)
-  unit_measure              Unit_Measure                @default(UN)
+  unit_measure              Unit_Measure                @default(KG)
   category_id               Int                         @default(1)
   group_id                  Int                         @default(1)
   supplier_id               Int?

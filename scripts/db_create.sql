@@ -64,7 +64,7 @@ CREATE TABLE "products" (
     "description" VARCHAR(255) NOT NULL,
     "code" VARCHAR(255) NOT NULL,
     "sku" VARCHAR(255) NOT NULL,
-    "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'UN',
+    "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'KG',
     "category_id" INTEGER NOT NULL DEFAULT 1,
     "group_id" INTEGER NOT NULL DEFAULT 1,
     "supplier_id" INTEGER,
