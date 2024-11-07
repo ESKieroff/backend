@@ -4,7 +4,10 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { CreateCompositionsDto } from './dto/create.compositions.dto';
-import { ResponseCompositionsDto } from './dto/response.compositions.dto';
+import {
+  ProductionStep,
+  ResponseCompositionsDto
+} from './dto/response.compositions.dto';
 import { UpdateCompositionsDto } from './dto/update.compositions.dto';
 import { CompositionsRepository } from './compositions.repository';
 import { format, isValid } from 'date-fns';
@@ -98,7 +101,6 @@ export class CompositionsService {
 
       let sequencia = 1;
 
-      // Inserção dos itens
       for (const item of createCompositionsDto.composition_items) {
         const createdItem =
           await this.compositionsRepository.createCompositionsItems({
@@ -132,6 +134,20 @@ export class CompositionsService {
     }
   }
 
+  private formatProductionSteps(steps: { id: string; description: string }[]): {
+    steps: ProductionStep[];
+  } {
+    return {
+      steps: steps.map((step, index) => ({
+        id:
+          typeof step.id === 'string'
+            ? parseInt(step.id, 10)
+            : step.id || index + 1,
+        description: step.description || 'Sem descrição'
+      }))
+    };
+  }
+
   async findAll(orderBy: string): Promise<ResponseCompositionsDto[]> {
     const compositions =
       await this.compositionsRepository.findAllCompositionsItems(orderBy);
@@ -141,8 +157,13 @@ export class CompositionsService {
       final_product: composition.final_product,
       description: composition.description,
       production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
+        ? this.formatProductionSteps(
+            composition.production_steps as {
+              id: string;
+              description: string;
+            }[]
+          )
+        : { steps: [] },
       created_at: this.formatDate(composition.created_at),
       updated_at: this.formatDate(composition.updated_at),
       created_by: composition.created_by,
@@ -173,8 +194,13 @@ export class CompositionsService {
       final_product: composition.final_product,
       description: composition.description,
       production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
+        ? this.formatProductionSteps(
+            composition.production_steps as {
+              id: string;
+              description: string;
+            }[]
+          )
+        : { steps: [] },
       created_at: this.formatDate(composition.created_at),
       updated_at: this.formatDate(composition.updated_at),
       created_by: composition.created_by,

@@ -72,9 +72,14 @@ export class CompositionsController {
       id: composition.id,
       final_product: composition.final_product,
       description: composition.description,
-      production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
+      production_steps: {
+        steps: Array.isArray(composition.production_steps)
+          ? composition.production_steps.map(step => ({
+              id: step.id,
+              description: step.description
+            }))
+          : []
+      },
       created_at: composition.created_at,
       updated_at: composition.updated_at,
       created_by: composition.created_by,
