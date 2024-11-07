@@ -19,7 +19,8 @@ VALUES
 ('defaultBatchOutputMask', 'PD', 'Define o padrão de máscara para batch de saída','root','root'),
 ('lastDocumentNumber', '3000', 'Serve para guardar o último número de documento criado para incrementar a partir dele','root','root'),
 ('lastBatchNumber', '1000', 'Serve para guardar o último número de batch criado para incrementar a partir dele','root','root'),
-('batchNumberLength', '5', 'Define o tamanho do número do batch para preenchimento com zeros à esquerda (ex: 00001)','root','root');
+('batchNumberLength', '5', 'Define o tamanho do número do batch para preenchimento com zeros à esquerda (ex: 00001)','root','root'),
+('lastOrderNumber','113', 'Serve para guardar o último número de ordem de produção criado para incrementar a partir dele','root','root');
 
 -- Insert into persons
 INSERT INTO "persons" ("name")
