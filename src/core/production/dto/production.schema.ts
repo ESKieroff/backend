@@ -1,3 +1,4 @@
+import { Production_Status } from 'src/core/common/enums';
 import * as z from 'zod';
 
 export const CreateProductionSchema = z.object({
@@ -44,7 +45,7 @@ export const UpdateProductionSchema = z.object({
       message: 'Invalid date format'
     })
     .optional(),
-  Production_Status: z.string().optional(),
+  Production_Status: z.nativeEnum(Production_Status).optional(),
   production_items: z
     .array(
       z.object({

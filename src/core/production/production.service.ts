@@ -28,9 +28,7 @@ export class ProductionService {
 
     const currentUser = this.sessionService.getCurrentUser();
     const numberString = await this.settingsService.get('lastOrderNumber');
-    console.log('recebido', numberString);
     const number = Number(numberString) + 1;
-    console.log('novo', number);
     const description = `Ordem ${descriptionProduct} - ${number}`;
     const status = Production_Status.CREATED;
 
@@ -64,7 +62,28 @@ export class ProductionService {
       sequence++;
       this.settingsService.incrementOrderNumber();
     }
-    return { production, items: createProductionDto.production_items };
+    const allItems = await this.productionRepository.getOrderItems(
+      production.id
+    );
+
+    const formattedItems = allItems.map(item => ({
+      ...item,
+      batch_expiration: this.formatDate(item.batch_expiration),
+      created_at: this.formatDate(item.created_at),
+      updated_at: this.formatDate(item.updated_at)
+    }));
+
+    return {
+      production: {
+        id: production.id,
+        description: production.description,
+        production_date: this.formatDate(production.production_date),
+        created_at: this.formatDate(production.created_at),
+        updated_at: this.formatDate(production.updated_at),
+        Production_Status: production.Production_Status,
+        items: formattedItems.sort((a, b) => a.sequence - b.sequence)
+      }
+    };
   }
 
   async findAll(orderBy: string): Promise<
@@ -102,7 +121,14 @@ export class ProductionService {
 
   async update(id: number, updateProductionDto: UpdateProductionDto) {
     const currentUser = this.sessionService.getCurrentUser();
-    await this.productionRepository.updateOrder(id, {
+
+    const existingOrder = await this.productionRepository.findById(id);
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Production with ID ${id} not found`);
+    }
+
+    const updatedOrder = await this.productionRepository.updateOrder(id, {
       description: updateProductionDto.description ?? undefined,
       production_date: updateProductionDto.production_date
         ? new Date(updateProductionDto.production_date)
@@ -112,72 +138,88 @@ export class ProductionService {
       updated_by: currentUser
     });
 
-    const existingItems = await this.productionRepository.getOrderItems(id);
-    const updatedItems = [];
+    const existingItems = await this.productionRepository.getOrderItems(
+      updatedOrder.id
+    );
 
     let sequence = (await this.productionRepository.getLastSequence(id)) + 1;
 
     for (const item of updateProductionDto.production_items) {
-      const existingItem = existingItems.find(
-        i => i.final_product_id === item.final_product_id
-      );
+      const existingItem = existingItems.find(i => i.id === item.id);
 
       if (existingItem) {
-        await this.productionRepository.updateOrderItem(
-          item.production_order_id,
-          {
-            final_product_id: item.final_product_id,
-            production_quantity_estimated:
-              item.production_quantity_estimated ?? undefined,
-            production_quantity_real:
-              item.production_quantity_real ?? undefined,
-            production_quantity_loss:
-              item.production_quantity_estimated &&
-              item.production_quantity_real
-                ? item.production_quantity_estimated -
-                  item.production_quantity_real
-                : undefined,
-            updated_at: new Date(),
-            updated_by: currentUser
-          }
-        );
-        updatedItems.push({ ...existingItem, ...item });
-      } else {
-        const newItem = await this.productionRepository.createOrderItem({
-          production_order_id: id,
-          sequence: sequence,
-          final_product_id: item.final_product_id!,
-          production_quantity_estimated: item.production_quantity_estimated!,
-          production_quantity_real: item.production_quantity_real!,
+        const updateItem = {
+          id: existingItem.id,
+          production_order: { connect: { id: Number(updatedOrder.id) } },
+          final_product_made: {
+            connect: { id: Number(existingItem.final_product_id) }
+          },
+          production_quantity_estimated:
+            item.production_quantity_estimated ?? undefined,
+          production_quantity_real: item.production_quantity_real ?? undefined,
           production_quantity_loss:
             item.production_quantity_estimated && item.production_quantity_real
               ? item.production_quantity_estimated -
                 item.production_quantity_real
-              : 0,
-          batch: item.batch!,
-          batch_expiration: item.batch_expiration!,
-          created_at: new Date(),
+              : undefined,
           updated_at: new Date(),
-          created_by: currentUser!,
-          updated_by: currentUser!
-        });
-        updatedItems.push(newItem);
-        sequence++;
+          updated_by: currentUser
+        };
+
+        await this.productionRepository.updateOrderItem(
+          updateItem.id,
+          updateItem
+        );
+      } else {
+        for (const item of updateProductionDto.production_items) {
+          if (
+            !existingItems.find(
+              i => i.final_product_id === item.final_product_id
+            )
+          ) {
+            await this.productionRepository.createOrderItem({
+              production_order_id: id,
+              sequence: sequence,
+              final_product_id: item.final_product_id!,
+              production_quantity_estimated:
+                item.production_quantity_estimated!,
+              production_quantity_real: item.production_quantity_real!,
+              production_quantity_loss:
+                item.production_quantity_estimated &&
+                item.production_quantity_real
+                  ? item.production_quantity_estimated -
+                    item.production_quantity_real
+                  : 0,
+              batch: item.batch!,
+              batch_expiration: item.batch_expiration!,
+              created_at: new Date(),
+              updated_at: new Date(),
+              created_by: currentUser!,
+              updated_by: currentUser!
+            });
+            sequence++;
+          }
+        }
       }
     }
+    const allItems = await this.productionRepository.getOrderItems(
+      updatedOrder.id
+    );
 
-    const allItems = updatedItems.concat(existingItems);
-    allItems.sort((a, b) => a.sequence - b.sequence);
+    const formattedItems = allItems.map(item => ({
+      ...item,
+      batch_expiration: this.formatDate(item.batch_expiration),
+      created_at: this.formatDate(item.created_at),
+      updated_at: this.formatDate(item.updated_at)
+    }));
 
     return {
       production: {
         id,
         description: updateProductionDto.description,
-        updated_at: new Date(),
+        updated_at: this.formatDate(updatedOrder.updated_at),
         updated_by: updateProductionDto.updated_by,
-        items: updatedItems.concat(
-          existingItems.filter(i => !updatedItems.includes(i))
-        )
+        items: formattedItems.sort((a, b) => a.sequence - b.sequence)
       }
     };
   }
@@ -185,6 +227,13 @@ export class ProductionService {
   async remove(id: number) {
     await this.isValid(id);
     await this.productionRepository.delete(id);
+  }
+
+  private formatDate(date: string | Date): string | null {
+    const parsedDate = new Date(date);
+    return isNaN(parsedDate.getTime())
+      ? null
+      : format(parsedDate, 'dd/MM/yyyy HH:mm:ss');
   }
 
   private formatProductionDate(production: production_orders): Omit<
