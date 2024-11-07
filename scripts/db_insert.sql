@@ -17,11 +17,11 @@ VALUES
 ('defaultRoleForNewUser', 'DEFAULT', 'Serve para definir o papel padrão para novos usuários','root','root'),
 ('defaultBatchInputMask', 'P', 'Define o padrão de máscara para batch de entrada','root','root'),
 ('defaultBatchOutputMask', 'PD', 'Define o padrão de máscara para batch de saída','root','root'),
-('lastDocumentNumber', '3000', 'Serve para guardar o último número de documento criado para incrementar a partir dele','root','root'),
+('lastInputDocumentNumber', '3000', 'Serve para guardar o último número de documento de entrada criado para incrementar a partir dele','root','root'),
 ('lastBatchNumber', '1000', 'Serve para guardar o último número de batch criado para incrementar a partir dele','root','root'),
 ('batchNumberLength', '5', 'Define o tamanho do número do batch para preenchimento com zeros à esquerda (ex: 00001)','root','root'),
-('lastOrderNumber','113', 'Serve para guardar o último número de ordem de produção criado para incrementar a partir dele','root','root');
-
+('lastOrderNumber','113', 'Serve para guardar o último número de ordem de produção criado para incrementar a partir dele','root','root'),
+('lastOutputDocumentNumber', '1000', 'Serve para guardar o último número de documento de saída criado para incrementar a partir dele','root','root');
 -- Insert into persons
 INSERT INTO "persons" ("name")
 VALUES 
@@ -290,7 +290,7 @@ VALUES
 
 
 -- Insert into stock_items
-INSERT INTO "stock_items" ("stock_id", "sequence", "product_id", "quantity", "unit_price", "total_price", "batch", "expiration", "stock_location_id")
+INSERT INTO "stock_items" ("stock_id", "sequence", "product_id", "quantity", "unit_price", "total_price", "batch", "batch_expiration", "stock_location_id")
 VALUES 
 	(1, 1, 1, 100.0, 10.0, 1000.0, 'LoteA123', '2024-12-31 23:59:59', 1),
     (1, 2, 2, 100.0, 10.0, 1000.0, 'LoteC123', '2024-12-31 23:59:59', 1),

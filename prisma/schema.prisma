@@ -204,8 +204,8 @@ model stock_items {
   quantity          Float
   unit_price        Float
   total_price       Float
-  batch              String?
-  expiration        DateTime?
+  batch             String?
+  batch_expiration  DateTime?
   images            Int[]
   supplier          Int?
   costumer          Int?

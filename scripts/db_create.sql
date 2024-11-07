@@ -147,7 +147,7 @@ CREATE TABLE "stock_items" (
     "unit_price" DOUBLE PRECISION NOT NULL,
     "total_price" DOUBLE PRECISION NOT NULL,
     "batch" TEXT,
-    "expiration" TIMESTAMP(3),
+    "batch_expiration" TIMESTAMP(3),
     "images" INTEGER[],
     "supplier" INTEGER,
     "costumer" INTEGER,
