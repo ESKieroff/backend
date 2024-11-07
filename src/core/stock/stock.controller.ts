@@ -31,11 +31,11 @@ export class StockController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, product_id, lote, quantity, stock_id, sequence, created_at, updated_at',
+      'Field to order by. Valid fields: id, product_id, batch, quantity, stock_id, sequence, created_at, updated_at',
     enum: [
       'id',
       'product_id',
-      'lote',
+      'batch',
       'quantity',
       'stock_id',
       'sequence',
@@ -47,7 +47,7 @@ export class StockController {
     const validOrderFields = [
       'id',
       'product_id',
-      'lote',
+      'batch',
       'quantity',
       'stock_id',
       'sequence',
@@ -89,7 +89,7 @@ export class StockController {
     const batch = await this.stockService.getLote(stockMoviment);
 
     return {
-      lote: batch[0],
+      batch: batch[0],
       expiration: batch[1]
     } as ResponseBatchDto;
   }

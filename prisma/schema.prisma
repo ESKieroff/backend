@@ -204,7 +204,7 @@ model stock_items {
   quantity          Float
   unit_price        Float
   total_price       Float
-  lote              String?
+  batch              String?
   expiration        DateTime?
   images            Int[]
   supplier          Int?
@@ -251,8 +251,8 @@ model production_orders_items {
   production_quantity_estimated Float
   production_quantity_real      Float
   production_quantity_loss      Float
-  lote                          String?           @db.VarChar(255)
-  lote_expiration               DateTime?
+  batch                          String?           @db.VarChar(255)
+  batch_expiration               DateTime?
   created_at                    DateTime          @default(now()) @db.Timestamp(6)
   updated_at                    DateTime          @default(now()) @db.Timestamp(6)
   created_by                    String?

@@ -51,8 +51,8 @@ export class ProductionService {
         production_quantity_real: item.production_quantity_real,
         production_quantity_loss:
           item.production_quantity_estimated - item.production_quantity_real,
-        lote: item.lote,
-        lote_expiration: item.lote_expiration,
+        batch: item.batch,
+        batch_expiration: item.batch_expiration,
         created_at: new Date(),
         updated_at: new Date()
       });
@@ -151,8 +151,8 @@ export class ProductionService {
               ? item.production_quantity_estimated -
                 item.production_quantity_real
               : 0,
-          lote: item.lote!,
-          lote_expiration: item.lote_expiration!,
+          batch: item.batch!,
+          batch_expiration: item.batch_expiration!,
           created_at: new Date(),
           updated_at: new Date(),
           created_by: currentUser!,

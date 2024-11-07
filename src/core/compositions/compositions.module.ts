@@ -4,7 +4,7 @@ import { CompositionsController } from './compositions.controller';
 import { CompositionsRepository } from './compositions.repository';
 import { PrismaModule } from 'src/database/prisma/prisma.module';
 import { SettingsModule } from 'src/settings/settings.module';
-import { LoteService } from '../common/lote.utils';
+import { BatchService } from '../common/batch.utils';
 import { SessionService } from '../common/sessionService';
 
 @Module({
@@ -13,7 +13,7 @@ import { SessionService } from '../common/sessionService';
   providers: [
     CompositionsService,
     CompositionsRepository,
-    LoteService,
+    BatchService,
     SessionService
   ]
 })

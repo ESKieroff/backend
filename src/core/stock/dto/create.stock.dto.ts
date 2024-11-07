@@ -46,7 +46,7 @@ export class CreateStockItemsDto {
   readonly product_id: number;
 
   @ApiHideProperty()
-  readonly lote: string;
+  readonly batch: string;
 
   @ApiHideProperty()
   readonly expiration: Date;

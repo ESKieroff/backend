@@ -17,6 +17,6 @@ export class UpdateProductionItemsDto {
   readonly updated_by: string;
   production_order_id?: number;
   final_product_id?: number;
-  lote?: string;
-  lote_expiration?: string;
+  batch?: string;
+  batch_expiration?: string;
 }

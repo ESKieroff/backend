@@ -7,7 +7,7 @@ import { CreateStockDto, CreateStockItemsDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { StockRepository } from './stock.repository';
 import { SettingsService } from 'src/settings/settings.service';
-import { LoteService } from '../common/lote.utils';
+import { BatchService } from '../common/batch.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
@@ -19,7 +19,7 @@ export class StockService {
     private readonly sessionService: SessionService,
     private readonly stockRepository: StockRepository,
     private readonly settingsService: SettingsService,
-    private readonly loteService: LoteService
+    private readonly batchService: BatchService
   ) {}
 
   stockMovimentsToCheck = new Set([
@@ -84,12 +84,14 @@ export class StockService {
       const stock_location_default = parseInt(stock_location_default_str, 10);
 
       for (const item of createStockDto.stock_items) {
-        let lote;
+        let batch;
         let expiration;
-        if (!item.lote) {
-          [lote, expiration] = await this.getLote(stockDocument.stock_moviment);
+        if (!item.batch) {
+          [batch, expiration] = await this.getLote(
+            stockDocument.stock_moviment
+          );
         } else {
-          lote = item.lote;
+          batch = item.batch;
           expiration = new Date(item.expiration);
         }
 
@@ -100,7 +102,7 @@ export class StockService {
           quantity: item.quantity,
           unit_price: item.unit_price,
           total_price: item.unit_price * item.quantity,
-          lote: lote,
+          batch: batch,
           expiration: expiration.toISOString(),
           observation: item.observation!,
           supplier: item.supplier!,
@@ -147,11 +149,11 @@ export class StockService {
   }
 
   async getLote(stockMoviment: Stock_Moviment): Promise<[string, Date]> {
-    const loteGenerated = await this.loteService.generateLote(
+    const batchGenerated = await this.batchService.generateBatch(
       stockMoviment === Stock_Moviment.INPUT ? 'INPUT' : 'OUTPUT'
     );
-    const [lote, expiration] = loteGenerated.split('-');
-    return [lote, new Date(expiration)];
+    const [batch, expiration] = batchGenerated.split('-');
+    return [batch, new Date(expiration)];
   }
 
   private async validateStock(
@@ -159,17 +161,17 @@ export class StockService {
     errorMessages: string[]
   ) {
     for (const item of items) {
-      const saldoAtual = await this.checkStock(item.product_id, item.lote);
+      const saldoAtual = await this.checkStock(item.product_id, item.batch);
       if (item.quantity > saldoAtual) {
         errorMessages.push(
-          `Saldo insuficiente para o produto ${item.product_id} no lote ${item.lote}. \nQuantidade atual: ${saldoAtual}.`
+          `Saldo insuficiente para o produto ${item.product_id} no batch ${item.batch}. \nQuantidade atual: ${saldoAtual}.`
         );
       }
     }
   }
 
-  async checkStock(product_id: number, lote: string): Promise<number> {
-    const estoque = await this.stockRepository.checkStock(product_id, lote);
+  async checkStock(product_id: number, batch: string): Promise<number> {
+    const estoque = await this.stockRepository.checkStock(product_id, batch);
 
     return estoque || 0;
   }
@@ -200,7 +202,7 @@ export class StockService {
   }
 
   async getAllProductLots(orderBy, origin) {
-    return this.stockRepository.getAllProductLots(orderBy, origin);
+    return this.stockRepository.getAllProductBatchs(orderBy, origin);
   }
 
   async update(id: number, updateStockDto: UpdateStockDto) {

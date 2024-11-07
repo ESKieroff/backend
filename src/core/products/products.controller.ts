@@ -13,7 +13,10 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create.products.dto';
 import { UpdateProductDto } from './dto/update.products.dto';
-import { ResponseProductsDto } from './dto/response.products.dto';
+import {
+  ResponseProductsDto,
+  ShortResponseProductsDto
+} from './dto/response.products.dto';
 import { Origin, Unit_Measure } from '../common/enums';
 import { ApiQuery } from '@nestjs/swagger';
 
@@ -178,6 +181,29 @@ export class ProductsController {
     }));
   }
 
+  @Get('made-short')
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Field to order by. Valid fields: id, description',
+    enum: ['id', 'description']
+  })
+  async findMadeShort(
+    @Query('orderBy') orderBy: string = 'id'
+  ): Promise<ShortResponseProductsDto[]> {
+    const validOrderFields = ['id', 'description'];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    }
+    const origin = Origin.MADE;
+    const products = await this.productsService.findByOrigin(orderBy, origin);
+    return products.map(product => ({
+      id: product.id,
+      description: product.description
+    }));
+  }
+
   @Get('raw-material')
   @ApiQuery({
     name: 'orderBy',
@@ -229,6 +255,29 @@ export class ProductsController {
       active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
+    }));
+  }
+
+  @Get('raw-material-short')
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Field to order by. Valid fields: id, description',
+    enum: ['id', 'description']
+  })
+  async findRawShort(
+    @Query('orderBy') orderBy: string = 'id'
+  ): Promise<ShortResponseProductsDto[]> {
+    const validOrderFields = ['id', 'description'];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    }
+    const origin = Origin.RAW_MATERIAL;
+    const products = await this.productsService.findByOrigin(orderBy, origin);
+    return products.map(product => ({
+      id: product.id,
+      description: product.description
     }));
   }
 
