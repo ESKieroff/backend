@@ -6,6 +6,7 @@ import { production_orders } from '@prisma/client';
 import { format } from 'date-fns';
 import { SettingsService } from 'src/settings/settings.service';
 import { SessionService } from '../common/sessionService';
+import { Production_Status } from '../common/enums';
 
 @Injectable()
 export class ProductionService {
@@ -27,14 +28,17 @@ export class ProductionService {
 
     const currentUser = this.sessionService.getCurrentUser();
     const numberString = await this.settingsService.get('lastOrderNumber');
-    const number = Number(numberString);
+    console.log('recebido', numberString);
+    const number = Number(numberString) + 1;
+    console.log('novo', number);
     const description = `Ordem ${descriptionProduct} - ${number}`;
+    const status = Production_Status.CREATED;
 
     const production = await this.productionRepository.createOrder({
       number: number,
       description: description,
       production_date: new Date(createProductionDto.production_date),
-      Production_Status: createProductionDto.Production_Status,
+      Production_Status: status,
       created_at: new Date(),
       updated_at: new Date(),
       created_by: currentUser,
@@ -139,7 +143,6 @@ export class ProductionService {
         );
         updatedItems.push({ ...existingItem, ...item });
       } else {
-        // Cria um novo item
         const newItem = await this.productionRepository.createOrderItem({
           production_order_id: id,
           sequence: sequence,

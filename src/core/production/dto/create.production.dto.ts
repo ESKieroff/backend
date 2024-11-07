@@ -12,6 +12,7 @@ export class CreateProductionDto {
 }
 
 export class CreateProductionItemsDto {
+  readonly id: number;
   readonly production_order_id: number;
   readonly sequence: number;
   readonly final_product_id: number;

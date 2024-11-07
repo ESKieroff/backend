@@ -72,11 +72,11 @@ export const ZodSchemasMap: SchemaMap = {
   'POST:/persons/': CreatePersonsSchema,
   'PATCH:/persons/': UpdatePersonsSchema,
   //production
-  'POST:/production/': CreateProductionSchema,
-  'PATCH:/production/': UpdateProductionSchema,
+  'POST:/orders/': CreateProductionSchema,
+  'PATCH:/orders/': UpdateProductionSchema,
   //production-progress
-  'POST:/production-progress/': CreateProductionProgressSchema,
-  'PATCH:/production-progress/': UpdateProductionProgressSchema,
+  'POST:/progress/': CreateProductionProgressSchema,
+  'PATCH:/progress/': UpdateProductionProgressSchema,
   //production-steps
   'POST:/steps/': CreateProductionStepSchema,
   'PATCH:/steps/': UpdateProductionStepSchema,

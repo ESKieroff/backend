@@ -5,7 +5,6 @@ export const CreateStockSchema = z.object({
     .string()
     .transform(str => new Date(str))
     .refine(date => !isNaN(date.getTime()), {
-      // Verifica se a data é válida
       message: 'Invalid date format'
     })
     .default(() => new Date().toISOString()),
