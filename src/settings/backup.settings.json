@@ -49,20 +49,20 @@
 		},
 		{
 			"id": 6,
-			"key": "lastDocumentNumber",
-			"value": "3000",
+			"key": "lastInputDocumentNumber",
+			"value": "3001",
 			"active": true,
 			"description": "Serve para guardar o último número de documento criado para incrementar a partir dele",
-			"updated_at": "06-11-2024 22:33:35",
+			"updated_at": "07-11-2024 17:00:40",
 			"updated_by": "root"
 		},
 		{
 			"id": 7,
 			"key": "lastBatchNumber",
-			"value": "1000",
+			"value": "1003",
 			"active": true,
 			"description": "Serve para guardar o último número de batch criado para incrementar a partir dele",
-			"updated_at": "06-11-2024 22:33:35",
+			"updated_at": "07-11-2024 17:01:29",
 			"updated_by": "root"
 		},
 		{
@@ -77,10 +77,19 @@
 		{
 			"id": 9,
 			"key": "lastOrderNumber",
-			"value": "113",
+			"value": "115",
 			"active": true,
 			"description": "Serve para guardar o último númer de ordem de produção criado para incrementar a partir dele",
-			"updated_at": "07-11-2024 15:19:51",
+			"updated_at": "07-11-2024 16:55:10",
+			"updated_by": "root"
+		},
+		{
+			"id": 10,
+			"key": "lastOutputDocumentNumber",
+			"value": "4001",
+			"active": true,
+			"description": "Serve para guardar o último número de documento de saída criado para incrementar a partir dele",
+			"updated_at": "07-11-2024 17:01:29",
 			"updated_by": "root"
 		}
 	]
