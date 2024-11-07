@@ -22,7 +22,6 @@ export class StockController {
 
   @Post()
   create(@Body() createStockDto: CreateStockDto) {
-    console.log('createStockDto', createStockDto);
     return this.stockService.create(createStockDto);
   }
 
