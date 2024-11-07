@@ -25,11 +25,11 @@ export class ProductBatch {
   batchs: {
     batch: string;
     totalQuantity: number;
-    expiration: Date | null;
+    batch_expiration: Date | null;
   }[];
 }
 
 export class ResponseBatchDto {
   batch: string;
-  expiration: Date | null;
+  batch_expiration: Date | null;
 }

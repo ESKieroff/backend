@@ -20,7 +20,7 @@ export class StockRepository {
         unit_price: data.unit_price,
         total_price: data.total_price,
         batch: data.batch,
-        expiration: data.expiration,
+        batch_expiration: data.batch_expiration,
         products: { connect: { id: data.product_id } },
         stock: { connect: { id: data.stock_id } },
         stock_location: data.stock_location_id
@@ -59,7 +59,7 @@ export class StockRepository {
         unit_price: data.unit_price,
         total_price: data.total_price,
         batch: data.batch,
-        expiration: data.expiration,
+        batch_expiration: data.batch_expiration,
         ...(data.stock_location_id
           ? { stock_location: { connect: { id: data.stock_location_id } } }
           : {}),
@@ -259,7 +259,7 @@ export class StockRepository {
               }
             },
             batch: true,
-            expiration: true,
+            batch_expiration: true,
             quantity: true,
             unit_price: true,
             total_price: true,
@@ -334,7 +334,7 @@ export class StockRepository {
       select: {
         product_id: true,
         batch: true,
-        expiration: true,
+        batch_expiration: true,
         quantity: true
       },
       orderBy: {
@@ -347,7 +347,8 @@ export class StockRepository {
     for (const myBatch of batchs) {
       const productId = myBatch.product_id;
       const batch = myBatch.batch || 'sem batch';
-      const expiration = myBatch.expiration || new Date('1900-01-01');
+      const batch_expiration =
+        myBatch.batch_expiration || new Date('1900-01-01');
 
       if (!productBatchSummary[productId]) {
         const description = await this.prisma.products.findUnique({
@@ -365,7 +366,7 @@ export class StockRepository {
       productBatchSummary[productId].batchs.push({
         batch: batch,
         totalQuantity: 0,
-        expiration: expiration
+        batch_expiration: batch_expiration
       });
     }
 
@@ -386,7 +387,7 @@ export class StockRepository {
       select: {
         product_id: true,
         batch: true,
-        expiration: true,
+        batch_expiration: true,
         quantity: true
       },
       orderBy: { product_id: orderBy }
@@ -418,7 +419,7 @@ export class StockRepository {
       productBatchSummary[productId].batchs.push({
         batch: batch,
         totalQuantity: availableStock,
-        expiration: myBatch.expiration
+        batch_expiration: myBatch.batch_expiration
       });
     }
 

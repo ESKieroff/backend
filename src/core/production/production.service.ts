@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { SettingsService } from 'src/settings/settings.service';
 import { SessionService } from '../common/sessionService';
 import { Production_Status } from '../common/enums';
+import { formatDate } from '../common/utils';
 
 @Injectable()
 export class ProductionService {
@@ -68,18 +69,18 @@ export class ProductionService {
 
     const formattedItems = allItems.map(item => ({
       ...item,
-      batch_expiration: this.formatDate(item.batch_expiration),
-      created_at: this.formatDate(item.created_at),
-      updated_at: this.formatDate(item.updated_at)
+      batch_expiration: formatDate(item.batch_expiration),
+      created_at: formatDate(item.created_at),
+      updated_at: formatDate(item.updated_at)
     }));
 
     return {
       production: {
         id: production.id,
         description: production.description,
-        production_date: this.formatDate(production.production_date),
-        created_at: this.formatDate(production.created_at),
-        updated_at: this.formatDate(production.updated_at),
+        production_date: formatDate(production.production_date),
+        created_at: formatDate(production.created_at),
+        updated_at: formatDate(production.updated_at),
         Production_Status: production.Production_Status,
         items: formattedItems.sort((a, b) => a.sequence - b.sequence)
       }
@@ -208,16 +209,16 @@ export class ProductionService {
 
     const formattedItems = allItems.map(item => ({
       ...item,
-      batch_expiration: this.formatDate(item.batch_expiration),
-      created_at: this.formatDate(item.created_at),
-      updated_at: this.formatDate(item.updated_at)
+      batch_expiration: formatDate(item.batch_expiration),
+      created_at: formatDate(item.created_at),
+      updated_at: formatDate(item.updated_at)
     }));
 
     return {
       production: {
         id,
         description: updateProductionDto.description,
-        updated_at: this.formatDate(updatedOrder.updated_at),
+        updated_at: formatDate(updatedOrder.updated_at),
         updated_by: updateProductionDto.updated_by,
         items: formattedItems.sort((a, b) => a.sequence - b.sequence)
       }
@@ -227,13 +228,6 @@ export class ProductionService {
   async remove(id: number) {
     await this.isValid(id);
     await this.productionRepository.delete(id);
-  }
-
-  private formatDate(date: string | Date): string | null {
-    const parsedDate = new Date(date);
-    return isNaN(parsedDate.getTime())
-      ? null
-      : format(parsedDate, 'dd/MM/yyyy HH:mm:ss');
   }
 
   private formatProductionDate(production: production_orders): Omit<

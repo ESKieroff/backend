@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
+import { formatDate } from '../common/utils';
 
 @Injectable()
 export class StockService {
@@ -29,22 +30,39 @@ export class StockService {
   ]);
 
   async create(createStockDto: CreateStockDto) {
-    const currentUser = this.sessionService.getCurrentUser();
     const errorMessages = [];
     if (!Array.isArray(createStockDto.stock_items)) {
       throw new BadRequestException('Items must be an array');
     }
 
-    const existingStock = await this.stockRepository.findByDocumentNumber(
-      createStockDto.document_number
-    );
-    if (existingStock) {
-      throw new BadRequestException(
-        `Document number ${createStockDto.document_number} already exists`
+    const currentUser = this.sessionService.getCurrentUser();
+    let documentNumber = '';
+    let isInput = false;
+
+    if (createStockDto.stock_moviment === Stock_Moviment.INPUT) {
+      isInput = true;
+
+      documentNumber = await this.settingsService.get(
+        'lastInputDocumentNumber'
+      );
+    } else {
+      isInput = false;
+
+      documentNumber = await this.settingsService.get(
+        'lastOutputDocumentNumber'
       );
     }
 
-    if (this.stockMovimentsToCheck.has(createStockDto.stock_moviment)) {
+    const number = Number(documentNumber) + 1;
+
+    const existingStock = await this.stockRepository.findByDocumentNumber(
+      number.toString()
+    );
+    if (existingStock) {
+      throw new BadRequestException(`Document number ${number} already exists`);
+    }
+
+    if (!isInput) {
       const enableNegativeStock = await this.settingsService.get(
         'enableNegativeStock'
       );
@@ -67,8 +85,8 @@ export class StockService {
     const createdItems = [];
     try {
       stockDocument = await this.stockRepository.createStock({
-        document_number: createStockDto.document_number,
-        document_date: new Date(createStockDto.document_date),
+        document_number: number.toString(),
+        document_date: new Date(),
         stock_moviment: createStockDto.stock_moviment,
         created_at: new Date(),
         updated_at: new Date(),
@@ -85,17 +103,17 @@ export class StockService {
 
       for (const item of createStockDto.stock_items) {
         let batch;
-        let expiration;
+        let batch_expiration;
         if (!item.batch) {
-          [batch, expiration] = await this.getLote(
+          [batch, batch_expiration] = await this.getLote(
             stockDocument.stock_moviment
           );
         } else {
           batch = item.batch;
-          expiration = new Date(item.expiration);
+          batch_expiration = new Date(item.batch_expiration);
         }
 
-        const createdItem = await this.stockRepository.createStockItems({
+        await this.stockRepository.createStockItems({
           stock_id: stockDocument.id,
           product_id: item.product_id,
           sequence: sequencia,
@@ -103,7 +121,7 @@ export class StockService {
           unit_price: item.unit_price,
           total_price: item.unit_price * item.quantity,
           batch: batch,
-          expiration: expiration.toISOString(),
+          batch_expiration: batch_expiration.toISOString(),
           observation: item.observation!,
           supplier: item.supplier!,
           costumer: item.costumer!,
@@ -112,17 +130,33 @@ export class StockService {
           updated_at: new Date()
         });
         sequencia++;
-        createdItems.push(createdItem);
+
+        await this.settingsService.set(
+          isInput ? 'lastInputDocumentNumber' : 'lastOutputDocumentNumber',
+          number.toString()
+        );
       }
+
+      const allItems = await this.stockRepository.getStockItems(
+        stockDocument.id
+      );
+
+      createdItems.push(
+        ...allItems.map(item => ({
+          ...item,
+          batch_expiration: formatDate(item.batch_expiration),
+          created_at: formatDate(item.created_at),
+          updated_at: formatDate(item.updated_at)
+        }))
+      );
 
       return {
         stockDocument: {
           id: stockDocument.id,
           document_number: stockDocument.document_number,
-          document_date: stockDocument.document_date,
+          document_date: formatDate(stockDocument.document_date),
           stock_moviment: stockDocument.stock_moviment,
-          created_at: stockDocument.created_at,
-          updated_at: stockDocument.updated_at,
+          created_at: formatDate(stockDocument.created_at),
           items: createdItems
         }
       };
@@ -152,8 +186,8 @@ export class StockService {
     const batchGenerated = await this.batchService.generateBatch(
       stockMoviment === Stock_Moviment.INPUT ? 'INPUT' : 'OUTPUT'
     );
-    const [batch, expiration] = batchGenerated.split('-');
-    return [batch, new Date(expiration)];
+    const [batch, batch_expiration] = batchGenerated.split('-');
+    return [batch, new Date(batch_expiration)];
   }
 
   private async validateStock(

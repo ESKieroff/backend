@@ -90,7 +90,7 @@ export class StockController {
 
     return {
       batch: batch[0],
-      expiration: batch[1]
+      batch_expiration: batch[1]
     } as ResponseBatchDto;
   }
 
