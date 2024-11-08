@@ -11,7 +11,6 @@ export class CompositionsRepository {
   constructor(private prisma: PrismaService) {}
 
   async createCompositions(data: Prisma.compositionsCreateInput) {
-    console.log('cheguei aqui', data);
     const createdComposition = await this.prisma.compositions.create({
       data: {
         description: data.description,

@@ -162,23 +162,19 @@ export class StockService {
         }
       };
     } catch (error) {
-      console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
-
       if (stockDocument?.id) {
         try {
           await this.stockRepository.deleteStock(stockDocument.id);
         } catch (deleteError) {
-          console.error(
-            'Error removing stock document:',
-            (deleteError as Error).message
-          );
+          return {
+            status: 'error',
+            message: `Error removing stock document: ${(deleteError as Error).message}`
+          };
         }
       }
-
       return {
-        success: false,
-        message:
-          'Erro ao criar itens do documento de estoque. Documento foi removido.'
+        status: 'error',
+        message: `Error during item insertion: ${(error as Error).message}`
       };
     }
   }

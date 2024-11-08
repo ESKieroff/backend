@@ -157,9 +157,7 @@ export class StockRepository {
     });
 
     const totalTransit = transit._sum.quantity || 0;
-    // total
     const totalUndisponible = totalOutput + totalReserved + totalTransit;
-
     const totalQuantity =
       totalInput - totalUndisponible > 0 ? totalInput - totalUndisponible : 0;
 
@@ -418,7 +416,7 @@ export class StockRepository {
       const batch = myBatch.batch;
 
       if (typeof productId !== 'number') {
-        console.error(`Product ID ${productId} tem um formato inválido!`);
+        throw new Error(`Product ID ${productId} tem um formato inválido!`);
       }
       if (!productBatchSummary[productId]) {
         const description = await this.prisma.products.findUnique({
@@ -450,7 +448,6 @@ export class StockRepository {
   ): Promise<ProductBatchByCategory[]> {
     const productFilter = origin ? { origin } : {};
 
-    // Passo 1: Buscar todos os lotes com seus product_id
     const batches = await this.prisma.stock_items.findMany({
       distinct: ['product_id', 'batch'],
       where: {
@@ -465,10 +462,8 @@ export class StockRepository {
       orderBy: { product_id: orderBy }
     });
 
-    // Passo 2: Obter todos os product_id únicos
     const productIds = [...new Set(batches.map(batch => batch.product_id))];
 
-    // Passo 3: Buscar as informações de categoria e descrição dos produtos
     const products = await this.prisma.products.findMany({
       where: {
         id: { in: productIds }
@@ -479,13 +474,12 @@ export class StockRepository {
         category_id: true,
         categories: {
           select: {
-            description: true // Descrição da categoria
+            description: true
           }
         }
       }
     });
 
-    // Passo 4: Agrupar os lotes por categoria
     const productBatchByCategory: Record<string, ProductBatchByCategory> = {};
 
     for (const batch of batches) {
@@ -514,7 +508,6 @@ export class StockRepository {
       });
     }
 
-    // Passo 5: Retornar os lotes organizados por categoria
     return Object.values(productBatchByCategory);
   }
 }
