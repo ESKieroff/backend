@@ -1,12 +1,8 @@
-export class ProductionStep {
-  id: number;
-  description: string;
-}
 export class ResponseCompositionsDto {
   id: number;
   final_product: number;
   description: string;
-  production_steps: { steps: ProductionStep[] };
+  production_steps: object;
   created_at?: string;
   updated_at?: string;
   created_by?: string;
