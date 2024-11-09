@@ -24,6 +24,7 @@ import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 import { ZodValidationPipe } from './config/zod.validation.pipe';
 import { SessionService } from './core/common/sessionService';
 import { RequestMethodPathInterceptor } from './config/interceptor.request';
+import { ProductionStepsModule } from './core/production-steps/production-steps.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -49,7 +50,8 @@ import { RequestMethodPathInterceptor } from './config/interceptor.request';
     SettingsModule,
     StockModule,
     StockLocationsModule,
-    UsersModule
+    UsersModule,
+    ProductionStepsModule
   ],
   controllers: [ControlPanelController],
   providers: [
