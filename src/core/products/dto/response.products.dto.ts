@@ -4,7 +4,6 @@ export class ResponseProductsDto {
   id: number;
   description: string;
   code: string;
-  sku: string;
   origin: Origin;
   unit_measure: Unit_Measure;
   category_id: number;

@@ -30,8 +30,7 @@ export class ProductsController {
   ): Promise<ResponseProductsDto> {
     const matchedProducts = await this.productsService.matchProductByData(
       createProductDto.code,
-      createProductDto.description,
-      createProductDto.sku
+      createProductDto.description
     );
 
     if ((await matchedProducts).length > 0) {
@@ -55,7 +54,6 @@ export class ProductsController {
       id: createdProduct.id,
       description: createdProduct.description,
       code: createdProduct.code,
-      sku: createdProduct.sku,
       origin: createdProduct.origin as Origin,
       unit_measure: createdProduct.unit_measure as Unit_Measure,
       category_id: createdProduct.category_id,
@@ -75,12 +73,11 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, code, sku, origin, category_id, group_id, supplier_id',
+      'Field to order by. Valid fields: id, description, code, origin, category_id, group_id, supplier_id',
     enum: [
       'id',
       'description',
       'code',
-      'sku',
       'origin',
       'category_id',
       'supplier_id',
@@ -94,7 +91,6 @@ export class ProductsController {
       'id',
       'description',
       'code',
-      'sku',
       'origin',
       'category_id',
       'group_id',
@@ -110,7 +106,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -130,12 +125,11 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
+      'Field to order by. Valid fields: id, description, code, category_id, group_id, supplier_id',
     enum: [
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -148,7 +142,6 @@ export class ProductsController {
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -163,7 +156,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -207,12 +199,11 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
+      'Field to order by. Valid fields: id, description, code, category_id, group_id, supplier_id',
     enum: [
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -225,7 +216,6 @@ export class ProductsController {
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -240,7 +230,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -291,7 +280,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -334,7 +322,6 @@ export class ProductsController {
       id: updatedProduct.id,
       description: updatedProduct.description,
       code: updatedProduct.code,
-      sku: updatedProduct.sku,
       origin: updatedProduct.origin as Origin,
       unit_measure: updatedProduct.unit_measure as Unit_Measure,
       category_id: updatedProduct.category_id,
