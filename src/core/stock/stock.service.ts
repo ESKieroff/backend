@@ -13,7 +13,10 @@ import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
-import { ResponseStockDto } from './dto/response.stock.dto';
+import {
+  ResponseStockDto,
+  ResponseProductsWithBatches
+} from './dto/response.stock.dto';
 
 @Injectable()
 export class StockService {
@@ -354,5 +357,25 @@ export class StockService {
       created_at: format(stock.created_at, 'dd/MM/yyyy'),
       updated_at: format(stock.updated_at, 'dd/MM/yyyy')
     };
+  }
+
+  async getRawMaterialShortList(): Promise<ResponseProductsWithBatches[]> {
+    const products = await this.stockRepository.getProducts();
+
+    const response: ResponseProductsWithBatches[] = [];
+
+    for (const product of products) {
+      const batchQuantity =
+        await this.stockRepository.countDistinctBatchesWithStock(product.id);
+
+      response.push({
+        id: product.id,
+        description: product.description,
+        category: product.category,
+        batch_quantity: batchQuantity
+      });
+    }
+
+    return response;
   }
 }

@@ -510,4 +510,54 @@ export class StockRepository {
 
     return Object.values(productBatchByCategory);
   }
+
+  async countDistinctBatchesWithStock(product_id: number): Promise<number> {
+    const batches = await this.prisma.stock_items.findMany({
+      where: {
+        product_id
+      },
+      select: {
+        batch: true
+      },
+      distinct: ['batch']
+    });
+
+    let count = 0;
+
+    for (const batch of batches) {
+      const stockBalance = await this.checkStock(product_id, batch.batch);
+
+      if (stockBalance > 0) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  async getProducts(): Promise<
+    { id: number; description: string; category: string }[]
+  > {
+    const products = await this.prisma.products.findMany({
+      where: {
+        origin: 'RAW_MATERIAL',
+        active: true
+      },
+      select: {
+        id: true,
+        description: true,
+        categories: {
+          select: {
+            description: true
+          }
+        }
+      }
+    });
+
+    return products.map(product => ({
+      id: product.id,
+      description: product.description,
+      category: product.categories.description
+    }));
+  }
 }

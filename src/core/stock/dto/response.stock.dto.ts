@@ -55,3 +55,10 @@ export class ProductBatchByCategory {
     totalQuantity: number;
   }[];
 }
+
+export class ResponseProductsWithBatches {
+  id: number;
+  description: string;
+  category: string;
+  batch_quantity: number;
+}

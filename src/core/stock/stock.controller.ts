@@ -93,6 +93,12 @@ export class StockController {
     return result;
   }
 
+  @Get('raw-material-short-list')
+  async getRawMaterialShortList() {
+    const result = await this.stockService.getRawMaterialShortList();
+    return result;
+  }
+
   @Get('gen-batchs')
   async generateBatchs(
     @Query('moviment') moviment: string
