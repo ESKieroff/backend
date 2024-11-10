@@ -227,6 +227,13 @@ export class StockRepository {
     });
   }
 
+  async findBySku(sku: string): Promise<stock_items[]> {
+    return await this.prisma.stock_items.findMany({
+      where: { sku },
+      orderBy: { sequence: 'asc' }
+    });
+  }
+
   async update(data: Prisma.stockCreateInput): Promise<stock> {
     const stock = await this.prisma.stock.create({
       data

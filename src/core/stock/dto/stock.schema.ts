@@ -5,7 +5,6 @@ export const CreateStockSchema = z.object({
   stock_moviment: z.nativeEnum(Stock_Moviment),
   stock_items: z.array(
     z.object({
-      id: z.number().int().positive('Invalid stock item id'),
       product_id: z.number().int().positive('Product is required'),
       quantity: z.number().int().positive('Quantity is required'),
       unit_price: z
