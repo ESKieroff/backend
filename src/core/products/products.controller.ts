@@ -65,7 +65,6 @@ export class ProductsController {
         typeof createdProduct.nutritional_info === 'string'
           ? JSON.parse(createdProduct.nutritional_info)
           : createdProduct.nutritional_info,
-      active: createdProduct.active,
       created_at: createdProduct.created_at,
       updated_at: createdProduct.updated_at
     };
@@ -121,7 +120,6 @@ export class ProductsController {
         typeof product.nutritional_info === 'string'
           ? JSON.parse(product.nutritional_info)
           : product.nutritional_info,
-      active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
     }));
@@ -252,7 +250,6 @@ export class ProductsController {
         typeof product.nutritional_info === 'string'
           ? JSON.parse(product.nutritional_info)
           : product.nutritional_info,
-      active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
     }));
@@ -304,7 +301,6 @@ export class ProductsController {
         typeof product.nutritional_info === 'string'
           ? JSON.parse(product.nutritional_info)
           : product.nutritional_info,
-      active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
     }));
@@ -348,7 +344,6 @@ export class ProductsController {
         typeof updatedProduct.nutritional_info === 'string'
           ? JSON.parse(updatedProduct.nutritional_info)
           : updatedProduct.nutritional_info,
-      active: updatedProduct.active,
       created_at: updatedProduct.created_at,
       updated_at: updatedProduct.updated_at
     };

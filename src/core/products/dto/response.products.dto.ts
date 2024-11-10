@@ -11,16 +11,9 @@ export class ResponseProductsDto {
   group_id: number;
   supplier_id: number;
   nutritional_info: object;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-  //   created_by: number;
-  //   updated_by: number;
-  //   relationships - fazer na sequencia
-  //     prices: Price[];
-  //     categories: Category;
-  //     groups: Group;
-  //     persons: Person;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export class ShortResponseProductsDto {
