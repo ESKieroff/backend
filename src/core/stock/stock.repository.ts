@@ -3,6 +3,7 @@ import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { ProductBatch, ProductBatchByCategory } from './dto/response.stock.dto';
 import { formatDate } from '../common/utils';
+import { Origin } from '../common/enums';
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -22,6 +23,7 @@ export class StockRepository {
         total_price: data.total_price,
         batch: data.batch,
         batch_expiration: data.batch_expiration,
+        sku: data.sku,
         products: { connect: { id: data.product_id } },
         stock: { connect: { id: data.stock_id } },
         stock_location: data.stock_location_id
@@ -270,8 +272,7 @@ export class StockRepository {
               select: {
                 id: true,
                 description: true,
-                code: true,
-                sku: true
+                code: true
               }
             },
             batch: true,
@@ -535,12 +536,12 @@ export class StockRepository {
     return count;
   }
 
-  async getProducts(): Promise<
-    { id: number; description: string; category: string }[]
-  > {
+  async getProducts(
+    origin: Origin
+  ): Promise<{ id: number; description: string; category: string }[]> {
     const products = await this.prisma.products.findMany({
       where: {
-        origin: 'RAW_MATERIAL',
+        origin: origin,
         active: true
       },
       select: {

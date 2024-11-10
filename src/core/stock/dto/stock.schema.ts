@@ -20,6 +20,7 @@ export const CreateStockSchema = z.object({
         .refine(date => !isNaN(date.getTime()), {
           message: 'Invalid expiration date format'
         }),
+      sku: z.string().min(3, 'SKU is required'),
       supplier: z.number().int().positive('Supplier is required').optional(),
       costumer: z.number().int().positive('Costumer is required').optional(),
       stock_location_id: z

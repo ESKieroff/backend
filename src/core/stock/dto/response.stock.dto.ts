@@ -21,6 +21,7 @@ export class ResponseStockItems {
   total_price?: number;
   batch: string;
   batch_expiration: string;
+  sku: string;
   observation?: string;
   supplier?: string;
   costumer?: string;

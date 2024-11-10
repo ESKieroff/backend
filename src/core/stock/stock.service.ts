@@ -10,7 +10,7 @@ import { SettingsService } from 'src/settings/settings.service';
 import { BatchService } from '../common/batch.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
-import { Stock_Moviment } from '../common/enums';
+import { Stock_Moviment, Origin } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
 import {
@@ -126,6 +126,7 @@ export class StockService {
           total_price: item.unit_price * item.quantity,
           batch: batch,
           batch_expiration: batch_expiration.toISOString(),
+          sku: item.sku,
           observation: item.observation!,
           supplier: item.supplier!,
           costumer: item.costumer!,
@@ -230,6 +231,7 @@ export class StockService {
         total_price: item.total_price,
         batch: item.batch,
         batch_expiration: formatDate(item.batch_expiration),
+        sku: item.sku,
         observation: item.observation,
         supplier: item.supplier,
         costumer: item.costumer,
@@ -264,6 +266,7 @@ export class StockService {
         total_price: item.total_price,
         batch: item.batch,
         batch_expiration: formatDate(item.batch_expiration),
+        sku: item.sku,
         observation: item.observation,
         supplier: item.supplier,
         costumer: item.costumer,
@@ -359,8 +362,8 @@ export class StockService {
     };
   }
 
-  async getRawMaterialShortList(): Promise<ResponseProductsWithBatches[]> {
-    const products = await this.stockRepository.getProducts();
+  async getShortList(origin: Origin): Promise<ResponseProductsWithBatches[]> {
+    const products = await this.stockRepository.getProducts(origin);
 
     const response: ResponseProductsWithBatches[] = [];
 

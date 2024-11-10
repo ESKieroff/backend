@@ -95,7 +95,13 @@ export class StockController {
 
   @Get('raw-material-short-list')
   async getRawMaterialShortList() {
-    const result = await this.stockService.getRawMaterialShortList();
+    const result = await this.stockService.getShortList(Origin.RAW_MATERIAL);
+    return result;
+  }
+
+  @Get('made-short-list')
+  async getMadeShortList() {
+    const result = await this.stockService.getShortList(Origin.MADE);
     return result;
   }
 
