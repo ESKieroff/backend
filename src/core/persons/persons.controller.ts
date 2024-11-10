@@ -47,7 +47,6 @@ export class PersonsController {
     return {
       id: createdPerson.id,
       name: createdPerson.name,
-      active: createdPerson.active,
       created_at: createdPerson.created_at,
       updated_at: createdPerson.updated_at
     };

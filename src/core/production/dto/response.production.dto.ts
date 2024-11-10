@@ -27,3 +27,9 @@ export class ResponseProductionItem {
   created_by?: string;
   updated_by?: string;
 }
+
+export class ShortResponseProductionDto {
+  id: number;
+  description: string;
+  Production_Status: string;
+}
