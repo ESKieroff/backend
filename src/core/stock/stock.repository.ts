@@ -37,6 +37,13 @@ export class StockRepository {
           costumers: { connect: { id: data.costumer } }
         }) ||
           {})
+      },
+      include: {
+        products: {
+          select: {
+            unit_measure: true
+          }
+        }
       }
     });
   }
@@ -72,6 +79,13 @@ export class StockRepository {
         ...(data.costumer
           ? { costumers: { connect: { id: data.costumer } } }
           : {})
+      },
+      include: {
+        products: {
+          select: {
+            unit_measure: true
+          }
+        }
       }
     });
 
@@ -92,10 +106,19 @@ export class StockRepository {
     });
   }
 
-  async getStockItems(stockId: number): Promise<stock_items[]> {
+  async getStockItems(
+    stockId: number
+  ): Promise<(stock_items & { products: { unit_measure: string } })[]> {
     return await this.prisma.stock_items.findMany({
       where: { stock_id: stockId },
-      orderBy: { sequence: 'asc' }
+      orderBy: { sequence: 'asc' },
+      include: {
+        products: {
+          select: {
+            unit_measure: true
+          }
+        }
+      }
     });
   }
 
@@ -192,7 +215,8 @@ export class StockRepository {
             product_id: true,
             products: {
               select: {
-                description: true
+                description: true,
+                unit_measure: true
               }
             },
             batch: true,
@@ -279,7 +303,8 @@ export class StockRepository {
               select: {
                 id: true,
                 description: true,
-                code: true
+                code: true,
+                unit_measure: true
               }
             },
             batch: true,
