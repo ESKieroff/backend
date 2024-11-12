@@ -326,11 +326,16 @@ VALUES
 -- Insert into production_orders
 INSERT INTO "production_orders" ("number","description", "production_date","Production_Status")
 VALUES 
-    (1,'Production A','2024-12-31 23:59:59', 'CREATED'),
+    (1,'Production A','2024-12-31 23:59:59','CREATED'),
     (2,'Production B','2024-12-15 23:59:59','SCHEDULED'),
-    (3,'Production C','2024-12-31 23:59:59', 'IN_PROGRESS'),
+    (3,'Production C','2024-12-31 23:59:59','IN_PROGRESS'),
     (4,'Production D','2024-12-15 23:59:59','SCHEDULED'),
-    (5,'Production E','2024-12-31 23:59:59', 'OPEN');
+    (5,'Production E','2024-12-31 23:59:59','OPEN'),
+    (6,'Production K','2024-12-15 23:59:59','CANCELED'),
+    (7,'Production G','2024-12-31 23:59:59','FINISHED'),
+    (8,'Production H','2024-12-15 23:59:59','IN_PROGRESS'),
+    (9,'Production I','2024-12-31 23:59:59','STOPPED'),
+    (10,'Production J','2024-12-15 23:59:59','FINISHED');
 
 -- Insert into production_orders_items
 INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "batch", "batch_expiration")
