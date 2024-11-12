@@ -14,7 +14,10 @@ import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
 import { Origin, Stock_Moviment } from '../common/enums';
-import { ResponseBatchDto } from './dto/response.stock.dto';
+import {
+  ResponseBatchDto,
+  ResponseBatchsByProductDto
+} from './dto/response.stock.dto';
 
 @Controller('stock')
 export class StockController {
@@ -113,6 +116,13 @@ export class StockController {
       batch: batch[0],
       batch_expiration: batch[1]
     } as ResponseBatchDto;
+  }
+
+  @Get('batchs/:id')
+  async getBatchsByProductId(
+    @Param('id') id: number
+  ): Promise<ResponseBatchsByProductDto[]> {
+    return this.stockService.getBatchesByProductId(id);
   }
 
   @Get(':id')
