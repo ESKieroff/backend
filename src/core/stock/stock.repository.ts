@@ -510,4 +510,32 @@ export class StockRepository {
 
     return Object.values(productBatchByCategory);
   }
+  async findBatchesByProductId(productId: number) {
+    return this.prisma.stock_items
+      .findMany({
+        where: {
+          product_id: productId,
+          products: {
+            origin: 'RAW_MATERIAL'
+          }
+        },
+        select: {
+          id: true,
+          quantity: true,
+          products: {
+            select: {
+              description: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          id: item.id,
+          description:
+            item.products?.description || 'Description not available',
+          current_quantity: item.quantity
+        }))
+      );
+  }
 }
