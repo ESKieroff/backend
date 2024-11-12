@@ -13,7 +13,10 @@ import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
-import { ResponseStockDto } from './dto/response.stock.dto';
+import {
+  ResponseBatchsByProductDto,
+  ResponseStockDto
+} from './dto/response.stock.dto';
 
 @Injectable()
 export class StockService {
@@ -354,5 +357,16 @@ export class StockService {
       created_at: format(stock.created_at, 'dd/MM/yyyy'),
       updated_at: format(stock.updated_at, 'dd/MM/yyyy')
     };
+  }
+  async getBatchesByProductId(
+    productId: number
+  ): Promise<ResponseBatchsByProductDto[]> {
+    const batches =
+      await this.stockRepository.findBatchesByProductId(productId);
+    return batches.map(batch => ({
+      id: batch.id.toString(),
+      description: batch.description,
+      current_quantity: batch.current_quantity
+    }));
   }
 }
