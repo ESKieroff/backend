@@ -119,10 +119,14 @@ export class StockController {
   }
 
   @Get('batchs/:id')
-  async getBatchsByProductId(
-    @Param('id') id: number
+  async getBatchesByProductId(
+    @Param('id') productId: string
   ): Promise<ResponseBatchsByProductDto[]> {
-    return this.stockService.getBatchesByProductId(id);
+    if (isNaN(+productId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.stockService.getBatchesByProductId(+productId);
+    return result;
   }
 
   @Get(':id')
