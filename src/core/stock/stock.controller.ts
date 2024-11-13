@@ -17,7 +17,8 @@ import { Origin, Stock_Moviment } from '../common/enums';
 import {
   ResponseBatchDto,
   ResponseBatchsByProductDto,
-  ResponseBatchsByRawDto
+  ResponseBatchsByRawDto,
+  ResponseRawBatchsByIdDto
 } from './dto/response.stock.dto';
 
 @Controller('stock')
@@ -133,6 +134,17 @@ export class StockController {
   @Get('batchs-raw')
   async getBatchesByCategoryRaw(): Promise<ResponseBatchsByRawDto[]> {
     const result = await this.stockService.getBatchesRaw();
+    return result;
+  }
+
+  @Get('raw-batchs/:id')
+  async getRawBatchesByProductId(
+    @Param('id') productId: string
+  ): Promise<ResponseRawBatchsByIdDto[]> {
+    if (isNaN(+productId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.stockService.getRawBatchesByProductId(+productId);
     return result;
   }
 

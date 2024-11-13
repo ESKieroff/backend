@@ -16,7 +16,8 @@ import { formatDate } from '../common/utils';
 import {
   ResponseBatchsByProductDto,
   ResponseBatchsByRawDto,
-  ResponseStockDto
+  ResponseStockDto,
+  ResponseRawBatchsByIdDto
 } from './dto/response.stock.dto';
 
 @Injectable()
@@ -368,6 +369,18 @@ export class StockService {
       id: batch.id.toString(),
       description: batch.description,
       current_quantity: batch.current_quantity
+    }));
+  }
+  async getRawBatchesByProductId(
+    productId: number
+  ): Promise<ResponseRawBatchsByIdDto[]> {
+    const batches =
+      await this.stockRepository.findRawBatchesByProductId(productId);
+    return batches.map(batch => ({
+      id: batch.product_id.toString(),
+      sku: batch.quantity,
+      measure_unit: batch.measure_unit,
+      quantity: batch.quantity
     }));
   }
   async getBatchesRaw(): Promise<ResponseBatchsByRawDto[]> {

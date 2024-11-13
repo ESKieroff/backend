@@ -68,3 +68,10 @@ export class ResponseBatchsByRawDto {
   quantity: number;
   sku: string;
 }
+
+export class ResponseRawBatchsByIdDto {
+  id: string;
+  sku: number;
+  measure_unit: string;
+  quantity: number;
+}

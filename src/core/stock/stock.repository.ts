@@ -561,4 +561,33 @@ export class StockRepository {
         }))
       );
   }
+  async findRawBatchesByProductId(productId: number) {
+    return this.prisma.stock_items
+      .findMany({
+        where: {
+          product_id: productId,
+          products: {
+            origin: 'RAW_MATERIAL'
+          }
+        },
+        select: {
+          id: true,
+          quantity: true,
+          products: {
+            select: {
+              unit_measure: true,
+              sku: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          product_id: item.id, // Ajuste para retornar o campo id como product_id
+          measure_unit: item.products.unit_measure,
+          sku: item.products.sku,
+          quantity: item.quantity
+        }))
+      );
+  }
 }
