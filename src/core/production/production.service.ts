@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductionDto } from './dto/create.production.dto';
 import { UpdateProductionDto } from './dto/update.production.dto';
 import { ProductionRepository } from './production.repository';
-import { production_orders } from '@prisma/client';
+import { production_orders, composition_items } from '@prisma/client';
 import { format } from 'date-fns';
 import { SettingsService } from 'src/settings/settings.service';
 import { SessionService } from '../common/sessionService';
@@ -18,8 +18,7 @@ export class ProductionService {
   ) {}
 
   async create(createProductionDto: CreateProductionDto) {
-    const firstProductId =
-      createProductionDto.production_items[0]?.final_product_id;
+    const firstProductId = createProductionDto.final_product_id;
 
     const descriptionProduct = firstProductId
       ? await this.productionRepository.findProductDescriptionById(
@@ -33,6 +32,22 @@ export class ProductionService {
     const description = `Ordem ${descriptionProduct} - ${number}`;
     const status = Production_Status.CREATED;
 
+    const composition =
+      await this.productionRepository.findCompositionById(firstProductId);
+    if (!composition) {
+      throw new NotFoundException(
+        `Composition with ID ${firstProductId} not found`
+      );
+    }
+
+    const compositionItems =
+      await this.productionRepository.findCompositionItemsById(composition.id);
+
+    const calculatedItems = await this.validateCompositionWithDto(
+      compositionItems,
+      createProductionDto
+    );
+
     const production = await this.productionRepository.createOrder({
       number: number,
       description: description,
@@ -41,21 +56,22 @@ export class ProductionService {
       created_at: new Date(),
       updated_at: new Date(),
       created_by: currentUser,
-      updated_by: currentUser
+      updated_by: currentUser,
+      final_product_id: firstProductId,
+      production_quantity_estimated: 0,
+      production_quantity_real: 0,
+      production_quantity_loss: 0
     });
 
     let sequence = 1;
-    for (const item of createProductionDto.production_items) {
+    for (const item of calculatedItems) {
       await this.productionRepository.createOrderItem({
         production_order_id: production.id,
-        sequence: sequence,
-        final_product_id: item.final_product_id,
-        production_quantity_estimated: item.production_quantity_estimated,
-        production_quantity_real: item.production_quantity_real,
-        production_quantity_loss:
-          item.production_quantity_estimated - item.production_quantity_real,
-        batch: item.batch,
-        batch_expiration: item.batch_expiration,
+        sequence,
+        raw_product_id: item.raw_product_id,
+        raw_product_initial_quantity: item.raw_product_initial_quantity,
+        raw_product_used_quantity: item.raw_product_used_quantity,
+        used_batchs: JSON.stringify(item.used_batchs),
         created_at: new Date(),
         updated_at: new Date()
       });
@@ -69,7 +85,6 @@ export class ProductionService {
 
     const formattedItems = allItems.map(item => ({
       ...item,
-      batch_expiration: formatDate(item.batch_expiration),
       created_at: formatDate(item.created_at),
       updated_at: formatDate(item.updated_at)
     }));
@@ -130,7 +145,6 @@ export class ProductionService {
     }
 
     const updatedOrder = await this.productionRepository.updateOrder(id, {
-      description: updateProductionDto.description ?? undefined,
       production_date: updateProductionDto.production_date
         ? new Date(updateProductionDto.production_date)
         : undefined,
@@ -153,16 +167,11 @@ export class ProductionService {
           id: existingItem.id,
           production_order: { connect: { id: Number(updatedOrder.id) } },
           final_product_made: {
-            connect: { id: Number(existingItem.final_product_id) }
+            connect: { id: Number(existingItem.raw_product_id) }
           },
-          production_quantity_estimated:
-            item.production_quantity_estimated ?? undefined,
-          production_quantity_real: item.production_quantity_real ?? undefined,
-          production_quantity_loss:
-            item.production_quantity_estimated && item.production_quantity_real
-              ? item.production_quantity_estimated -
-                item.production_quantity_real
-              : undefined,
+          raw_product_used_quantity:
+            item.raw_product_used_quantity ?? undefined,
+          used_batchs: JSON.stringify(item.used_batchs),
           updated_at: new Date(),
           updated_by: currentUser
         };
@@ -173,26 +182,14 @@ export class ProductionService {
         );
       } else {
         for (const item of updateProductionDto.production_items) {
-          if (
-            !existingItems.find(
-              i => i.final_product_id === item.final_product_id
-            )
-          ) {
+          if (!existingItems.find(i => i.raw_product_id === item.id)) {
             await this.productionRepository.createOrderItem({
               production_order_id: id,
               sequence: sequence,
-              final_product_id: item.final_product_id!,
-              production_quantity_estimated:
-                item.production_quantity_estimated!,
-              production_quantity_real: item.production_quantity_real!,
-              production_quantity_loss:
-                item.production_quantity_estimated &&
-                item.production_quantity_real
-                  ? item.production_quantity_estimated -
-                    item.production_quantity_real
-                  : 0,
-              batch: item.batch!,
-              batch_expiration: item.batch_expiration!,
+              raw_product_id: item.id!,
+              raw_product_initial_quantity: item.raw_product_initial_quantity!,
+              raw_product_used_quantity: item.raw_product_used_quantity!,
+              used_batchs: JSON.stringify(item.used_batchs)!,
               created_at: new Date(),
               updated_at: new Date(),
               created_by: currentUser!,
@@ -209,7 +206,6 @@ export class ProductionService {
 
     const formattedItems = allItems.map(item => ({
       ...item,
-      batch_expiration: formatDate(item.batch_expiration),
       created_at: formatDate(item.created_at),
       updated_at: formatDate(item.updated_at)
     }));
@@ -217,7 +213,6 @@ export class ProductionService {
     return {
       production: {
         id,
-        description: updateProductionDto.description,
         updated_at: formatDate(updatedOrder.updated_at),
         updated_by: updateProductionDto.updated_by,
         items: formattedItems.sort((a, b) => a.sequence - b.sequence)
@@ -263,5 +258,76 @@ export class ProductionService {
     }
 
     return order;
+  }
+
+  async validateCompositionWithDto(
+    compositionItems: composition_items[],
+    createProductionDto: CreateProductionDto
+  ) {
+    const requiredQuantities = new Map<number, number>();
+    for (const item of compositionItems) {
+      const totalQuantity =
+        item.quantity * createProductionDto.production_quantity_estimated;
+      requiredQuantities.set(item.raw_product, totalQuantity);
+    }
+
+    const calculatedItems = [];
+    for (const productionItem of createProductionDto.production_items) {
+      const requiredQuantity = requiredQuantities.get(
+        productionItem.raw_product_id
+      );
+      if (requiredQuantity === undefined) {
+        throw new Error(
+          `Produto ${productionItem.raw_product_id} não está presente na composição.`
+        );
+      }
+
+      const totalBatchs =
+        await this.validateAndSumBatchQuantities(productionItem);
+
+      const totalBatchQuantity =
+        totalBatchs * createProductionDto.production_quantity_estimated;
+
+      const totalEstimatedQuantity =
+        totalBatchs * createProductionDto.production_quantity_estimated;
+
+      // console.log('totalBatchs', totalBatchs);
+      // console.log('totalBatchQuantity', totalBatchQuantity);
+      // console.log('totalEstimatedQuantity', totalEstimatedQuantity);
+
+      if (totalBatchQuantity !== totalEstimatedQuantity) {
+        throw new Error(
+          `A quantidade total de lotes usados (${totalBatchQuantity}) não corresponde ao esperado (${createProductionDto.production_quantity_estimated}) para o produto ${totalEstimatedQuantity}.`
+        );
+      } else if (totalBatchQuantity < requiredQuantity) {
+        throw new Error(
+          `A quantidade total de lotes para o produto ${productionItem.raw_product_id} é insuficiente.`
+        );
+      }
+
+      calculatedItems.push({
+        raw_product_id: productionItem.raw_product_id,
+        raw_product_initial_quantity: requiredQuantity,
+        raw_product_used_quantity: totalBatchQuantity,
+        used_batchs: productionItem.used_batchs
+      });
+    }
+    return calculatedItems;
+  }
+
+  async validateAndSumBatchQuantities(productionItem) {
+    let totalQuantity = 0;
+    for (const batch of productionItem.used_batchs) {
+      const stockItem = await this.productionRepository.findStockItemById(
+        batch.stock_item_id
+      );
+      if (!stockItem) {
+        throw new NotFoundException(
+          `Stock item ${batch.stock_item_id} not found.`
+        );
+      }
+      totalQuantity += batch.quantity;
+    }
+    return totalQuantity;
   }
 }

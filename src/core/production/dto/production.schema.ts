@@ -7,30 +7,26 @@ export const CreateProductionSchema = z.object({
     .transform(str => new Date(str))
     .refine(date => !isNaN(date.getTime()), {
       message: 'Invalid date format'
-    })
-    .default(() => new Date().toISOString()),
+    }),
+  final_product_id: z.number().int().positive('Final product ID is required'),
+  production_quantity_estimated: z
+    .number()
+    .int()
+    .positive('Estimated production quantity is required'),
   production_items: z
     .array(
       z.object({
-        final_product_id: z
-          .number()
-          .int()
-          .positive('Final product is required'),
-        production_quantity_estimated: z
-          .number()
-          .int()
-          .positive('Estimated quantity is required'),
-        production_quantity_real: z
-          .number()
-          .int()
-          .positive('Real quantity is required'),
-        batch: z.string().min(3, 'Batch is required').optional(),
-        batch_expiration: z
-          .string()
-          .transform(str => new Date(str))
-          .refine(date => !isNaN(date.getTime()), {
-            message: 'Invalid date format'
+        raw_product_id: z.number().int().positive('Raw product ID is required'),
+        used_batchs: z.array(
+          z.object({
+            stock_item_id: z
+              .number()
+              .int()
+              .positive('Stock item ID is required'),
+            batch: z.string().min(3, 'Batch is required'),
+            quantity: z.number().int().positive('Quantity is required')
           })
+        )
       })
     )
     .optional()
@@ -49,16 +45,28 @@ export const UpdateProductionSchema = z.object({
   production_items: z
     .array(
       z.object({
-        id: z.number().int().positive('Item id is required'),
-        production_quantity_estimated: z
+        id: z.number().int().positive('Item ID is required'),
+        raw_product_id: z
           .number()
           .int()
-          .positive('Estimated quantity is required')
+          .positive('Raw product ID is required')
           .optional(),
-        production_quantity_real: z
-          .number()
-          .int()
-          .positive('Real quantity is required')
+        used_batchs: z
+          .array(
+            z.object({
+              stock_item_id: z
+                .number()
+                .int()
+                .positive('Stock item ID is required')
+                .optional(),
+              batch: z.string().min(3, 'Batch is required').optional(),
+              quantity: z
+                .number()
+                .int()
+                .positive('Quantity is required')
+                .optional()
+            })
+          )
           .optional()
       })
     )
