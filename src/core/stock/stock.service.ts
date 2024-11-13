@@ -10,11 +10,12 @@ import { SettingsService } from 'src/settings/settings.service';
 import { BatchService } from '../common/batch.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
-import { Stock_Moviment } from '../common/enums';
+import { Origin, Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
 import {
   ResponseBatchsByProductDto,
+  ResponseBatchsByRawDto,
   ResponseStockDto
 } from './dto/response.stock.dto';
 
@@ -368,5 +369,27 @@ export class StockService {
       description: batch.description,
       current_quantity: batch.current_quantity
     }));
+  }
+  async getBatchesRaw(): Promise<ResponseBatchsByRawDto[]> {
+    const rawMaterials = await this.stockRepository.getRawMaterialsByOrigin(
+      Origin.RAW_MATERIAL
+    );
+    const batchResponses: ResponseBatchsByRawDto[] = [];
+
+    for (const material of rawMaterials) {
+      const batches = await this.stockRepository.findBatchesByProductId(
+        material.product_id
+      );
+      for (const batch of batches) {
+        batchResponses.push({
+          raw_material_description: material.raw_material_description,
+          measure_unit: material.measure_unit,
+          quantity: batch.current_quantity,
+          sku: material.sku
+        });
+      }
+    }
+
+    return batchResponses;
   }
 }

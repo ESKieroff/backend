@@ -3,6 +3,7 @@ import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { ProductBatch, ProductBatchByCategory } from './dto/response.stock.dto';
 import { formatDate } from '../common/utils';
+import { Origin } from '../common/enums';
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -535,6 +536,28 @@ export class StockRepository {
           description:
             item.products?.description || 'Description not available',
           current_quantity: item.quantity
+        }))
+      );
+  }
+  async getRawMaterialsByOrigin(origin: Origin) {
+    return this.prisma.products
+      .findMany({
+        where: {
+          origin
+        },
+        select: {
+          id: true, // Supondo que o campo ID é o identificador único de cada produto
+          description: true, // Descrição do produto
+          unit_measure: true, // Unidade de medida
+          sku: true // Código SKU do produto
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          product_id: item.id, // Ajuste para retornar o campo id como product_id
+          raw_material_description: item.description,
+          measure_unit: item.unit_measure,
+          sku: item.sku
         }))
       );
   }

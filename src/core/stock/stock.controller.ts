@@ -16,7 +16,8 @@ import { ApiQuery } from '@nestjs/swagger';
 import { Origin, Stock_Moviment } from '../common/enums';
 import {
   ResponseBatchDto,
-  ResponseBatchsByProductDto
+  ResponseBatchsByProductDto,
+  ResponseBatchsByRawDto
 } from './dto/response.stock.dto';
 
 @Controller('stock')
@@ -126,6 +127,12 @@ export class StockController {
       throw new BadRequestException('Invalid ID format');
     }
     const result = await this.stockService.getBatchesByProductId(+productId);
+    return result;
+  }
+
+  @Get('batchs-raw')
+  async getBatchesByCategoryRaw(): Promise<ResponseBatchsByRawDto[]> {
+    const result = await this.stockService.getBatchesRaw();
     return result;
   }
 
