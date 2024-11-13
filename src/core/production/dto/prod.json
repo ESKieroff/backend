@@ -1,0 +1,82 @@
+{
+  "production_date": "2024-12-31T00:00:00Z",
+  "final_product_id": 8,
+  "production_quantity_estimated": 500,
+  "production_items": [
+    {
+      "raw_product_id": 1,
+      "used_batchs": [
+        {
+          "stock_item_id": 1,
+          "batch": "LoteA123",
+          "quantity": 100
+        },
+        {
+          "stock_item_id": 2,
+          "batch": "LoteA123",
+          "quantity": 100
+        }
+      ]
+    },
+    {
+      "raw_product_id": 2,
+      "used_batchs": [
+        {
+          "stock_item_id": 3,
+          "batch": "LoteA123",
+          "quantity": 50
+        },
+        {
+          "stock_item_id": 4,
+          "batch": "LoteA123",
+          "quantity": 50
+        }
+      ]
+    }
+  ]
+}
+
+{
+  "production_date": "2024-12-31T00:00:00Z",
+  "final_product_id": 8,
+  "production_quantity_estimated": 5,
+  "production_items": [
+    {
+      "raw_product_id": 1,
+      "raw_product_initial_quantity": 200,
+      "raw_product_used_quantity": 200,
+      "used_batchs": [
+        {
+          "stock_item_id": 33,
+          "batch": "BX3-01",
+          "quantity": 100
+        },
+        {
+          "stock_item_id": 34,
+          "batch": "BX3-02",
+          "quantity": 100
+        }
+      ]
+    },
+    {
+      "raw_product_id": 2,
+      "raw_product_initial_quantity": 100,
+      "raw_product_used_quantity": 100,
+      "used_batchs": [
+        {
+          "stock_item_id": 3,
+          "batch": "BX3-05",
+          "quantity": 50
+        },
+        {
+          "stock_item_id": 4,
+          "batch": "BX3-06",
+          "quantity": 50
+        }
+      ]
+    }
+  ]
+}
+
+
+{{"stock_item_id": 22,"batch": "LoteA144","quantity": 30},{"stock_item_id": 23,"batch": "LoteA145","quantity": 10}}
