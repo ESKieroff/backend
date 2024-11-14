@@ -85,6 +85,10 @@ export class ProductionService {
 
     const formattedItems = allItems.map(item => ({
       ...item,
+      used_batchs:
+        typeof item.used_batchs === 'string'
+          ? JSON.parse(item.used_batchs)
+          : item.used_batchs,
       created_at: formatDate(item.created_at),
       updated_at: formatDate(item.updated_at)
     }));
@@ -206,6 +210,10 @@ export class ProductionService {
 
     const formattedItems = allItems.map(item => ({
       ...item,
+      used_batchs:
+        typeof item.used_batchs === 'string'
+          ? JSON.parse(item.used_batchs)
+          : item.used_batchs,
       created_at: formatDate(item.created_at),
       updated_at: formatDate(item.updated_at)
     }));
