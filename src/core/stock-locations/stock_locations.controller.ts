@@ -13,7 +13,10 @@ import {
 import { CreateStockLocationDto } from './dto/create.stock-locations.dto';
 import { StockLocationsService } from './stock_locations.service';
 import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
-import { ResponseStockLocationDto } from './dto/response.stock-locations';
+import {
+  ResponseLocationBatchsDto,
+  ResponseStockLocationDto
+} from './dto/response.stock-locations';
 
 @Controller('stock-locations')
 export class StockLocationsController {
@@ -49,7 +52,6 @@ export class StockLocationsController {
     return {
       id: createdStockLocation.id,
       description: createdStockLocation.description,
-      active: createdStockLocation.active,
       created_at: createdStockLocation.created_at,
       updated_at: createdStockLocation.updated_at
     };
@@ -70,7 +72,6 @@ export class StockLocationsController {
     return stockLocation.map(stockLocation => ({
       id: stockLocation.id,
       description: stockLocation.description,
-      active: stockLocation.active,
       created_at: stockLocation.created_at,
       updated_at: stockLocation.updated_at
     }));
@@ -87,10 +88,14 @@ export class StockLocationsController {
     return stockLocation.then(stockLocation => ({
       id: stockLocation.id,
       description: stockLocation.description,
-      active: stockLocation.active,
       created_at: stockLocation.created_at,
       updated_at: stockLocation.updated_at
     }));
+  }
+
+  @Get('locations-batchs')
+  async getAllLocationsBatchs(): Promise<ResponseLocationBatchsDto[]> {
+    return this.stockLocationService.getAllLocationsWithBatchQuantity();
   }
 
   @Patch(':id')
@@ -125,7 +130,6 @@ export class StockLocationsController {
     return {
       id: updatedStockLocation.id,
       description: updatedStockLocation.description,
-      active: updatedStockLocation.active,
       created_at: updatedStockLocation.created_at,
       updated_at: updatedStockLocation.updated_at
     };
