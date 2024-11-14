@@ -43,7 +43,7 @@ export class ProductionService {
     const compositionItems =
       await this.productionRepository.findCompositionItemsById(composition.id);
 
-    const calculatedItems = await this.validateCompositionWithDto(
+    const calculatedItems = await this.validateCompositionWithCreateDto(
       compositionItems,
       createProductionDto
     );
@@ -141,18 +141,31 @@ export class ProductionService {
 
   async update(id: number, updateProductionDto: UpdateProductionDto) {
     const currentUser = this.sessionService.getCurrentUser();
-
+    console.log('id:', id);
     const existingOrder = await this.productionRepository.findById(id);
-
+    console.log('Ordem existente:', existingOrder);
     if (!existingOrder) {
       throw new NotFoundException(`Production with ID ${id} not found`);
+    } else if (existingOrder.Production_Status !== Production_Status.CREATED) {
+      throw new Error(
+        `Cannot update order with situation ${existingOrder.Production_Status}.`
+      );
     }
+
+    const compositionItems =
+      await this.productionRepository.findCompositionItemsById(id);
+    console.log('Itens da composição:', compositionItems);
+    const validatedItems = await this.validateCompositionWithUpdateDto(
+      compositionItems,
+      updateProductionDto
+    );
 
     const updatedOrder = await this.productionRepository.updateOrder(id, {
       production_date: updateProductionDto.production_date
         ? new Date(updateProductionDto.production_date)
         : undefined,
-      Production_Status: updateProductionDto.Production_Status ?? undefined,
+      production_quantity_estimated:
+        updateProductionDto.production_quantity_estimated,
       updated_at: new Date(),
       updated_by: currentUser
     });
@@ -161,47 +174,27 @@ export class ProductionService {
       updatedOrder.id
     );
 
-    let sequence = (await this.productionRepository.getLastSequence(id)) + 1;
-
-    for (const item of updateProductionDto.production_items) {
+    for (const item of validatedItems) {
       const existingItem = existingItems.find(i => i.id === item.id);
 
       if (existingItem) {
         const updateItem = {
           id: existingItem.id,
-          production_order: { connect: { id: Number(updatedOrder.id) } },
-          final_product_made: {
-            connect: { id: Number(existingItem.raw_product_id) }
-          },
-          raw_product_used_quantity:
-            item.raw_product_used_quantity ?? undefined,
-          used_batchs: JSON.stringify(item.used_batchs),
+          // production_order: { connect: { id: Number(updatedOrder.id) } },
+          // final_product_made: {
+          //   connect: { id: Number(existingItem.raw_product_id) }
+          // },
+          used_batchs: item.used_batchs
+            ? JSON.stringify(item.used_batchs)
+            : undefined,
           updated_at: new Date(),
           updated_by: currentUser
         };
 
         await this.productionRepository.updateOrderItem(
-          updateItem.id,
+          existingItem.id,
           updateItem
         );
-      } else {
-        for (const item of updateProductionDto.production_items) {
-          if (!existingItems.find(i => i.raw_product_id === item.id)) {
-            await this.productionRepository.createOrderItem({
-              production_order_id: id,
-              sequence: sequence,
-              raw_product_id: item.id!,
-              raw_product_initial_quantity: item.raw_product_initial_quantity!,
-              raw_product_used_quantity: item.raw_product_used_quantity!,
-              used_batchs: JSON.stringify(item.used_batchs)!,
-              created_at: new Date(),
-              updated_at: new Date(),
-              created_by: currentUser!,
-              updated_by: currentUser!
-            });
-            sequence++;
-          }
-        }
       }
     }
     const allItems = await this.productionRepository.getOrderItems(
@@ -268,19 +261,18 @@ export class ProductionService {
     return order;
   }
 
-  async validateCompositionWithDto(
+  async validateCompositionWithCreateDto(
     compositionItems: composition_items[],
-    createProductionDto: CreateProductionDto
+    productionDto: CreateProductionDto
   ) {
     const requiredQuantities = new Map<number, number>();
     for (const item of compositionItems) {
       const totalQuantity =
-        item.quantity * createProductionDto.production_quantity_estimated;
+        item.quantity * productionDto.production_quantity_estimated;
       requiredQuantities.set(item.raw_product, totalQuantity);
     }
-
     const calculatedItems = [];
-    for (const productionItem of createProductionDto.production_items) {
+    for (const productionItem of productionDto.production_items) {
       const requiredQuantity = requiredQuantities.get(
         productionItem.raw_product_id
       );
@@ -294,18 +286,14 @@ export class ProductionService {
         await this.validateAndSumBatchQuantities(productionItem);
 
       const totalBatchQuantity =
-        totalBatchs * createProductionDto.production_quantity_estimated;
+        totalBatchs * productionDto.production_quantity_estimated;
 
       const totalEstimatedQuantity =
-        totalBatchs * createProductionDto.production_quantity_estimated;
-
-      // console.log('totalBatchs', totalBatchs);
-      // console.log('totalBatchQuantity', totalBatchQuantity);
-      // console.log('totalEstimatedQuantity', totalEstimatedQuantity);
+        totalBatchs * productionDto.production_quantity_estimated;
 
       if (totalBatchQuantity !== totalEstimatedQuantity) {
         throw new Error(
-          `A quantidade total de lotes usados (${totalBatchQuantity}) não corresponde ao esperado (${createProductionDto.production_quantity_estimated}) para o produto ${totalEstimatedQuantity}.`
+          `A quantidade total de lotes usados (${totalBatchQuantity}) não corresponde ao esperado (${productionDto.production_quantity_estimated}) para o produto ${totalEstimatedQuantity}.`
         );
       } else if (totalBatchQuantity < requiredQuantity) {
         throw new Error(
@@ -320,6 +308,134 @@ export class ProductionService {
         used_batchs: productionItem.used_batchs
       });
     }
+    return calculatedItems;
+  }
+
+  // async validateCompositionWithUpdateDto(
+  //   compositionItems: composition_items[],
+  //   updateProductionDto: UpdateProductionDto
+  // ) {
+  //   console.log('Update DTO recebido:', updateProductionDto);
+
+  //   const compositionItemIds = compositionItems.map(item => item.id).sort();
+  //   const dtoItemIds = updateProductionDto.production_items
+  //     .map(item => item.id)
+  //     .sort();
+  //   const isEqual =
+  //     JSON.stringify(compositionItemIds) === JSON.stringify(dtoItemIds);
+  //   if (!isEqual) {
+  //     throw new Error(
+  //       'Os itens do DTO de atualização não correspondem aos itens da ordem de produção.'
+  //     );
+  //   }
+
+  //   const requiredQuantities = new Map<number, number>();
+  //   for (const item of compositionItems) {
+  //     const totalQuantity =
+  //       item.quantity * updateProductionDto.production_quantity_estimated;
+  //     requiredQuantities.set(item.raw_product, totalQuantity);
+  //   }
+  //   console.log('Quantidades necessárias calculadas:', requiredQuantities);
+
+  //   const calculatedItems = [];
+  //   for (const productionItem of updateProductionDto.production_items) {
+  //     console.log('Validando item de produção:', productionItem);
+
+  //     const rawProductId = existingItem.raw_product;
+  //     const requiredQuantity = requiredQuantities.get(rawProductId);
+  //     if (requiredQuantity === undefined) {
+  //       throw new Error(
+  //         `Produto ${rawProductId} não está presente na composição.`
+  //       );
+  //     }
+
+  //     // Validar e somar as quantidades dos lotes usados
+  //     const totalBatchQuantity =
+  //       await this.validateAndSumBatchQuantities(productionItem);
+  //     console.log(
+  //       `Quantidade total de lotes usados para produto ${rawProductId}: ${totalBatchQuantity}`
+  //     );
+
+  //     if (totalBatchQuantity < requiredQuantity) {
+  //       throw new Error(
+  //         `A quantidade total de lotes para o produto ${rawProductId} é insuficiente.`
+  //       );
+  //     }
+
+  //     calculatedItems.push({
+  //       id: productionItem.id,
+  //       raw_product_id: rawProductId,
+  //       raw_product_initial_quantity: requiredQuantity,
+  //       raw_product_used_quantity: totalBatchQuantity,
+  //       used_batchs: productionItem.used_batchs
+  //     });
+  //   }
+
+  //   console.log('Itens calculados e validados:', calculatedItems);
+  //   return calculatedItems;
+  // }
+
+  async validateCompositionWithUpdateDto(
+    compositionItems: composition_items[],
+    updateProductionDto: UpdateProductionDto
+  ) {
+    console.log('Update DTO recebido:', updateProductionDto);
+
+    const compositionItemIds = compositionItems.map(item => item.id).sort();
+    const dtoItemIds = updateProductionDto.production_items
+      .map(item => item.id)
+      .sort();
+
+    const isEqual =
+      JSON.stringify(compositionItemIds) === JSON.stringify(dtoItemIds);
+    if (!isEqual) {
+      throw new Error(
+        'Os itens do DTO de atualização não correspondem aos itens da ordem de produção.'
+      );
+    }
+
+    const requiredQuantities = new Map<number, number>();
+    for (const item of compositionItems) {
+      const totalQuantity =
+        item.quantity * updateProductionDto.production_quantity_estimated;
+      requiredQuantities.set(item.raw_product, totalQuantity);
+    }
+    console.log('Quantidades necessárias calculadas:', requiredQuantities);
+
+    const calculatedItems = [];
+    for (const productionItem of updateProductionDto.production_items) {
+      console.log('Validando item de produção:', productionItem);
+
+      const rawProductId = productionItem.raw_product_id;
+      const requiredQuantity = requiredQuantities.get(rawProductId);
+      if (requiredQuantity === undefined) {
+        throw new Error(
+          `Produto ${rawProductId} não está presente na composição.`
+        );
+      }
+
+      const totalBatchQuantity =
+        await this.validateAndSumBatchQuantities(productionItem);
+      console.log(
+        `Quantidade total de lotes usados para produto ${rawProductId}: ${totalBatchQuantity}`
+      );
+
+      if (totalBatchQuantity < requiredQuantity) {
+        throw new Error(
+          `A quantidade total de lotes para o produto ${rawProductId} é insuficiente.`
+        );
+      }
+
+      calculatedItems.push({
+        id: productionItem.id,
+        raw_product_id: rawProductId,
+        raw_product_initial_quantity: requiredQuantity,
+        raw_product_used_quantity: totalBatchQuantity,
+        used_batchs: productionItem.used_batchs
+      });
+    }
+
+    console.log('Itens calculados e validados:', calculatedItems);
     return calculatedItems;
   }
 

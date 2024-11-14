@@ -165,6 +165,12 @@ export class ProductionRepository {
     });
   }
 
+  async findCompositionItemById(id: number): Promise<composition_items> {
+    return this.prisma.composition_items.findUnique({
+      where: { id: id }
+    });
+  }
+
   async updateOrder(
     id: number,
     data: Prisma.production_ordersUpdateInput

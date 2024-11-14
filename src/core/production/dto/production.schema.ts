@@ -33,7 +33,6 @@ export const CreateProductionSchema = z.object({
 });
 
 export const UpdateProductionSchema = z.object({
-  description: z.string().min(3, 'Description is required').optional(),
   production_date: z
     .string()
     .transform(str => new Date(str))
@@ -42,6 +41,10 @@ export const UpdateProductionSchema = z.object({
     })
     .optional(),
   Production_Status: z.nativeEnum(Production_Status).optional(),
+  production_quantity_estimated: z
+    .number()
+    .int()
+    .positive('Estimated production quantity is required'),
   production_items: z
     .array(
       z.object({
