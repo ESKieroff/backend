@@ -11,13 +11,17 @@ import { SettingsService } from 'src/settings/settings.service';
 import { BatchService } from '../common/batch.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
-import { Stock_Moviment, Origin } from '../common/enums';
+import { Origin, Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
 import {
+  ResponseBatchsByProductDto,
+  ResponseBatchsByRawDto,
   ResponseStockDto,
+  ResponseRawBatchsByIdDto,
   ResponseProductsWithBatches
 } from './dto/response.stock.dto';
+import { ResponseCategoriesBatchsDto } from './dto/response.categories.batchs.dto';
 
 @Injectable()
 export class StockService {
@@ -418,6 +422,60 @@ export class StockService {
     }
 
     return response;
+  }
+  async getBatchesByProductId(
+    productId: number
+  ): Promise<ResponseBatchsByProductDto[]> {
+    const batches =
+      await this.stockRepository.findBatchesByProductId(productId);
+    return batches.map(batch => ({
+      id: batch.id.toString(),
+      description: batch.description,
+      current_quantity: batch.current_quantity
+    }));
+  }
+  async getRawBatchesByProductId(
+    productId: number
+  ): Promise<ResponseRawBatchsByIdDto[]> {
+    const batches =
+      await this.stockRepository.findRawBatchesByProductId(productId);
+    return batches.map(batch => ({
+      id: batch.product_id.toString(),
+      sku: batch.quantity,
+      measure_unit: batch.measure_unit,
+      quantity: batch.quantity
+    }));
+  }
+  async getBatchesRaw(): Promise<ResponseBatchsByRawDto[]> {
+    const rawMaterials = await this.stockRepository.getRawMaterialsByOrigin(
+      Origin.RAW_MATERIAL
+    );
+    const batchResponses: ResponseBatchsByRawDto[] = [];
+
+    for (const material of rawMaterials) {
+      const batches = await this.stockRepository.findBatchesByProductId(
+        material.product_id
+      );
+      for (const batch of batches) {
+        batchResponses.push({
+          raw_material_description: material.raw_material_description,
+          measure_unit: material.measure_unit,
+          quantity: batch.current_quantity,
+          sku: material.sku
+        });
+      }
+    }
+
+    return batchResponses;
+  }
+
+  async getCategoriesWithBatchCount(): Promise<ResponseCategoriesBatchsDto[]> {
+    const categories = await this.stockRepository.getCategoriesWithBatchCount();
+    return categories.map(category => ({
+      id: category.id.toString(),
+      description: category.description,
+      batch_quantity: category.batch_quantity
+    }));
   }
 
   async getAllBatchsByLocations(): Promise<ResponseProductsWithLocations[]> {
