@@ -64,3 +64,9 @@ export class ResponseProductsWithBatches {
   category: string;
   batch_quantity: number;
 }
+
+export class ResponseLocationBatchsDto {
+  id: number;
+  description: string;
+  batch_quantity: number;
+}
