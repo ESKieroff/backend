@@ -631,7 +631,12 @@ export class StockRepository {
           id: true, // Supondo que o campo ID é o identificador único de cada produto
           description: true, // Descrição do produto
           unit_measure: true, // Unidade de medida
-          sku: true // Código SKU do produto
+          stock_items: {
+            // Join with stock_items table
+            select: {
+              sku: true
+            }
+          }
         }
       })
       .then(items =>
@@ -639,7 +644,7 @@ export class StockRepository {
           product_id: item.id, // Ajuste para retornar o campo id como product_id
           raw_material_description: item.description,
           measure_unit: item.unit_measure,
-          sku: item.sku
+          sku: item.stock_items[0].sku
         }))
       );
   }
@@ -655,10 +660,10 @@ export class StockRepository {
         select: {
           id: true,
           quantity: true,
+          sku: true,
           products: {
             select: {
-              unit_measure: true,
-              sku: true
+              unit_measure: true
             }
           }
         }
@@ -667,7 +672,7 @@ export class StockRepository {
         items.map(item => ({
           product_id: item.id, // Ajuste para retornar o campo id como product_id
           measure_unit: item.products.unit_measure,
-          sku: item.products.sku,
+          sku: item.sku,
           quantity: item.quantity
         }))
       );
